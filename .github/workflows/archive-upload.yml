@@ -21,7 +21,11 @@ jobs:
         run: gem install cocoapods
 
       - name: Pod Install
-        run: pod install
+        run: |
+          pod repo update
+          pod install --verbose 2>&1 | tail -30
+          echo "=== Pod install done ==="
+          ls -la Pods/QCloudCore/QCloudCore/Classes/Base/ 2>/dev/null || echo "QCloudCore base dir not found"
 
       - name: Setup signing
         run: |
