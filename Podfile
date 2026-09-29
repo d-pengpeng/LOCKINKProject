@@ -37,6 +37,9 @@ post_install do |installer|
       config.build_settings.delete('PROVISIONING_PROFILE')
       config.build_settings.delete('PROVISIONING_PROFILE_SPECIFIER')
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      # Xcode 26 兼容：禁用模块编译，避免老 Pod 头文件找不到
+      config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
+      config.build_settings['OTHER_CFLAGS'] = '-Wno-error=implicit-function-declaration -Wno-error=non-modular-include-in-framework-module -Wno-error=deprecated-objc-isa-usage'
     end
   end
 end
