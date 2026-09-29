@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+*/.DS_Store
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# CocoaPods
+Pods/
+
+# Build
+build/
+DerivedData/
+*.xcarchive
+*.ipa
+
+# Signing
+*.p12
+*.mobileprovision
+*.cer
+*.p8
+
+# Secrets
+*base64.txt

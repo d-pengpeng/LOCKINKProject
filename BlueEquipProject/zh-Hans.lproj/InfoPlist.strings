@@ -1,0 +1,615 @@
+/* 
+  InfoPlist.strings
+  BlueEquipProject
+
+  Created by Edwin on 2023/9/8.
+  
+*/
+
+CFBundleDisplayName = "LOCKINK";
+
+NSPhotoLibraryUsageDescription = "需要使用您的相册,  用来发布动态时用来添加图片";
+
+NSPhotoLibraryAddUsageDescription = "需要使用您的相册,  用来发布动态时用来添加图片";
+
+NSCameraUsageDescription = "需要使用您的相机,  用来发布动态时用来添加图片";
+
+NSMicrophoneUsageDescription = "需要使用您的麦克风, 在发布动态时用来录制语音";
+
+NSLocationUsageDescription = "需要使用您的定位, 在定位锁中查看位置";
+
+NSLocationWhenInUseUsageDescription = "需要使用您的定位, 在定位锁在使用期间中查看位置";
+
+NSLocationAlwaysUsageDescription = "需要使用您的定位, 在定位锁在使用期间始终访问查看位置";
+
+NSBluetoothPeripheralUsageDescription = "需要使用您的蓝牙,  用来搜索连接蓝牙设备";
+
+
+"new_msg_1" = "请先进行匹配";
+"new_msg_2" = "已解绑";
+"new_msg_3" = "请完善信息";
+"new_msg_4" = "返回";
+"new_msg_5" = "强";
+"new_msg_6" = "中";
+"new_msg_7" = "弱";
+"new_msg_8" = "请开启随机模式";
+"new_msg_9" = "主人正在远程操作中，请勿操作";
+
+"new_msg_10" = "处在硬核模式状态下";
+
+//灰色UI
+"fourth_nams1" = "经典波形";
+"fourthModel2_nams1" = "浅吻轻啜";
+"fourthModel2_nams2" = "持续撩拨";
+"fourthModel2_nams3" = "渐入佳境";
+"fourthModel2_nams4" = "快感绵延";
+"fourthModel2_nams5" = "此起彼伏";
+"fourthModel2_nams6" = "急速引爆";
+"fourthModel2_nams7" = "激爽失控";
+"fourthModel2_nams8" = "高潮迭起";
+"fourthModel2_nams9" = "狂风浪涌";
+"fourthModel2_nams10" = "快乐巅峰";
+"fourth_channel_A" = "A通道";
+"fourth_channel_B" = "B通道";
+"fourth_channel_A2" = "A通道播放列表";
+"fourth_channel_B2" = "B通道播放列表";
+
+
+
+//三期
+"thr_nams1" = "经典模式";
+"thr_nams2" = "摇一摇";
+"thr_nams3" = "语音控制";
+"thr_nams4" = "手动模式";
+"thr_nams5" = "波形管理";
+"thr_nams7" = "电击模式";
+"thr_nams8" = "旋转模式";
+"thr_nams8_2" = "震动模式";
+"thr_nams8_3" = "吮吸模式";
+"thr_nams9" = "狂暴模式";
+"thr_nams10" = "顺时旋转";
+"thr_nams10_10" = "逆时旋转";
+"thr_nams11" = "随机模式";
+"thr_nams12" = "开启此模式前，请先确认接受电流上限！ ";
+"thr_nams13" = "是否退出此模式?";
+"thrModel_nams1" = "浅吻轻啜";
+"thrModel_nams1_15" = "浅颤轻啄";
+"thrModel_nams2" = "持续撩拨";
+"thrModel_nams2_15" = "柔振轻撩";
+"thrModel_nams3" = "渐入佳境";
+"thrModel_nams3_15" = "渐入酥麻";
+"thrModel_nams4" = "快感绵延";
+"thrModel_nams4_15" = "酥颤绵延";
+"thrModel_nams5" = "此起彼伏";
+"thrModel_nams5_15" = "迭颤起伏";
+"thrModel_nams6" = "急速引爆";
+"thrModel_nams6_15" = "快颤引爆";
+"thrModel_nams7" = "激爽失控";
+"thrModel_nams7_15" = "激颤失控";
+"thrModel_nams8" = "高潮迭起";
+"thrModel_nams8_15" = "酥潮迭起";
+"thrModel_nams9" = "狂风浪涌";
+"thrModel_nams9_15" = "狂震浪涌";
+"thrModel_nams10" = "快乐巅峰";
+"thrModel_nams10_15" = "酥乐巅峰";
+"thrModel2_nams1" = "蜻蜒点水";
+"thrModel2_nams2" = "酥酥麻麻";
+"thrModel2_nams3" = "耳鬓厮磨";
+"thrModel2_nams4" = "食髓知味";
+"thrModel2_nams5" = "流连忘返";
+"thrModel2_nams6" = "激情缠绵";
+"thrModel2_nams7" = "翻云覆雨";
+"thrModel2_nams8" = "颠鸾倒凤";
+"thrModel2_nams9" = "高潮不断";
+"thrModel2_nams10" = "快乐巅峰";
+
+
+
+
+
+
+
+//二期
+"two_nams1" = "记录一下这次的感受吧…";
+"two_nams12" = "请输入波形标题";
+"two_nams13" = "是否保存本次波形";
+"two_nams14" = "你的独创波形将保存在“我设计的波形”里方便你下次直接使用";
+"two_nams15" = "不保存";
+"two_nams16" = "去保存";
+"two_nams17" = "继续操作";
+"two_nams18" = "手动电击";
+"two_nams19" = "预设波形";
+"two_nams20" = "已经是第一个波形了";
+"two_nams21" = "已经是最后一个波形了";
+"two_nams22" = "正在执行 %@ 波形";
+"two_nams23" = "官方波形";
+"two_nams24" = "我设计的波形";
+"two_nams25" = "新手初尝";
+"two_nams26" = "确定删除?";
+"two_nams27" = "停止定时";
+"two_nams28" = "电击时间";
+"two_nams30" = "范围 1-999";
+"role_name33_33" = "每票定时时间";
+"two_nams31" = "你的独创波形时长少于30s, 无法保存";
+"two_nams32" = "继续操作";
+"two_nams33" = "最短时间不能低于1分钟";
+"two_nams34" = "你的独创波形将保存在“波形管理”里方便你下次直接使用";
+"two_tips123" = "初次使用，触摸板底部电击力度较弱，顶部电击力度较强，为了不必要的损伤，请从底部开始划起。";
+
+
+
+
+"chat_all19" = "邀请消息";
+"chat_all24" = "权限转移消息";
+"chat_all20" = "邀请TA成为佩戴者";
+"chat_all21" = "邀请TA成为主人";
+"chat_all20_20" = "邀请您成为TA的佩戴者";
+"chat_all21_21" = "邀请您成为TA的主人";
+"chat_all22" = "权限转移给TA";
+"chat_all23" = "权限转移给您";
+"login_err1" = "去注册在使用?";
+"login_err2" = "去注册";
+"login_err3" = "性别是必选项";
+"login_err4" = "发送成功请等待审核";
+"login_err5" = "未进入定位锁范围";
+"login_err6" = "请先设置定位锁范围";
+"login_err7" = "截止时间 为必选项";
+"login_err8" = "定时券已设置成功";
+"login_err9" = "已有定时任务生效中，如需替换点确定";
+
+
+
+"login_privary1" = "隐私保护政策";
+"login_privary2" = "感谢您信任并使用LOCKINK服务, 我们非常重视您的个人信息和隐私保护, 依照最新法律要求, 我们更新了用户协议、隐私政策, 情您务必仔细阅读《隐私政策》、《用户协议》并确认了解我们对您个人信息的处理规则;";
+"login_privary3" = "感谢您信任并使用LOCKINK服务, 我们非常重视您的个人信息和隐私保护, 依照最新法律要求, 我们更新了用户协议、隐私政策, 情您务必仔细阅读";
+"login_privary4" = "《隐私政策》";
+"login_privary4_5" = "、";
+"login_privary5" = "《用户协议》";
+"login_privary6" = "同意并继续";
+"login_privary7" = "不同意并退出App";
+"home_Shoot" = "相机";
+"home_SelectFromAlbum" = "相册";
+
+"message_friend2" = "等待验证";
+"message_friend3" = "已开锁";
+
+"home_Sure" = "确认";
+"home_Publish" = "发布";
+"home_ok" = "完成";
+"attent_normal" = "+关注";
+"attent_normal_yes" = "已关注";
+"attent_sel" = "私聊";
+"request_success" = "操作成功";
+"home_Cancel" = "取消";
+"home_reset" = "重置";
+"home_edit_save" = "保存";
+"home_send" = "发送";
+"home_more" = "更多";
+"home_delete" = "删除";
+"home_skip" = "跳过";
+"homeMsg_delete" = "确认删除?";
+"home_MasterDrawing" = "原图";
+"home_preview" = "预览";
+"home_isPening" = "待审核";
+
+
+"msg_UIUIStr1" = "当前未连接设备, 请连接成功后在操作";
+"msg_UIUIStr2" = "去连接";
+"msg_UIUIStr3" = "搜索ID或用户名";
+"msg_UIUIStr4" = "如未添加好友, 请在消息界面先添加好友";
+"msg_UIUIStr5" = "主人已没收权限";
+"msg_UIUIStr6" = "主人已放开权限";
+
+
+"login_all1" = "手机登录";
+"login_all2" = "邮箱登录";
+
+"login_all1_1" = "手机注册";
+"login_all2_2" = "邮箱注册";
+
+"login_all3" = "请输入手机号";
+"login_all3_3" = "请输入邮箱";
+"login_all4" = "请输入验证码";
+"login_all4_4" = "请输入密码";
+"login_all5" = "获取验证码";
+"login_all6" = "密码登录";
+"login_all7" = "验证码登录";
+"login_all8" = "登  录";
+"login_all9" = "还没有账号？";
+"login_all10" = "立即注册";
+"login_all11" = "我已阅读并同意";
+"login_all12" = "《用户协议》";
+"login_all13" = "和";
+"login_all14" = "《隐私政策》";
+
+"login_all11_11" = "我已阅读并同意《用户协议》和《隐私政策》";
+
+"login_all15" = "请先同意 用户协议、隐私政策";
+"login_all16" = "请输入6～16位登录密码";
+"login_all17" = "请确认密码";
+"login_all18" = "注册";
+
+"login_all19" = "年龄&地区";
+"login_all20" = "设置生日（年龄大于18岁）";
+"login_all21" = "您的身高";
+"login_all22" = "您的体重";
+"login_all23" = "您所在的国家/地区";
+"login_all24" = "选择年月日";
+"login_all25" = "下一步";
+"login_all26" = "性别&性取向&属性";
+"login_all27" = "设置您的性别";
+"login_all28" = "设置您的性取向";
+"login_all29" = "设置您的属性";
+"login_all30" = "选择国家";
+"login_all31" = "年龄";
+"login_all32" = "体重";
+"login_all33" = "请选择性别";
+"login_all34" = "性取向";
+"login_all35" = "属性";
+"login_all36" = "国家及地区";
+
+
+"home_set_SureLogOut" = "确认退出登录吗?";
+"home_LogOutLogOut" = "退出登录";
+
+"version_msg" = "当前已是最新版本";
+"version_newUrl" = "发现最新版本, 请下载";
+"home_CheckUpdates" = "检查更新";
+
+
+
+"tabbar_tit1" = "玩具";
+"tabbar_tit2" = "广场";
+"tabbar_tit3" = "消息";
+"tabbar_tit4" = "我的";
+"noData_msg1" = "暂无数据";
+
+"home_nam1" = "未连接";
+"home_nam2" = "正在连接";
+"home_nam3" = "已连接";
+
+"toys_all8" = "手机不支持蓝牙，请检查手机。";
+"toys_all9" = "手机蓝牙断开，复位…";
+"toys_all10" = "手机蓝牙功能已关闭，请进入设置开启蓝牙，控制中心开启蓝牙。";
+"toys_all11" = "手机蓝牙功能没有权限，请进入“设置”。";
+"toys_all7" = "进入设置";
+"toys_all6" = "蓝牙警报";
+"ble_fail" = "连接失败";
+"ble_fail3" = "未找到特征";
+"home_title3" = "搜索设备";
+"toys_all12" = "确保蓝牙开启后按下设备按钮，使设备闪烁红色灯光";
+"toys_all13" = "搜索设备中…";
+"toys_all1" = "找不到玩具？";
+"toys_all2" = "确保您的玩具有电且灯光闪烁。";
+"toys_all3" = "确保您的玩具靠近这台设备。";
+"toys_all4" = "尝试从蓝牙设备管理器中删除所有设备（稍后可以再次添加）。连接的设备越多，连接可能不太稳定，具体取决于您的手机。";
+"role_name1" = "主人";
+"role_name2" = "佩戴者";
+"role_name3" = "定时锁";
+"role_name4" = "电击";
+"role_name5" = "定位锁";
+"role_name6" = "邀请好友";
+"role_name7" = "发布寻主";
+"role_name8" = "确认邀请";
+"role_name9" = "成为佩戴者";
+"role_name10" = "成为主人";
+"role_name11" = "内容";
+"role_name12" = "参与条件";
+"role_name13" = "不填则默认永久";
+"role_name14" = "天";
+"role_name14_h" = "时";
+"role_name14_m" = "分";
+"role_name14_14" = "分钟";
+"role_name15" = "已选";
+"role_name16" = "未开启";
+"role_name16_16" = "已开启";
+"role_name17" = "随机设定";
+"role_name18" = "手动设置";
+"role_name19" = "公投";
+"role_name20" = "立即使用";
+"role_name21" = "私聊TA";
+"role_name22" = "随机";
+"role_name23" = "手动";
+"role_name24" = "公投";
+"role_name25" = "最短时间";
+"role_name26" = "最长时间";
+"role_name27" = "开始";
+"role_name28" = "设置完成后即时生效";
+"role_name29" = "是否开启开锁电击提醒";
+"role_name30" = "电压选择";
+"role_name31" = "重新设置";
+"role_name32" = "开始启动";
+"role_name33" = "每票闭锁时间";
+
+"role_name34" = "截止时间";
+"role_name35" = "参与条件";
+"role_name36" = "公投记录";
+"role_name37" = "已累计总时长";
+"role_name38" = "待执行时长";
+"role_name39" = "添加定时电击";
+"role_name39_39" = "定时电击";
+"role_name40" = "后电击";
+"role_name42" = "长电击模式";
+"role_name43" = "震动";
+"role_name44" = "震颤";
+"role_name45" = "针刺";
+"role_name46" = "开始电击";
+"role_name46_46" = "停止电击";
+"role_name47" = "定时设置";
+"role_name48" = "设定满足您的电击时间";
+"role_name49" = "电击选项";
+"role_name50" = "电击频率";
+"role_name51" = "电击时长";
+"role_name52" = "开启定位锁";
+"role_name52_1" = "关闭定位锁";
+"role_name54" = "是否确认解除绑定设备?";
+"role_name55" = "您已被佩戴者强制解绑";
+"role_name56" = "删除聊天?";
+
+"role_setting1" = "当前定位:";
+"role_setting2" = "直径范围:";
+"role_setting3" = "电击提醒:";
+"role_setting4" = "电压选择:";
+"role_setting5" = "请输入公里数";
+"role_setting6" = "开启";
+"role_setting7" = "关闭";
+"role_setting8" = "搜索";
+"role_setting9" = "记录";
+"role_setting10" = "定位位置";
+"role_setting11" = "启用";
+"role_setting12" = "修改";
+"role_setting13" = "是否切换角色?";
+"role_setting14" = "邀请您成为TA的";
+"role_setting15" = "正在等待同意...";
+"role_setting16" = "强制解绑主人";
+"role_setting16_16" = "您已被强制解绑";
+"role_setting17" = "硬核模式";
+"role_setting18" = "开锁记录";
+"role_setting19" = "设备记录";
+"role_setting19_19" = "申请记录"; 
+"role_setting21" = "强制删除开锁记录";
+"role_setting23" = "公示设备";
+"role_setting24" = "设备名称";
+"role_setting25" = "解除绑定";
+"role_setting25_25" = "解除绑定角色";
+"role_setting26" = "权限转移";
+
+"role_setting29" = "设备记录";
+"role_setting30" = "公示设备";
+"role_setting31" = "设备名称";
+"role_setting36" = "设备记录";
+"role_setting37" = "转移天数";
+"role_setting38" = "永久";
+"role_setting39" = "自定义天数";
+"role_setting40" = "转移好友";
+"role_setting41" = "开启硬核模式后，佩戴者将无法强制解绑主人，需双方同意开启后方可进入硬核模式，解除时也需双方同意方可解除。";
+"role_setting41_41" = "关闭硬核模式，需双方同意且完成录音认证后方可关闭成功。";
+"role_setting42" = "我已悉知";
+"role_setting43" = "录音认证";
+"role_setting44" = "清空";
+"role_setting45" = "请依照下列文本内容朗读并完成录制";
+"role_setting49" = "确定使用定时券?";
+"role_setting51" = "解除硬核模式";
+"role_setting52" = "每月1号重置";
+"role_setting53" = "本月已强制解锁";
+"role_setting54" = "第";
+"role_setting55" = "惩罚";
+"role_setting56" = "已有定时券, 请使用后再操作";
+"role_setting57" = "最多添加3个定时电击";
+"role_setting58" = "双方需绑定时间满一个月才可以开启硬核模式";
+"voice_Recorded" = "确认提交?";
+"voice_Recorded2" = "还未录制";
+"role_connect1" = "终止远程操作";
+"role_unlock1" = "开锁成功";
+"role_unlock2" = "关锁成功";
+"role_unlock3" = "开锁失败";
+"role_unlock4" = "关锁失败";
+
+
+
+"home_bluetooth1" = "搜索结果";
+"plaza_all1" = "关注";
+"plaza_all1_1" = "取消关注";
+"plaza_all2" = "推荐";
+"plaza_all3" = "热门";
+"plaza_all4" = "最新";
+"plaza_all5" = "视频";
+"plaza_all6" = "音频";
+"plaza_all11" = "全部";
+"plaza_all12" = "寻主";
+"plaza_all13" = "公投";
+"plaza_all14" = "动态";
+"postPlaza_placeText" = "请输入...";
+"plaza_all15" = "所在位置";
+"plaza_all15_15" = "不显示位置";
+"plaza_all16" = "可见范围";
+"plaza_all17" = "公开";
+"plaza_all18" = "好友可见";
+"plaza_all19" = "仅自己可见";
+"plaza_all20" = "图片";
+"plaza_all21" = "视频";
+"plaza_all22" = "录音";
+"plaza_all22_22" = "录音中...";
+"plaza_all23" = "排行榜";
+"plaza_all24" = "立即加入";
+"plaza_all25" = "耐力榜";
+"plaza_all26" = "加入榜单后，将开始统计您的设备佩戴总时长，榜单每周一零点更新";
+"plaza_all27" = "耐电榜";
+"plaza_all28" = "加入榜单后，将开始统计您的点击总时长，榜单每周一零点更新";
+"plaza_all29" = "详情";
+"find_detail1" = "性别";
+"find_detail2" = "权限时长";
+"find_detail3" = "截止时间";
+"find_detail4" = "申请成为主人";
+"find_detail4_44" = "已绑定主人";
+"find_detail4_4" = "我要投票";
+"find_detail5" = "评论";
+"find_detail6" = "  回复  ";
+"find_detail7" = "  删除  ";
+"find_choose1" = "状态";
+"find_choose2" = "进行中";
+"find_choose3" = "已结束";
+"fieldText_place" = "友善发言,文明发言...";
+"find_choose4" = "举报原因";
+"find_choose5" = "请选择";
+"find_choose6" = "举报描述";
+"find_choose7" = "图片证据";
+"find_choose8" = "参与人";
+"find_push1" = "您发布的内容需要等待管理员审核通过后，才能发布显示，请您谅解！";
+
+
+
+"center_all1" = "刷新";
+"center_all2" = "筛选";
+"center_all3" = "当前有 ";
+"center_all3_3" = " 人在线";
+"center_all4" = "寻找合适的TA";
+"center_all5" = "求探索";
+"center_all6" = "开拓者";
+"center_all7" = "求安慰";
+"center_all8" = "找朋友";
+"center_all9" = "求脱单";
+"center_all9_9" = "想给谁看到你";
+"center_all10" = "随便聊";
+"center_all11" = "后重发";
+
+"center_all12" = "不限";
+"center_all13" = "我有玩具";
+"center_all14" = "我没玩具";
+"center_all15" = "男";
+"center_all16" = "女";
+"center_all18" = "TA的性别";
+"center_all19" = "TA的取向";
+"center_all20" = "TA的属性(可多选)";
+"center_all21" = "四爱受";
+"center_all22" = "四爱攻";
+"center_all23" = "四爱互";
+"center_all24" = "非亚文化圈";
+"center_all25" = "成功发出信号后，您会出现[世界]中，持续成功发出信号后，您会出现在[世界]中持续2小时";
+
+
+"IMMsg_all1" = "互动消息";
+"IMMsg_all2" = "设备消息";
+"IMMsg_all3" = "系统消息";
+"message_tile4" = "新的好友";
+"message_tile5" = "黑名单";
+"message_tile6" = "同意";
+"message_tile7" = "拒绝";
+"message_tile8" = "已同意";
+"message_tile9" = "已拒绝";
+"message_tile10" = "通讯录";
+"message_tile11" = "搜索好友/聊天记录";
+"message_tile12" = "添加好友";
+"goodFriend_ttt" = "添加";
+"message_friend1" = "同意";
+"message_friend1_1" = "已同意";
+"home_equipment2" = "设备名称";
+"expertTitl_detail" = "详情";
+"chat_all5" = "好友备注";
+"message_mdr" = "消息免打扰";
+"chat_all4" = "清空聊天记录";
+"chat_all7" = "删除好友";
+"chat_all8" = "您已被禁言";
+"chat_all9" = "已被对方拉黑";
+"chat_all3" = "置顶聊天";
+"chat_all10" = "个性签名";
+"chat_all11" = "官方";
+
+"send_msg" = "发消息";
+"message_photo" = "照片";
+"message_camera" = "拍摄";
+
+
+"me_allNames1" = "相册";
+"me_allNames2" = "设备";
+"me_allNames3" = "昵称";
+"me_allNames4" = "该用户很懒，什么也没留下…";
+"me_allNames5" = "编辑资料";
+"me_allNames5_5" = "资料";
+"me_allNames7" = "粉丝";
+"me_allNames8" = "获赞";
+"me_allNames9" = "访客";
+"me_allNames10" = "审核中";
+"me_allNames11" = "审核拒绝";
+"me_allNames12" = "上传相册";
+"me_allNames13" = "寻主";
+"me_allNames14" = "公投";
+"me_allNames15" = "已有";
+"me_allNames16" = "人申请";
+"me_allNames18" = "谁看过我";
+"me_allNames19" = "我看过谁";
+"me_allNames20" = "共访问了你";
+"me_allNames20_20" = "共访问了TA";
+"me_allNames21" = "次";
+"me_allNames22" = "加入黑名单";
+"me_allNames22_22" = "移出黑名单";
+"me_allNames23" = "举报";
+"me_allNames24" = "保密";
+"me_allNames25" = "身高";
+"my_settings" = "设置";
+"my_settings1" = "账户与安全";
+"my_settings2" = "常见问题";
+"my_settings3" = "问题反馈";
+"my_settings4" = "检查更新";
+"my_settings5" = "关于我们";
+"my_settings6" = "清理缓存";
+"my_settings7" = "语言更换";
+"my_settings8" = "在线客服";
+"my_settings9" = "切换账号";
+"my_settings10" = "注销账号";
+"my_settings11" = "更换绑定";
+"my_settings12" = "修改密码";
+"my_settings13" = "提交";
+"my_about8" = "你有什么建议…或问题需要帮助吗？请告诉我们";
+"my_about1" = "隐私政策";
+"my_about2" = "用户协议";
+"my_about3" = "终端用户许可协议";
+"my_about4" = "提示";
+"my_about4_lock" = "当前已有定时锁生效中";
+"my_about4_lock2" = "当前已有定时锁生效中, 不可强制解锁, 惩罚至%@";
+"my_about5" = "确认清除缓存?";
+"my_about6" = "确认选择角色为 主人?";
+"my_about7" = "确认选择角色为 佩戴者?";
+"my_about6_6" = "主人";
+"my_about7_7" = "佩戴者";
+"my_about6_6L" = "主人";
+"my_about7_7L" = "佩戴者";
+"my_about8" = "已绑定手机号：";
+"my_about9" = "已绑定邮箱：";
+"my_about10" = "换绑";
+"my_about11" = "确认并注销";
+"my_about12" = "账户注销说明:";
+"my_about13" = "1.取消您的账户将清除您在LOCKINK服务器上的相关信息，包括您的个人信息、设备、社区记录、消息记录等；";
+"my_about14" = "2.账户注销后，无法恢复。请谨慎操作。";
+"my_about15" = "3.注销账户后，您可以重新注册为新账户。";
+"my_about16" = "没收权限后，佩戴者将无任何权限操作设备，是否确认没收佩戴者权限？";
+"my_about17" = "给予权限后，佩戴者将有权限操作设备，是否确认给予佩戴者权限？";
+"my_about18" = "申请";
+"my_about19" = "是否向主人申请开锁?";
+"my_about20" = "已被主人没收权限";
+"my_about21" = "确认切换账号?";
+"my_about22" = "已加入黑名单";
+"my_about22_22" = "已移出黑名单";
+"my_about23" = "移出";
+"my_about24" = "对方已同意";
+"my_about25" = "对方已拒绝";
+"my_about26" = "添加账号";
+
+"updatedVersion1" = "版本更新啦";
+"updatedVersion2" = "立即更新";
+"updatedVersion3" = "版本更新说明";
+"home_Prompt" = "提示";
+"home_DeviceSupportTakingPhotos" = "该设备不支持拍照";
+
+"language_zh" = "简体中文";
+"language_zht" = "繁体中文";
+"language_en" = "英文";
+
+"anti_fraud_title" = "国家反诈中心提醒";
+"anti_fraud_tip" = "请勿轻信汇款、中奖等信息，谨慎对待陌生电话，避免上当受骗。遇到可疑情况请及时反馈。";
+"anti_fraud_report" = "点此举报";
+"violation_content_tip" = "内容包含违规信息，是否仍要发送？";
+"violation_skip_tip" = "包含违规信息，已跳过";
+"cancel" = "取消";
+"send_anyway" = "仍然发送";
+

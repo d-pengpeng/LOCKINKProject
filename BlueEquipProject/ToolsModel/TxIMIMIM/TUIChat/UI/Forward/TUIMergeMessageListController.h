@@ -1,0 +1,23 @@
+//
+//  TUIMergeMessageListController.h
+//  Pods
+//
+//  Created by harvy on 2020/12/9.
+//
+
+#import <UIKit/UIKit.h>
+#import "TUIDefine.h"
+#import "TUIMessageControllerDelegate.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface TUIMergeMessageListController : UITableViewController
+
+@property (nonatomic, weak) id<TUIMessageControllerDelegate> delegate;
+@property (nonatomic, strong) V2TIMMergerElem *mergerElem;
+@property (nonatomic, copy) dispatch_block_t willCloseCallback;
+
+- (void)addUUUIUIU;
+@end
+
+NS_ASSUME_NONNULL_END

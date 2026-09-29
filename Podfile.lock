@@ -1,0 +1,138 @@
+PODS:
+  - AFNetworking (4.0.1):
+    - AFNetworking/NSURLSession (= 4.0.1)
+    - AFNetworking/Reachability (= 4.0.1)
+    - AFNetworking/Security (= 4.0.1)
+    - AFNetworking/Serialization (= 4.0.1)
+    - AFNetworking/UIKit (= 4.0.1)
+  - AFNetworking/NSURLSession (4.0.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (4.0.1)
+  - AFNetworking/Security (4.0.1)
+  - AFNetworking/Serialization (4.0.1)
+  - AFNetworking/UIKit (4.0.1):
+    - AFNetworking/NSURLSession
+  - BRPickerView (2.9.3):
+    - BRPickerView/All (= 2.9.3)
+  - BRPickerView/All (2.9.3):
+    - BRPickerView/Default
+    - BRPickerView/Deprecated
+  - BRPickerView/Core (2.9.3)
+  - BRPickerView/DatePicker (2.9.3):
+    - BRPickerView/Core
+  - BRPickerView/Default (2.9.3):
+    - BRPickerView/DatePicker
+    - BRPickerView/TextPicker
+  - BRPickerView/Deprecated (2.9.3):
+    - BRPickerView/Core
+    - BRPickerView/Deprecated/AddressPickerView (= 2.9.3)
+    - BRPickerView/Deprecated/Base (= 2.9.3)
+    - BRPickerView/Deprecated/StringPickerView (= 2.9.3)
+  - BRPickerView/Deprecated/AddressPickerView (2.9.3):
+    - BRPickerView/Core
+    - BRPickerView/Deprecated/Base
+  - BRPickerView/Deprecated/Base (2.9.3):
+    - BRPickerView/Core
+  - BRPickerView/Deprecated/StringPickerView (2.9.3):
+    - BRPickerView/Core
+    - BRPickerView/Deprecated/Base
+  - BRPickerView/TextPicker (2.9.3):
+    - BRPickerView/Core
+  - Bugly (2.5.93)
+  - HappyDNS (1.0.2)
+  - JCore (4.7.0)
+  - JPush (4.8.1):
+    - JCore (>= 2.0.0)
+  - Masonry (1.1.0)
+  - MBProgressHUD (1.2.0)
+  - MJExtension (3.4.1)
+  - MJRefresh (3.7.5)
+  - Protobuf (3.21.12)
+  - QCloudCore/WithoutMTA (6.1.7)
+  - QCloudCOSXML/Transfer (6.1.7):
+    - QCloudCore/WithoutMTA (= 6.1.7)
+  - Qiniu (8.5.0):
+    - HappyDNS (~> 1.0.2)
+  - SDCycleScrollView (1.82):
+    - SDWebImage (>= 5.0.0)
+  - SDWebImage (5.14.3):
+    - SDWebImage/Core (= 5.14.3)
+  - SDWebImage/Core (5.14.3)
+  - SocketRocket (0.6.0)
+  - SSZipArchive (2.4.3)
+  - SVGAPlayer (2.5.7):
+    - SVGAPlayer/Core (= 2.5.7)
+    - SVGAPlayer/ProtoFiles (= 2.5.7)
+  - SVGAPlayer/Core (2.5.7):
+    - SSZipArchive (>= 1.8.1)
+    - SVGAPlayer/ProtoFiles
+  - SVGAPlayer/ProtoFiles (2.5.7):
+    - Protobuf (~> 3.4)
+  - SVProgressHUD (2.2.5)
+
+DEPENDENCIES:
+  - AFNetworking
+  - BRPickerView
+  - Bugly
+  - JPush
+  - Masonry
+  - MBProgressHUD
+  - MJExtension
+  - MJRefresh
+  - QCloudCOSXML/Transfer
+  - Qiniu
+  - SDCycleScrollView
+  - SocketRocket
+  - SVGAPlayer
+  - SVProgressHUD
+
+SPEC REPOS:
+  trunk:
+    - AFNetworking
+    - BRPickerView
+    - Bugly
+    - HappyDNS
+    - JCore
+    - JPush
+    - Masonry
+    - MBProgressHUD
+    - MJExtension
+    - MJRefresh
+    - Protobuf
+    - QCloudCore
+    - QCloudCOSXML
+    - Qiniu
+    - SDCycleScrollView
+    - SDWebImage
+    - SocketRocket
+    - SSZipArchive
+    - SVGAPlayer
+    - SVProgressHUD
+
+SPEC CHECKSUMS:
+  AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
+  BRPickerView: 3eb9408f993c27a87badd5e271322f899dbf604a
+  Bugly: b8715e6ec4004b7f7fbffab0643ba80545aee3da
+  HappyDNS: 75eed16b27c6c3abccea34ac349ab7b7e954b25b
+  JCore: 943c8177944bb31c9b7f83245ef89c7a37488a32
+  JPush: 2caabdb6d62d009bc07a9bd115d03c7c42512b5e
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  MJExtension: 21c5f6f8c4d5d8844b7ae8fbae08fed0b501f961
+  MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
+  Protobuf: 120350fc38646e2dedc26f49ecba778184ea1de2
+  QCloudCore: cbf7f1140ef71c6cc372af0ded71c9188ea8c5b1
+  QCloudCOSXML: 9c208ae9311d62d02c1a34f9f40f4c5aec817100
+  Qiniu: 172360b79f8ced0d407556add290b6e2da5e162c
+  SDCycleScrollView: a0d74c3384caa72bdfc81470bdbc8c14b3e1fbcf
+  SDWebImage: 9c36e66c8ce4620b41a7407698dda44211a96764
+  SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+  SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
+  SVGAPlayer: 318b85a78b61292d6ae9dfcd651f3f0d1cdadd86
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+
+PODFILE CHECKSUM: 7a32767b0cff0b0b35b44da1ea93171add9f6de6
+
+COCOAPODS: 1.17.0

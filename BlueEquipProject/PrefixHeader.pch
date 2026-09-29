@@ -1,0 +1,180 @@
+//
+//  PrefixHeader.pch
+//  AuctionLiveProject
+//
+//  Created by Edwin on 2023/5/3.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#import "allBotmLineView.h"
+#import "requestUrlRFile.h"
+#import "SwichLanguage.h"
+#import <Masonry.h>
+#import <SVProgressHUD.h>
+#import <SDWebImage.h>
+#import <MJRefresh.h>
+#import "MJExtension.h"
+#import "HistoryRecordModel.h"
+#import "requestToolClass.h"
+#import "CXDatePickerView.h"
+#import "UIButton+Ex.h"
+#import "UIView+Frame.h"
+#import "SGActionView.h"
+#import "DashLineView.h"
+#import "UIColor+Transform.h"
+#import "QiNiuUpload.h"
+#import "noDataImgView.h"
+#import "YLAudioPlay.h"
+#import <ImSDK_Plus/ImSDK_Plus.h>
+#import "LYUserDefault.h"
+#import "PopModifyView.h"
+#import "FloatingWindowModel.h"
+#import "eSocketRocketUtility.h"
+#import "UIImage+MHClip.h"
+#import "MHFmdbIMModel.h"
+#import "MHBoXingModel.h"
+#import "AppVersionManager.h"
+
+#define TOKEN [[NSUserDefaults standardUserDefaults] objectForKey:@"AppToken"]
+
+#define _window_width    [[UIScreen mainScreen] bounds].size.width
+#define _window_height   [[UIScreen mainScreen] bounds].size.height
+
+#define kIs_iphone ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
+
+#define kIs_iPhoneX [[FloatingWindowModel shareInstance] getStatusBarManagerHeighMehotd] > 25.0f && kIs_iphone
+
+#define TIMESTATUSHEIGHT [[FloatingWindowModel shareInstance] getStatusBarManagerHeighMehotd]
+
+#define NAVHEIGHT ([[FloatingWindowModel shareInstance] getStatusBarManagerHeighMehotd]+self.navigationController.navigationBar.frame.size.height)
+
+#define TARBARHEIGHT (CGFloat)(kIs_iPhoneX?(49.0 + 34.0):(49.0))
+
+
+
+#define normalColors [UIColor colorWithRed:208/255.0 green:96/255.0 blue:255/255.0 alpha:1]
+
+#define RGB(r, g, b) [UIColor colorWithRed:(r)/255.f green:(g)/255.f blue:(b)/255.f alpha:1.f]
+#define RGBA(r, g, b, a)[UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a]
+#define GroupBackColor [UIColor colorWithRed:245/255.f green:245/255.f blue:245/255.f alpha:1.f]
+#define GrayText [UIColor colorWithRed:150/255.f green:150/255.f blue:150/255.f alpha:1.f]
+#define GrayText204 [UIColor colorWithRed:204/255.f green:204/255.f blue:204/255.f alpha:1.f]
+#define GrayText133 [UIColor colorWithRed:133/255.f green:133/255.f blue:133/255.f alpha:1.f]
+#define GrayText102 [UIColor colorWithRed:102/255.f green:102/255.f blue:102/255.f alpha:1.f]
+#define GrayTextColor [UIColor colorWithRed:50/255.f green:50/255.f blue:50/255.f alpha:1.f]
+#define normalOrangeColors [UIColor colorWithRed:255/255.0 green:168/255.0 blue:0/255.0 alpha:1]
+#define GrayLineColor [UIColor colorWithRed:230/255.f green:230/255.f blue:230/255.f alpha:1.f]
+
+#define normalBlueColors [UIColor colorWithRed:69/255.0 green:139/255.0 blue:255/255.0 alpha:1]
+#define normalPurpleColors [UIColor colorWithRed:176/255.0 green:51/255.0 blue:228/255.0 alpha:1]
+
+
+#define XZRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:1.0]
+
+
+#define RGB_COLOR(_STR_,a) ([UIColor colorWithRed:[[NSString stringWithFormat:@"%lu", strtoul([[_STR_ substringWithRange:NSMakeRange(1, 2)] UTF8String], 0, 16)] intValue] / 255.0 green:[[NSString stringWithFormat:@"%lu", strtoul([[_STR_ substringWithRange:NSMakeRange(3, 2)] UTF8String], 0, 16)] intValue] / 255.0 blue:[[NSString stringWithFormat:@"%lu", strtoul([[_STR_ substringWithRange:NSMakeRange(5, 2)] UTF8String], 0, 16)] intValue] / 255.0 alpha:a])
+
+
+
+
+//语言
+#define eLocalizedString(key) [[SwichLanguage shareInstance] getStringForKey:key withTable:@"InfoPlist"]
+#define WEAKSELF __weak __typeof(self)weakSelf = self;
+#define STRONG_SELF __strong __typeof(self)self = weakSelf;
+
+#define SYS_Font(a) [UIFont systemFontOfSize:(a)]
+#define CGFontU_Growth(a) [UIFont fontWithName:@"Helvetica-Bold" size:a];
+
+
+//直播 礼物、红包等通知
+#define klivingInputCrownNote @"livingInputCrown"
+#define klivingInputLookNote @"livingInputLook"
+#define klivingInputRedbagNote @"livingInputRedbag"
+#define klivingInputGiftNote @"livingInputGift"
+#define klivingInputClearNote @"livingInputClear" //清除事件
+
+#define minStr(a) [NSString stringWithFormat:@"%@", (a)]
+#define minIntStr(a) [NSString stringWithFormat:@"%d", (a)]
+
+#define klivingInputMsgNote @"livingInputMsg" //直播间横屏后发送的消息
+
+#define customTabbaNotifi @"customTabbaNotif" //隐藏显示 自定义tabbar
+#define customTabbaNotifi2 @"customTabbaNotif2" //隐藏显示 自定义tabbar
+
+#define app_placeAA1_img  [UIImage imageNamed:@"mode_placeAA-03Img"]
+#define app_placeAA2_img  [UIImage imageNamed:@"mode_placeAA-03Img"]
+#define normal_placeHeadImg  [UIImage imageNamed:@"place_head2.jpeg"]
+
+
+#define app_sendCustomNotifName  @"sendCustomNotifName" //发送自定义动画
+#define app_sendCustomNotifNameIM  @"sendCustomNotifNameIM" //发送自定义动画
+#define kNeedChangeGoodsNote @"kNeedChangeJSNote"
+#define kNeedChangeGoodsUploginNote @"kNeedChangeJSNoteUplogin"
+
+#define kNeedEnterForegroundNote @"kNeedEnterForegroundNote" //进入前台 刷新定时锁即时  //进入后台 关闭03 滑动电击
+
+#define kNotifUploadQiuiPlayListNote @"notifUploadQiuiPlayList"
+
+//蓝牙设备名称
+#define kCharactName @"AA-A1001" //微智贞操锁
+#define kCharactName2 @"AA-A1002"//钥匙盒  老设备协议
+#define kCharactName3 @"AA-A1003"//电鳗贞操锁
+#define kCharactName4 @"AA-A1004" //@"LOCKINKCUP" //马眼棒
+#define kCharactName5 @"AA-A1005" //飞机杯   26.02.10--加 暂停
+#define kCharactName6 @"AA-A1006" //震动棒
+#define kCharactName12 @"AA-A1012" //刺蜂贞操锁  蜂刺
+
+#define kCharactName7 @"AA-A1007" //偷心电击款  和 马眼棒一样界面操作指令   26.02.10--加 暂停、退出控制页面不发停止设备
+#define kCharactName14 @"AA-A1014" //男性训练器，双功能，震动+电击，和 AA-A1007 一致 ;  26.02.10之后没有同步
+
+#define kCharactName8 @"AA-A1008" //震动肛塞
+#define kCharactName9 @"AA-A1009" //心形肛塞
+#define kCharactName10 @"AA-A1010" //圆形震动肛塞
+#define kCharactName11 @"AA-A1011" //心形震动肛塞
+
+#define kCharactName13 @"AA-A1013"//@"qiui_Collar" //新灰色UI设备 电击按摩垫片 4个片
+#define kCharactName15 @"AA-A1015" // 锋刺长款贞操锁
+
+
+
+#define kServiceUUID @"0x8AC0"
+#define kCharacteristicUUID @"0X8AC1"
+#define kCharacteristicUUID2 @"0X8AC2"
+
+#define kServiceQiuiUUID @"8653000a-43e6-47b7-9cb0-5fc21d4ae340"
+#define kCharacteristicQiuiUUID @"8653000c-43e6-47b7-9cb0-5fc21d4ae340"
+#define kCharacteristicQiuiUUID2 @"8653000b-43e6-47b7-9cb0-5fc21d4ae340"
+
+#define blue_EncryptionKey @"8F2A1C7B4D5E9063C8B7A6D5E4F32109"
+
+
+
+static int const pattNum = 1; //低于多少就为0
+
+static int const txIMAppId_int = 1600164272;
+//static int const txIMAppId_int = 1600023905;
+
+
+static NSString * const GaoDeKey = @"6488a31d96a8f92a4388446f75ca962c";
+
+//bugly
+static NSString * const buglyAppIDId = @"e4f942c57d";
+
+//极光
+static NSString * const bascicJGAppKey = @"c19d8785c5e27cf5e299ebeb";
+
+
+
+
+
+
+//com.menghuang.LOCKINK
+//com.lockink.qingQuPro  foshan
+
+
+#endif /* PrefixHeader_pch */

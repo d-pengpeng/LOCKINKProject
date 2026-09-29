@@ -1,0 +1,99 @@
+name: Archive & Upload to App Store Connect
+
+on:
+  workflow_dispatch:
+    inputs:
+      scheme:
+        description: 'Xcode Scheme'
+        required: true
+        default: 'BlueEquipProject'
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.app/Contents/Developer
+
+      - name: Install CocoaPods
+        run: gem install cocoapods
+
+      - name: Pod Install
+        run: pod install
+        working-directory: .
+
+      - name: Decode signing certificate
+        run: |
+          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          BUILD_CERTIFICATE_PASSWORD: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+
+      - name: Decode provisioning profile
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+        env:
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+
+      - name: Archive
+        run: |
+          xcodebuild archive \
+            -workspace BlueEquipProject.xcworkspace \
+            -scheme BlueEquipProject \
+            -configuration Release \
+            -archivePath build/BlueEquipProject.xcarchive \
+            -destination "generic/platform=iOS" \
+            -allowProvisioningUpdates \
+            CODE_SIGN_STYLE=Manual
+
+      - name: Export IPA
+        run: |
+          mkdir -p build/export
+          cat > build/export/ExportOptions.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>L992GPQMS4</string>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath build/BlueEquipProject.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist build/export/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyIssuerID "$API_ISSUER_ID" \
+            -authenticationKeyID "$API_KEY_ID" \
+            -authenticationKeyIssuerKey "$API_KEY_CONTENT"
+        env:
+          API_ISSUER_ID: ${{ secrets.APP_STORE_API_ISSUER_ID }}
+          API_KEY_ID: ${{ secrets.APP_STORE_API_KEY_ID }}
+          API_KEY_CONTENT: ${{ secrets.APP_STORE_API_KEY_CONTENT }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: BlueEquipProject-IPA
+          path: build/export/*.ipa
+
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          security delete-keychain build.keychain 2>/dev/null || true
+          rm -f certificate.p12

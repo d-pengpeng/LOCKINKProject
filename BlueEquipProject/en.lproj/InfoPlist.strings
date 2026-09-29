@@ -1,0 +1,940 @@
+/* 
+  InfoPlist.strings
+  BlueEquipProject
+
+  Created by Edwin on 2023/9/8.
+  
+*/
+
+CFBundleDisplayName = "LOCKINK";
+
+NSPhotoLibraryUsageDescription = "Your photos allow you to post updates";
+
+NSPhotoLibraryAddUsageDescription = "Your photos allow you to post updates";
+
+NSCameraUsageDescription = "Your camera allows you to use it to post updates";
+
+NSMicrophoneUsageDescription = "Your microphone allows you to use it to post updates";
+
+NSLocationUsageDescription = "Your location allows you to view the location in the location lock";
+
+NSLocationWhenInUseUsageDescription = "Your location allows you to view the location while the location lock is in use";
+
+NSLocationAlwaysUsageDescription = "Your location allows you to always access the viewing location while the location lock is in use";
+
+NSBluetoothPeripheralUsageDescription = "Your Bluetooth allows you to search for connected Bluetooth devices";
+
+
+"new_msg_1" = "Please match first";
+"new_msg_2" = "Unbound";
+"new_msg_3" = "Please complete the information";
+"new_msg_4" = "Back";
+"new_msg_5" = "STRONG";
+"new_msg_6" = "MIDDLE";
+"new_msg_7" = "WEAK";
+"new_msg_8" = "Please enable random mode";
+"new_msg_9" = "Master is in remote operation, please do not operate";
+"new_msg_10" = "It's in hardcore mode";
+
+
+//灰色UI
+"fourth_nams1" = "Classic Waveform";
+"fourthModel2_nams1" = "Light Kiss";
+"fourthModel2_nams2" = "Continuous Tease";
+"fourthModel2_nams3" = "Gradual Bliss";
+"fourthModel2_nams4" = "Endless Pleasure";
+"fourthModel2_nams5" = "Rising & Falling";
+"fourthModel2_nams6" = "Rapid Peak";
+"fourthModel2_nams7" = "Intense Ecstasy";
+"fourthModel2_nams8" = "Peak After Peak";
+"fourthModel2_nams9" = "Wild Surge";
+"fourthModel2_nams10" = "Pleasure Apex";
+"fourth_channel_A" = "Channel A";
+"fourth_channel_B" = "Channel B";
+"fourth_channel_A2" = "Channel A Playlist";
+"fourth_channel_B2" = "Channel B Playlist";
+
+
+//三期
+"thr_nams1" = "Classic Mode";
+"thr_nams2" = "Shake";
+"thr_nams3" = "Voice Control";
+"thr_nams4" = "Manual Mode";
+"thr_nams5" = "Waveform Management";
+"thr_nams7" = "Estim Mode";
+"thr_nams8" = "Rotate Mode";
+"thr_nams8_2" = "Vibrate Mode";
+"thr_nams8_3" = "Suction Mode";
+"thr_nams9" = "Berserk Mode";
+"thr_nams10" = "Clockwise";
+"thr_nams10_10" = "Anticlockwise";
+"thr_nams11" = "Random Mode";
+"thr_nams12" = "Please confirm Estim Tolerance before enabling!";
+"thr_nams13" = "Exit this mode?";
+"thrModel_nams1" = "Light Kiss";
+"thrModel_nams2" = "Continuous Tease";
+"thrModel_nams3" = "Gradual Bliss";
+"thrModel_nams4" = "Endless Pleasure";
+"thrModel_nams5" = "Rising & Falling";
+"thrModel_nams6" = "Rapid Peak";
+"thrModel_nams7" = "Intense Ecstasy";
+"thrModel_nams8" = "Peak After Peak";
+"thrModel_nams9" = "Wild Surge";
+"thrModel_nams10" = "Pleasure Apex";
+"thrModel2_nams1" = "Light Touch";
+"thrModel2_nams2" = "Tingling Sensation";
+"thrModel2_nams3" = "Intimate Caress";
+"thrModel2_nams4" = "Addictive Bliss";
+"thrModel2_nams5" = "Lingering Pleasure";
+"thrModel2_nams6" = "Passionate Embrace";
+"thrModel2_nams7" = "Wild Passion";
+"thrModel2_nams8" = "Ecstatic Union";
+"thrModel2_nams9" = "Non-Stop Peaks";
+"thrModel2_nams10" = "Pleasure Apex";
+
+
+
+
+//二期
+"two_nams1" = "Do you want to record your feelings this time?" ;
+"two_nams12" = "Please enter a waveform title";
+"two_nams13" = "Do you like to save this waveform?";
+"two_nams14" = "Your waveform will be saved in My Waveform for your convenience next time.";
+"two_nams15" = "Discard";
+"two_nams16" = "Save";
+"two_nams17" = "CONOPS";
+"two_nams18" = "Manual Estim";
+"two_nams19" = "Preset Waveform";
+"two_nams20" = "It's the first waveform.";
+"two_nams21" = "This is the last waveform.";
+"two_nams22" = "Executing %@ waveform";
+"two_nams23" = "Default Waveform";
+"two_nams24" = "My Waveforms";
+"two_nams25" = "For Beginners";
+"two_nams26" = "Are you sure to delete?" ;
+"two_nams27" = "Stop Timing";
+"two_nams28" = "Estim Time";
+"two_nams30" = "Range 1-999";
+"role_name33_33" = "Timing for each ticket";
+"two_nams31" = "Your waveform is less than 30 seconds long and cannot be saved.";
+"two_nams32" = "Continue";
+"two_nams33" = "The minimum time cannot be less than 1 minute";
+"two_nams34" = "Your waveform will be saved in My Waveform for your convenience next time.";
+"two_tips123" = "For the first time, the shock force at the bottom of the touchpad is weak, and the shock force at the top is strong. For unnecessary damage, please start from the bottom.";
+
+
+
+"chat_all19" = "Invitation message";
+"chat_all24" = "Authority transfer message";
+"chat_all20" = "Invite him/her to become a wearer";
+"chat_all21" = "Invite him/her to be your Master";
+"chat_all20_20" = "Invite you to be a wearer of TA";
+"chat_all21_21" = "Invite you to be their host";
+"chat_all22" = "Transfer authority to him/her";
+"chat_all23" = "Authority transferred to you";
+"login_err1" = "Don't have a LOCKINK account?";
+"login_err2" = "Go registering";
+"login_err3" = "Gender is required";
+"login_err4" = "Sent successfully, please wait for review";
+"login_err5" = "Beyond positioning lock range";
+"login_err6" = "Please set your positioning lock range first";
+"login_err7" = "End time as required items";
+"login_err8" = "The timing coupon is set successfully. Procedure";
+"login_err9" = "If a scheduled task is taking effect, determine the replacement point";
+
+"message_friend2" = "Waiting for verifcation";
+"message_friend3" = "Unlocked";
+
+"login_privary1" = "Privacy Policy";
+
+"login_privary2" = "Thank you for trusting and using LOCKINK services. We attach great importance to the protection of your personal information and privacy. In accordance with the latest legal requirements, we have updated the User Agreement and Privacy Policy. Please be sure to read the 《Privacy Policy》 and 《User Agreement》 carefully and confirm your understanding. Our rules for processing your personal information;";
+
+"login_privary3" = "Thank you for trusting and using LOCKINK services. We attach great importance to the protection of your personal information and privacy. In accordance with the latest legal requirements, we have updated the User Agreement and Privacy Policy. Please be sure to read the ";
+
+"login_privary4" = "《Privacy Policy》";
+"login_privary4_5" = " and ";
+"login_privary5" = "《User Agreement》";
+
+"login_privary6" = "Agree";
+
+"login_privary7" = "Disagree";
+
+"home_Shoot" = "Camera";
+
+"home_SelectFromAlbum" = "Photo Album";
+
+"home_Sure" = "Confirm";
+
+"home_Publish" = "Post";
+
+"home_ok" = "Finish";
+
+"attent_normal" = "Follow";
+
+"attent_normal_yes" = "Already following";
+
+"attent_sel" = "Private Chat";
+
+"request_success" = "Successful operation";
+
+"home_Cancel" = "Cancel";
+
+"home_reset" = "Reset";
+
+"home_edit_save" = "Save";
+
+"home_send" = "Send";
+
+"home_more" = "More";
+
+"home_delete" = "Delete";
+
+"home_MasterDrawing" = "Primitive";
+
+"home_preview" = "Preview";
+
+"home_skip" = "Skip";
+
+"homeMsg_delete" = "confirm deletion?";
+
+
+"msg_UIUIStr1" = "None device is currently connected, please connect your toys first";
+"msg_UIUIStr2" = "Connecting ...";
+"msg_UIUIStr3" = "Search for an ID or user name";
+"msg_UIUIStr4" = "If no friend is added, add the friend on the message screen";
+"msg_UIUIStr5" = "Master has forfeited access";
+"msg_UIUIStr6" = "Master has released access";
+
+
+
+"login_all1" = "Via Phone";
+
+"login_all2" = "Via Email";
+
+"login_all1_1" = "Via Phone Number";
+
+"login_all2_2" = "Via E-mail";
+
+"login_all3" = "Your Phone Number";
+
+"login_all3_3" = "Please enter your email";
+
+"login_all4" = "Verification code";
+
+"login_all4_4" = "Please enter your password";
+
+"login_all5" = "Send a code";
+
+"login_all6" = "Password login";
+
+"login_all7" = "Verification code login";
+
+"login_all8" = "Log in";
+
+"login_all9" = "Don’t have an account yet?";
+
+"login_all10" = "Sign up now";
+
+"login_all11" = "I have read and agreed";
+
+"login_all12" = "《User Agreement》";
+
+"login_all13" = " & ";
+
+"login_all14" = "《Privacy Policy》";
+
+"login_all11_11" = "I have read and agreed《User Agreement》 & 《Privacy Policy》";
+
+"login_all15" = "Please agree to the User Agreement and Privacy Policy first";
+
+"login_all16" = "Please enter a 6-16 digit login password";
+
+"login_all17" = "Please confirm your password";
+
+"login_all18" = "Sign Up";
+
+"login_all19" = "Age & Region";
+
+"login_all20" = "Set birthday (Your age must be equal to or greater than 18 years old)";
+
+"login_all21" = "your height";
+
+"login_all22" = "your weight";
+
+"login_all23" = "your country / region";
+
+"login_all24" = "Select year, month and day";
+
+"login_all25" = "Next step";
+
+"login_all26" = "Gender & Sexual Orientation & Roles";
+
+"login_all27" = "Set your gender";
+
+"login_all28" = "Set your sexual orientation";
+
+"login_all29" = "Set your roles";
+
+"login_all30" = "Choose a country";
+
+"login_all31" = "age";
+
+"login_all32" = "Weight";
+
+"login_all33" = "Please select your gender";
+
+"login_all34" = "Sexual Orientation";
+
+"login_all35" = "Roles";
+
+"login_all36" = "Countries or Regions";
+
+"home_set_SureLogOut" = "Are you sure to log out?";
+
+"home_LogOutLogOut" = "Log Out";
+
+"version_msg" = "Currently the latest version";
+
+"version_newUrl" = "If you find the latest version, please download it";
+
+"home_CheckUpdates" = "Check for the Latest Version";
+
+"tabbar_tit1" = "Toy";
+
+"tabbar_tit2" = "square";
+
+"tabbar_tit3" = "Messages";
+
+"tabbar_tit4" = "My";
+
+"noData_msg1" = "No data";
+
+"home_nam1" = "not connected";
+
+"home_nam2" = "add";
+
+"home_nam3" = "connected";
+
+"toys_all8" = "The phone does not support Bluetooth";
+
+"toys_all9" = "Mobile phone bluetooth disconnected";
+
+"toys_all10" = "The Bluetooth function of the mobile phone is turned off";
+
+"toys_all11" = "The Bluetooth function of the mobile phone does not have permission";
+
+"toys_all7" = "Go to settings";
+
+"toys_all6" = "Bluetooth alert";
+
+"ble_fail" = "Connection failed";
+
+"ble_fail3" = "Feature not found";
+
+"home_title3" = "Search device";
+
+"toys_all12" = "Make sure Bluetooth is on and press the device button";
+
+"toys_all13" = "Searching for devices…";
+
+"toys_all1" = "Can't find a toy?";
+
+"toys_all2" = "Make sure your toy has power and lights flashing";
+
+"toys_all3" = "Make sure your toys are close to the device";
+
+"toys_all4" = "Try removing all devices from Bluetooth Device Manager (you can add them again later)";
+
+"role_name1" = "Owner";
+
+"role_name2" = "wearer";
+
+"role_name3" = "time lock";
+
+"role_name4" = "E-stim";
+
+"role_name5" = "Locating the Cage";
+
+"role_name6" = "Invite friends";
+
+"role_name7" = "Post a search for a Dom/Domme";
+
+"role_name8" = "Confirm invitation";
+
+"role_name9" = "Become a wearer";
+
+"role_name10" = "Become the master?";
+
+"role_name11" = "content";
+
+"role_name12" = "Conditions of Participation";
+
+"role_name13" = "If you left this blank, the default is permanent.";
+
+//"role_name14" = "Days";
+//
+//"role_name14_h" = "Hours";
+//
+//"role_name14_m" = "Minutes";
+"role_name14" = "D";
+"role_name14_h" = "H";
+"role_name14_m" = "M";
+
+"role_name14_14" = "minutes";
+
+"role_name15" = "Selected";
+
+"role_name16" = "Have't be turned on";
+
+"role_name16_16" = "Turned on";
+
+"role_name17" = "Random setting";
+
+"role_name18" = "manual setting";
+
+"role_name19" = "Vote";
+
+"role_name20" = "Apply now";
+
+"role_name21" = "Chat about it privately";
+
+"role_name22" = "random";
+
+"role_name23" = "Manual";
+
+"role_name24" = "Vote";
+
+"role_name25" = "shortest time";
+
+"role_name26" = "longest time";
+
+"role_name27" = "start";
+
+"role_name28" = "It will take effect immediately after the setting is completed.";
+
+"role_name29" = "Whether to enable unlock click reminder";
+
+"role_name30" = "Voltage selection";
+
+"role_name31" = "reset";
+
+"role_name32" = "Start booting";
+
+"role_name33" = "Blocking time for each ticket";
+
+"role_name34" = "deadline";
+
+"role_name35" = "Conditions of participation";
+
+"role_name36" = "referendum record";
+
+"role_name37" = "The total time accumulated";
+
+"role_name38" = "Time to be executed";
+
+"role_name39" = "Add timed shock";
+
+"role_name39_39" = "timed shock";
+
+"role_name40" = "Post shock";
+
+"role_name42" = "long shock mode";
+
+"role_name43" = "shock";
+
+"role_name44" = "impulse";
+
+"role_name45" = "sting";
+
+"role_name46" = "Start electric shock";
+
+"role_name46_46" = "Stop shock";
+
+"role_name47" = "Timing settings";
+
+"role_name48" = "Set the shock time that suits you";
+
+"role_name49" = "Shock options";
+
+"role_name50" = "Shock frequency";
+
+"role_name51" = "Shock duration";
+
+"role_name52" = "Turn on locating lock";
+
+"role_name52_1" = "Turn off locating lock";
+"role_name54" = "Whether to unbind the device?";
+"role_name55" = "You have been forcibly unbound by the wearer";
+"role_name56" = "Delete the chat?";
+
+
+"role_setting1" = "Current location:";
+
+"role_setting2" = "Diameter range:";
+
+"role_setting3" = "Electric shock reminder:";
+
+"role_setting4" = "Voltage selection:";
+
+"role_setting5" = "Please enter the number of kilometers";
+
+"role_setting6" = "On";
+
+"role_setting7" = "Off";
+
+"role_setting8" = "search";
+
+"role_setting9" = "Record";
+
+"role_setting10" = "Location";
+
+"role_setting11" = "Enable";
+
+"role_setting12" = "Revise";
+
+"role_setting13" = "Do you want to switch roles?";
+
+"role_setting14" = "Invite you to become TA";
+
+"role_setting15" = "Waiting for their accepting of your invitation";
+
+"role_setting16" = "Forcefully unbind with your master";
+
+"role_setting16_16" = "You have been forcibly unbound";
+
+"role_setting17" = "Hardcore mode";
+
+"role_setting18" = "Unlock records";
+
+"role_setting19" = "Device records";
+
+"role_setting19_19" = "Application record'";
+
+"role_setting21" = "Forced deletion of unlocking records";
+
+"role_setting23" = "Public device";
+
+"role_setting24" = "Device Name";
+
+"role_setting25" = "Unbind";
+
+"role_setting25_25" = "Unbind role";
+
+"role_setting26" = "Permission transfer";
+
+"role_setting29" = "Device records";
+
+"role_setting30" = "Public device";
+
+"role_setting31" = "Device Name";
+
+"role_setting36" = "Device records";
+
+"role_setting37" = "Transfer days";
+
+"role_setting38" = "permanent";
+
+"role_setting39" = "Custom days";
+
+"role_setting40" = "Transfer friends";
+
+"role_setting41" = "After turning on hardcore mode";
+
+"role_setting41_41" = "Turn off hardcore mode";
+
+"role_setting42" = "I have already known.";
+
+"role_setting43" = "Audio Recording certification";
+"role_setting44" = "Clear";
+
+"role_setting45" = "Please read aloud and complete the audio recording according to the following text content";
+
+"role_setting49" = "Are you sure you want to use the timed ticket?";
+
+"role_setting51" = "Disable hardcore mode";
+
+"role_setting52" = "It will be reset on the 1st of every month";
+
+"role_setting53" = "Forced to unlock this month";
+
+"role_setting54" = "No.";
+
+"role_setting55" = "punishment";
+
+"role_setting56" = "If you already have a timed ticket, please use it before proceeding.";
+
+"role_setting57" = "Add up to 3 timed shocks";
+
+"role_setting58" = "Both parties need to be bound for one than 1 month before they can turn on the hardcore mode.";
+
+"voice_Recorded" = "confirm submission?";
+
+"voice_Recorded2" = "Not recorded yet";
+
+"role_connect1" = "Remote Off";
+
+"home_bluetooth1" = "Searching results";
+
+"plaza_all1" = "Follow";
+
+"plaza_all1_1" = "Unfollow";
+
+"plaza_all2" = "recommend";
+
+"plaza_all3" = "Popular";
+
+"plaza_all4" = "up to date";
+
+"plaza_all5" = "Videos";
+
+"plaza_all6" = "Audio";
+
+"plaza_all11" = "all";
+
+"plaza_all12" = "Looking for a Dom/Domme";
+
+"plaza_all13" = "Vote";
+"plaza_all14" = "Posts";
+
+"postPlaza_placeText" = "please enter...";
+
+"plaza_all15" = "location";
+
+"plaza_all16" = "Visible range";
+
+"plaza_all17" = "Public";
+
+"plaza_all18" = "Visible to friends";
+
+"plaza_all19" = "Visible to yourself only";
+
+"plaza_all20" = "Pictures";
+
+"plaza_all21" = "Videos";
+
+"plaza_all22" = "Audios";
+
+"plaza_all22_22" = "On audiosing...";
+
+"plaza_all23" = "Top list";
+
+"plaza_all24" = "Join Now";
+
+"plaza_all25" = "Top Endurance";
+
+"plaza_all26" = "After joining the list, the total time you wear the device will be counted. The list will be updated at 0:00 every Monday.";
+
+"plaza_all27" = "Top E-stim Resistance";
+
+"plaza_all28" = "After joining the list, your total click time will be counted. The list will be updated every Monday at 0:00";
+
+"plaza_all29" = "Details";
+
+"find_detail1" = "gender";
+
+"find_detail2" = "Permission duration";
+
+"find_detail3" = "deadline";
+
+"find_detail4" = "Apply to become a host";
+
+"find_detail4_44" = "Already bound to the owner";
+
+"find_detail4_4" = "I want to vote";
+
+"find_detail5" = "Comment";
+
+"find_detail6" = "Reply";
+
+"find_detail7" = "Delete";
+
+"find_choose1" = "status";
+
+"find_choose2" = "in progress";
+
+"find_choose3" = "over";
+
+"fieldText_place" = "Speak kindly, speak civilly...";
+
+"find_choose4" = "Your reason";
+
+"find_choose5" = "please choose";
+
+"find_choose6" = "Add a description";
+
+"find_choose7" = "Picture evidence";
+
+"find_choose8" = "Participants";
+
+"find_push1" = "The content you publish needs to be reviewed by the administrator before it can be published and displayed. Please understand!";
+
+
+"center_all1" = "Refresh";
+
+"center_all2" = "filter";
+
+"center_all3" = "Currently there are";
+
+"center_all3_3" = "people online";
+
+"center_all4" = "Matching";
+
+"center_all5" = "Exploring";
+
+"center_all6" = "Adventure";
+
+"center_all7" = "Soulmate";
+
+"center_all8" = "Friends";
+
+"center_all9" = "Dating";
+
+"center_all9_9" = "Who do you want to make yourself visible to?";
+
+"center_all10" = "A Chat";
+"center_all11" = "Resend later";
+
+"center_all12" = "No limit";
+
+"center_all13" = "I have a toy";
+
+"center_all14" = "I have no toy";
+
+"center_all15" = "Male";
+
+"center_all16" = "Female";
+
+"center_all18" = "His/Her gender";
+
+"center_all19" = "His/Her orientation";
+
+"center_all20" = "His/Her roles (multiple choices available)";
+
+"center_all21" = "Heterosexual button";
+
+"center_all22" = "Heterosexual top";
+
+"center_all23" = "Heteroromantic";
+
+"center_all24" = "Subculture & Cosplay";
+
+"center_all25" = "After successfully sending the signal";
+
+"IMMsg_all1" = "Chats";
+
+"IMMsg_all2" = "Device";
+
+"IMMsg_all3" = "System";
+
+"message_tile4" = "new friends";
+
+"message_tile5" = "Blacklist";
+
+"message_tile6" = "agree";
+
+"message_tile7" = "reject";
+
+"message_tile8" = "Approved";
+
+"message_tile9" = "Rejected";
+
+"message_tile10" = "Address book";
+
+"message_tile11" = "Search friends/chat history";
+
+"message_tile12" = "add a friend";
+
+"goodFriend_ttt" = "Add to";
+
+"message_friend1" = "Agree";
+
+"message_friend1_1" = "Approved";
+
+"home_equipment2" = "Device name";
+
+"expertTitl_detail" = "Details";
+
+"chat_all5" = "Friend's Notes";
+
+"message_mdr" = "Do not disturb messages";
+
+"chat_all4" = "Clear chat history";
+
+"chat_all7" = "delete friend";
+
+"chat_all8" = "You are under a gag order";
+"chat_all9" = "It has been blocked by the other party";
+"chat_all3" = "Sticky on Top";
+"chat_all10" = "Signature";
+"chat_all11" = "Official";
+
+"send_msg" = "send message";
+
+"message_photo" = "photo";
+
+"message_camera" = "shooting";
+
+"me_allNames1" = "photo album";
+
+"me_allNames2" = "Device";
+
+"me_allNames3" = "Nick name";
+"me_allNames4" = "This user was lazy and left nothing…";
+
+"me_allNames5" = "Editing information";
+
+"me_allNames5_5" = "Profile";
+
+"me_allNames7" = "Fans";
+
+"me_allNames8" = "Liked";
+
+"me_allNames9" = "Visitors";
+
+"me_allNames10" = "under review";
+
+"me_allNames11" = "Review rejection";
+
+"me_allNames12" = "Upload to Photo Album";
+
+"me_allNames13" = "Looking for A Dom/Domme";
+
+"me_allNames14" = "referendum";
+
+"me_allNames15" = "Already";
+
+"me_allNames16" = "people apply";
+
+"me_allNames18" = "Who saw me";
+
+"me_allNames19" = "Who have I seen";
+
+"me_allNames20" = "visited you in total";
+
+"me_allNames20_20" = "Visited TA in total";
+
+"me_allNames21" = "times";
+
+"me_allNames22" = "Add to blacklist";
+
+"me_allNames22_22" = "Remove from blacklist";
+
+"me_allNames23" = "Report a user or a post";
+
+"me_allNames24" = "Confidential";
+
+"me_allNames25" = "height";
+
+"my_settings" = "set up";
+
+"my_settings1" = "Account & Security";
+
+"my_settings2" = "Trouble Shooting";
+
+"my_settings3" = "Feedbacks";
+
+"my_settings4" = "Check for updates";
+
+"my_settings5" = "About us";
+
+"my_settings6" = "Clear cache";
+
+"my_settings7" = "Language change";
+
+"my_settings8" = "Online service";
+
+"my_settings9" = "Switch account";
+
+"my_settings10" = "Logout";
+
+"my_settings11" = "Change binding";
+
+"my_settings12" = "Change Password";
+
+"my_settings13" = "submit";
+
+"my_about8" = "Do you have any suggestions… or questions you need help with? Please tell us";
+
+"my_about1" = "Privacy Policy";
+
+"my_about2" = "User Agreement";
+
+"my_about3" = "User License Agreement";
+
+"my_about4" = "Tip";
+
+"my_about4_lock" = "A timing lock is currently in effect";
+"my_about4_lock2" = "The existing time lock is in effect, cannot be forced to unlock, penalty to %@";
+
+"my_about5" = "Confirm clearing cache?";
+
+"my_about6" = "Confirm to select the role as the Master?";
+"my_about7" = "Confirm to select the role as the wearer?";
+
+"my_about6_6" = "Owner";
+
+"my_about7_7" = "Wearer";
+
+"my_about6_6L" = "owner";
+
+"my_about7_7L" = "wearer";
+
+"my_about8" = "boud phone number:";
+
+"my_about9" = "bound email address:";
+
+"my_about10" = "Change the binding";
+
+"my_about11" = "Confirm and Cancel";
+
+"my_about12" = "About The Cancellation of Your Account:";
+
+"my_about13" = "1. Canceling your account will clear all your relevant information on the LOCKINK server, including your personal information, equipment, community records, message records, etc.;";
+
+"my_about14" = "2. After the account is canceled, it cannot be restored. Please proceed with caution;";
+
+"my_about15" = "3. After canceling your account, you can re-register as a new account.";
+
+"my_about16" = "After the permission is confiscated, the wearer will no longer have any permission to operate the device. Do you confirm that the wearer's permission has been confiscated?";
+
+"my_about17" = "After permission is given, the wearer will have permission to operate the device. Do you confirm that permission is given to the wearer?";
+"my_about18" = "Apply";
+
+"my_about19" = "Do you want to apply to the owner for unlocking?";
+
+"my_about20" = "Permission has been confiscated by the owner";
+
+"my_about21" = "Confirm to switch accounts?";
+
+"my_about22" = "Blacklisted";
+
+"my_about22_22" = "Removed from blacklist";
+
+"my_about23" = "Remove";
+"my_about24" = "The other party has agreed";
+
+"my_about25" = "The other party has rejected";
+
+"my_about26" = "Add an account";
+
+"updatedVersion1" = "New Version available";
+
+"updatedVersion2" = "Update";
+
+"updatedVersion3" = "About the New Version";
+
+"home_Prompt" = "Tips";
+"home_DeviceSupportTakingPhotos" = "The device does not support taking photos";
+
+
+"language_zh" = "Simplified Chinese";
+"language_zht" = "Traditional Chinese";
+"language_en" = "English";
+
+"anti_fraud_title" = "Anti-Fraud Center Alert";
+"anti_fraud_tip" = "Do not trust messages about remittances or winning prizes. Be cautious with calls from strangers. Report suspicious situations promptly. ";
+"anti_fraud_report" = "Click to report";
+"violation_content_tip" = "This content may violate our policies. Send anyway?";
+"violation_skip_tip" = "Content violates policy, skipped";
+"cancel" = "Cancel";
+"send_anyway" = "Send anyway";
