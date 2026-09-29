@@ -1,12 +1,7 @@
-name: Archive & Upload to App Store Connect
+name: Archive & Export IPA
 
 on:
   workflow_dispatch:
-    inputs:
-      scheme:
-        description: 'Xcode Scheme'
-        required: true
-        default: 'BlueEquipProject'
 
 jobs:
   build:
@@ -23,7 +18,6 @@ jobs:
 
       - name: Pod Install
         run: pod install
-        working-directory: .
 
       - name: Decode signing certificate
         run: |
@@ -53,7 +47,6 @@ jobs:
             -configuration Release \
             -archivePath build/BlueEquipProject.xcarchive \
             -destination "generic/platform=iOS" \
-            -allowProvisioningUpdates \
             CODE_SIGN_STYLE=Manual
 
       - name: Export IPA
@@ -77,16 +70,9 @@ jobs:
             -archivePath build/BlueEquipProject.xcarchive \
             -exportPath build/export \
             -exportOptionsPlist build/export/ExportOptions.plist \
-            -allowProvisioningUpdates \
-            -authenticationKeyIssuerID "$API_ISSUER_ID" \
-            -authenticationKeyID "$API_KEY_ID" \
-            -authenticationKeyIssuerKey "$API_KEY_CONTENT"
-        env:
-          API_ISSUER_ID: ${{ secrets.APP_STORE_API_ISSUER_ID }}
-          API_KEY_ID: ${{ secrets.APP_STORE_API_KEY_ID }}
-          API_KEY_CONTENT: ${{ secrets.APP_STORE_API_KEY_CONTENT }}
+            CODE_SIGN_STYLE=Manual
 
-      - name: Upload build artifacts
+      - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: BlueEquipProject-IPA
