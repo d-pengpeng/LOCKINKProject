@@ -40,6 +40,8 @@ post_install do |installer|
       # Xcode 26 兼容：禁用模块编译，避免老 Pod 头文件找不到
       config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
       config.build_settings['OTHER_CFLAGS'] = '-Wno-error=implicit-function-declaration -Wno-error=non-modular-include-in-framework-module -Wno-error=deprecated-objc-isa-usage'
+      # 禁用模块后需要显式链接系统框架
+      config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework UIKit -framework CoreGraphics -framework QuartzCore -framework Foundation -framework CFNetwork -framework Security -framework SystemConfiguration'
     end
   end
 end
