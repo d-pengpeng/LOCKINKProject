@@ -57,7 +57,7 @@ jobs:
 
       - name: Archive
         run: |
-          xcodebuild archive -workspace BlueEquipProject.xcworkspace -scheme BlueEquipProject -configuration Release -archivePath build/BlueEquipProject.xcarchive -destination "generic/platform=iOS" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=L992GPQMS4 CODE_SIGN_IDENTITY="iPhone Distribution" "BlueEquipProject_PROVISIONING_PROFILE=53f48a3c-823f-4e48-8911-ddb17f485846" "BlueEquipProjectNotiServier_PROVISIONING_PROFILE=f46ef368-3b06-463b-8e9f-8d3acdfa3ace" "BlueEquipProjectNotiServier_DEVELOPMENT_TEAM=L992GPQMS4" "BlueEquipProjectNotiServier_CODE_SIGN_IDENTITY=iPhone Distribution"
+          xcodebuild archive -workspace BlueEquipProject.xcworkspace -scheme BlueEquipProject -configuration Release -archivePath build/BlueEquipProject.xcarchive -destination "generic/platform=iOS"
 
       - name: Export IPA
         run: |
