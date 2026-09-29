@@ -36,6 +36,7 @@ post_install do |installer|
       config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
       config.build_settings.delete('PROVISIONING_PROFILE')
       config.build_settings.delete('PROVISIONING_PROFILE_SPECIFIER')
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
     end
   end
 end
