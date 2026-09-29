@@ -3,11 +3,6 @@ name: Archive & Export IPA
 on:
   workflow_dispatch:
 
-env:
-  PROVISIONING_PROFILE_APP: d7c4f98a-fb72-4d66-8125-18a1b5a4a538
-  PROVISIONING_PROFILE_EXT: 43a308a2-78f0-4399-993f-8bbb84f4cc32
-  TEAM_ID: L992GPQMS4
-
 jobs:
   build:
     runs-on: macos-15
@@ -15,13 +10,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: List and select Xcode
+      - name: Select Xcode
         run: |
-          echo "=== Available Xcode versions ==="
-          ls -d /Applications/Xcode*.app 2>/dev/null
-          LATEST_XCODE=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
-          echo "Latest: $LATEST_XCODE"
-          sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+          LATEST=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+          echo "Selecting: $LATEST"
+          sudo xcode-select -s "$LATEST/Contents/Developer"
           xcodebuild -version
 
       - name: Install CocoaPods
@@ -30,7 +23,7 @@ jobs:
       - name: Pod Install
         run: pod install
 
-      - name: Decode signing certificate
+      - name: Setup signing
         run: |
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
@@ -38,38 +31,36 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PP_DIR"
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PP_DIR/d7c4f98a-fb72-4d66-8125-18a1b5a4a538.mobileprovision"
+          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$PP_DIR/43a308a2-78f0-4399-993f-8bbb84f4cc32.mobileprovision"
+          ls -la "$PP_DIR"
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           BUILD_CERTIFICATE_PASSWORD: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-
-      - name: Decode provisioning profiles
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/d7c4f98a-fb72-4d66-8125-18a1b5a4a538.mobileprovision
-          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/43a308a2-78f0-4399-993f-8bbb84f4cc32.mobileprovision
-        env:
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
           PROVISIONING_PROFILE_EXT_BASE64: ${{ secrets.PROVISIONING_PROFILE_EXT_BASE64 }}
 
+      - name: Create xcconfig
+        run: |
+          cat > build_settings.xcconfig << 'EOF'
+          CODE_SIGN_STYLE = Manual
+          DEVELOPMENT_TEAM = L992GPQMS4
+          PROVISIONING_PROFILE = d7c4f98a-fb72-4d66-8125-18a1b5a4a538
+          PROVISIONING_PROFILE_SPECIFIER = 
+          CODE_SIGN_IDENTITY = iPhone Distribution
+          EOF
+          echo "=== xcconfig ==="
+          cat build_settings.xcconfig
+
       - name: Archive
         run: |
-          set -ex
-          xcodebuild archive \
-            -workspace BlueEquipProject.xcworkspace \
-            -scheme BlueEquipProject \
-            -configuration Release \
-            -archivePath build/BlueEquipProject.xcarchive \
-            -destination "generic/platform=iOS" \
-            CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            PROVISIONING_PROFILE="$PROVISIONING_PROFILE_APP" \
-            "BlueEquipProjectNotiServier_PROVISIONING_PROFILE=$PROVISIONING_PROFILE_EXT" \
-            DEVELOPMENT_TEAM="$TEAM_ID"
+          xcodebuild archive -workspace BlueEquipProject.xcworkspace -scheme BlueEquipProject -configuration Release -archivePath build/BlueEquipProject.xcarchive -destination "generic/platform=iOS" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=L992GPQMS4 PROVISIONING_PROFILE=d7c4f98a-fb72-4d66-8125-18a1b5a4a538 CODE_SIGN_IDENTITY="iPhone Distribution" "BlueEquipProjectNotiServier_PROVISIONING_PROFILE=43a308a2-78f0-4399-993f-8bbb84f4cc32" "BlueEquipProjectNotiServier_DEVELOPMENT_TEAM=L992GPQMS4" "BlueEquipProjectNotiServier_CODE_SIGN_IDENTITY=iPhone Distribution"
 
       - name: Export IPA
         run: |
-          set -ex
           mkdir -p build/export
           cat > build/export/ExportOptions.plist << 'EOF'
           <?xml version="1.0" encoding="UTF-8"?>
@@ -82,21 +73,29 @@ jobs:
               <string>L992GPQMS4</string>
               <key>uploadSymbols</key>
               <true/>
+              <key>signingStyle</key>
+              <string>manual</string>
               <key>provisioningProfiles</key>
               <dict>
                   <key>com.lockink.qingQuPro</key>
-                  <string>d7c4f98a-fb72-4d66-8125-18a1b5a4a538</string>
+                  <dict>
+                      <key>signingStyle</key>
+                      <string>manual</string>
+                      <key>profileUUID</key>
+                      <string>d7c4f98a-fb72-4d66-8125-18a1b5a4a538</string>
+                  </dict>
                   <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
-                  <string>43a308a2-78f0-4399-993f-8bbb84f4cc32</string>
+                  <dict>
+                      <key>signingStyle</key>
+                      <string>manual</string>
+                      <key>profileUUID</key>
+                      <string>43a308a2-78f0-4399-993f-8bbb84f4cc32</string>
+                  </dict>
               </dict>
           </dict>
           </plist>
           EOF
-          xcodebuild -exportArchive \
-            -archivePath build/BlueEquipProject.xcarchive \
-            -exportPath build/export \
-            -exportOptionsPlist build/export/ExportOptions.plist \
-            CODE_SIGN_STYLE=Manual
+          xcodebuild -exportArchive -archivePath build/BlueEquipProject.xcarchive -exportPath build/export -exportOptionsPlist build/export/ExportOptions.plist
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
@@ -104,7 +103,7 @@ jobs:
           name: BlueEquipProject-IPA
           path: build/export/*.ipa
 
-      - name: Cleanup keychain
+      - name: Cleanup
         if: always()
         run: |
           security delete-keychain build.keychain 2>/dev/null || true
