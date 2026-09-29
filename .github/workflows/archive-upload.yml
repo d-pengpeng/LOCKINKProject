@@ -33,8 +33,8 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PP_DIR/d7c4f98a-fb72-4d66-8125-18a1b5a4a538.mobileprovision"
-          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$PP_DIR/43a308a2-78f0-4399-993f-8bbb84f4cc32.mobileprovision"
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PP_DIR/53f48a3c-823f-4e48-8911-ddb17f485846.mobileprovision"
+          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$PP_DIR/f46ef368-3b06-463b-8e9f-8d3acdfa3ace.mobileprovision"
           ls -la "$PP_DIR"
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -57,7 +57,7 @@ jobs:
 
       - name: Archive
         run: |
-          xcodebuild archive -workspace BlueEquipProject.xcworkspace -scheme BlueEquipProject -configuration Release -archivePath build/BlueEquipProject.xcarchive -destination "generic/platform=iOS" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=L992GPQMS4 PROVISIONING_PROFILE=d7c4f98a-fb72-4d66-8125-18a1b5a4a538 CODE_SIGN_IDENTITY="iPhone Distribution" "BlueEquipProjectNotiServier_PROVISIONING_PROFILE=43a308a2-78f0-4399-993f-8bbb84f4cc32" "BlueEquipProjectNotiServier_DEVELOPMENT_TEAM=L992GPQMS4" "BlueEquipProjectNotiServier_CODE_SIGN_IDENTITY=iPhone Distribution"
+          xcodebuild archive -workspace BlueEquipProject.xcworkspace -scheme BlueEquipProject -configuration Release -archivePath build/BlueEquipProject.xcarchive -destination "generic/platform=iOS" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=L992GPQMS4 PROVISIONING_PROFILE=53f48a3c-823f-4e48-8911-ddb17f485846 CODE_SIGN_IDENTITY="iPhone Distribution" "BlueEquipProjectNotiServier_PROVISIONING_PROFILE=f46ef368-3b06-463b-8e9f-8d3acdfa3ace" "BlueEquipProjectNotiServier_DEVELOPMENT_TEAM=L992GPQMS4" "BlueEquipProjectNotiServier_CODE_SIGN_IDENTITY=iPhone Distribution"
 
       - name: Export IPA
         run: |
@@ -82,14 +82,14 @@ jobs:
                       <key>signingStyle</key>
                       <string>manual</string>
                       <key>profileUUID</key>
-                      <string>d7c4f98a-fb72-4d66-8125-18a1b5a4a538</string>
+                      <string>53f48a3c-823f-4e48-8911-ddb17f485846</string>
                   </dict>
                   <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
                   <dict>
                       <key>signingStyle</key>
                       <string>manual</string>
                       <key>profileUUID</key>
-                      <string>43a308a2-78f0-4399-993f-8bbb84f4cc32</string>
+                      <string>f46ef368-3b06-463b-8e9f-8d3acdfa3ace</string>
                   </dict>
               </dict>
           </dict>
