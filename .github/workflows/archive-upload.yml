@@ -3,6 +3,11 @@ name: Archive & Export IPA
 on:
   workflow_dispatch:
 
+env:
+  PROVISIONING_PROFILE_APP: d7c4f98a-fb72-4d66-8125-18a1b5a4a538
+  PROVISIONING_PROFILE_EXT: 43a308a2-78f0-4399-993f-8bbb84f4cc32
+  TEAM_ID: L992GPQMS4
+
 jobs:
   build:
     runs-on: macos-15
@@ -14,9 +19,6 @@ jobs:
         run: |
           echo "=== Available Xcode versions ==="
           ls -d /Applications/Xcode*.app 2>/dev/null
-          echo "=== Current xcode-select ==="
-          xcode-select -p
-          echo "=== Selecting latest Xcode ==="
           LATEST_XCODE=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
           echo "Latest: $LATEST_XCODE"
           sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
@@ -41,12 +43,14 @@ jobs:
           BUILD_CERTIFICATE_PASSWORD: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
 
-      - name: Decode provisioning profile
+      - name: Decode provisioning profiles
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/d7c4f98a-fb72-4d66-8125-18a1b5a4a538.mobileprovision
+          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/43a308a2-78f0-4399-993f-8bbb84f4cc32.mobileprovision
         env:
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          PROVISIONING_PROFILE_EXT_BASE64: ${{ secrets.PROVISIONING_PROFILE_EXT_BASE64 }}
 
       - name: Archive
         run: |
@@ -57,7 +61,11 @@ jobs:
             -configuration Release \
             -archivePath build/BlueEquipProject.xcarchive \
             -destination "generic/platform=iOS" \
-            CODE_SIGN_STYLE=Manual
+            CODE_SIGN_STYLE=Manual \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            PROVISIONING_PROFILE="$PROVISIONING_PROFILE_APP" \
+            "BlueEquipProjectNotiServier_PROVISIONING_PROFILE=$PROVISIONING_PROFILE_EXT" \
+            DEVELOPMENT_TEAM="$TEAM_ID"
 
       - name: Export IPA
         run: |
@@ -74,6 +82,13 @@ jobs:
               <string>L992GPQMS4</string>
               <key>uploadSymbols</key>
               <true/>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.lockink.qingQuPro</key>
+                  <string>d7c4f98a-fb72-4d66-8125-18a1b5a4a538</string>
+                  <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
+                  <string>43a308a2-78f0-4399-993f-8bbb84f4cc32</string>
+              </dict>
           </dict>
           </plist>
           EOF
