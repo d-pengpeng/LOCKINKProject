@@ -66,14 +66,10 @@
     self.isStopBo = YES;
 
     // 反诈提示条
-    self.antiTipH = 61;
+    self.antiTipH = 48;
     CGFloat antiBarH = 48;
-    self.antiFraudView = [[UIView alloc] initWithFrame:CGRectMake(12, NAVHEIGHT + 9, _window_width - 24, antiBarH)];
+    self.antiFraudView = [[UIView alloc] initWithFrame:CGRectMake(0, NAVHEIGHT, _window_width, antiBarH)];
     self.antiFraudView.backgroundColor = [UIColor colorWithRed:255/255.f green:248/255.f blue:240/255.f alpha:1.f];
-    self.antiFraudView.layer.cornerRadius = 8;
-    self.antiFraudView.layer.masksToBounds = YES;
-    self.antiFraudView.layer.borderWidth = 1;
-    self.antiFraudView.layer.borderColor = [UIColor colorWithRed:255/255.f green:212/255.f blue:163/255.f alpha:1.f].CGColor;
 
     // 警告图标
     UIImageView *warningIcon = [[UIImageView alloc] initWithFrame:CGRectMake(12, (antiBarH - 18) / 2.0, 20, 18)];
@@ -84,7 +80,7 @@
 
     // 关闭按钮 X
     UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    closeBtn.frame = CGRectMake(_window_width - 24 - 32, (antiBarH - 20) / 2.0, 20, 20);
+    closeBtn.frame = CGRectMake(_window_width - 32, (antiBarH - 20) / 2.0, 20, 20);
     [closeBtn setImage:[UIImage systemImageNamed:@"xmark"] forState:UIControlStateNormal];
     closeBtn.tintColor = [UIColor colorWithRed:153/255.f green:153/255.f blue:153/255.f alpha:1.f];
     [closeBtn addTarget:self action:@selector(closeAntiFraudTip) forControlEvents:UIControlEventTouchUpInside];
@@ -92,7 +88,7 @@
 
     // 文本（含可点击的"点此举报"链接）
     CGFloat textX = 40;
-    CGFloat textW = _window_width - 24 - textX - 36;
+    CGFloat textW = _window_width - textX - 36;
     UILabel *antiLabel = [[UILabel alloc] initWithFrame:CGRectMake(textX, 0, textW, antiBarH)];
     antiLabel.numberOfLines = 2;
     antiLabel.font = SYS_Font(12);
@@ -227,6 +223,8 @@
 - (void)openAntiFraudReport
 {
     MHReportJBViewController *vc = [[MHReportJBViewController alloc] init];
+    vc.typeL = @"USER";
+    vc.targetIId = self.chatId;
     [self.navigationController pushViewController:vc animated:YES];
 }
 

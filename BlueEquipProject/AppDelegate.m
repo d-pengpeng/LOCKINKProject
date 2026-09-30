@@ -14,6 +14,7 @@
 #import <JPUSHService.h>
 #import <UserNotifications/UserNotifications.h>
 #import <UserNotificationsUI/UserNotificationsUI.h>
+#import "AppVersionManager.h"
 
 @interface AppDelegate ()<QCloudSignatureProvider, QCloudCredentailFenceQueueDelegate, JPUSHRegisterDelegate>
 @property (nonatomic, assign) int IMgin;
@@ -51,7 +52,11 @@
     
     [self thridMethodM:launchOptions];
 
-    
+    // 启动网络操作完成后静默检测版本更新（延迟3秒，确保启动流程全部完成）
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [AppVersionManager silentCheckAppStoreVersionWithAppId:@"6615071633"];
+    });
+
     return YES;
 }
 

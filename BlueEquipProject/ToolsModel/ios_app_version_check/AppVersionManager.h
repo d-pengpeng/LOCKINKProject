@@ -6,6 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface AppVersionManager : NSObject
 
 + (void)checkAppStoreVersionWithAppId:(NSString *)appId;
++ (void)silentCheckAppStoreVersionWithAppId:(NSString *)appId;
 
 @end
 

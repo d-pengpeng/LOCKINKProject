@@ -156,8 +156,8 @@
 
 static int const pattNum = 1; //低于多少就为0
 
-static int const txIMAppId_int = 1600164272;
-//static int const txIMAppId_int = 1600023905;
+//static int const txIMAppId_int = 1600164272;
+static int const txIMAppId_int = 1600023905;
 
 
 static NSString * const GaoDeKey = @"6488a31d96a8f92a4388446f75ca962c";

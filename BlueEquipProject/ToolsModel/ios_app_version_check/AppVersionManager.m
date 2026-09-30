@@ -59,6 +59,48 @@
     [task resume];
 }
 
++ (void)silentCheckAppStoreVersionWithAppId:(NSString *)appId {
+    NSString *urlString = [NSString stringWithFormat:@"https://itunes.apple.com/lookup?id=%@", appId];
+    NSURL *url = [NSURL URLWithString:urlString];
+    
+    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithURL:url completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        
+        if (error) {
+            NSLog(@"静默版本检查失败: %@", error.localizedDescription);
+            return;
+        }
+        
+        NSError *jsonError;
+        NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
+        
+        if (jsonError || !responseDict) {
+            NSLog(@"静默版本检查JSON解析失败");
+            return;
+        }
+        
+        NSArray *results = responseDict[@"results"];
+        if (results.count > 0) {
+            NSDictionary *appInfo = results.firstObject;
+            NSString *appStoreVersion = minStr(appInfo[@"version"]);
+            NSString *releaseNotes = @"";
+            if ([appInfo.allKeys containsObject:@"releaseNotes"]) {
+                releaseNotes = appInfo[@"releaseNotes"];
+            }
+            NSString *trackViewUrl = minStr(appInfo[@"trackViewUrl"]);
+            NSString *currentVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+            
+            // 仅在有新版本时弹窗，无新版本不做任何提示
+            if ([self compareVersion:appStoreVersion withVersion:currentVersion] == NSOrderedDescending) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self showUpdateAlertWithVersion:appStoreVersion releaseNotes:releaseNotes trackViewUrl:trackViewUrl];
+                });
+            }
+        }
+    }];
+    
+    [task resume];
+}
+
 + (NSComparisonResult)compareVersion:(NSString *)version1 withVersion:(NSString *)version2 {
     return [version1 compare:version2 options:NSNumericSearch];
 }

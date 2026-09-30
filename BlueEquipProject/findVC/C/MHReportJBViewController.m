@@ -202,7 +202,11 @@
 - (void)uploadRequestMMM
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSDictionary *dicMMM = @{@"type":self.typeL, @"targetId":self.targetIId, @"cid":self.caget_id, @"description":minStr(self.textV.text), @"evidenceUrls":self.imgUrlStr};
+        NSDictionary *dicMMM = @{@"type":minStr(self.typeL),
+                                 @"targetId":minStr(self.targetIId),
+                                 @"cid":minStr(self.caget_id),
+                                 @"description":minStr(self.textV.text),
+                                 @"evidenceUrls":minStr(self.imgUrlStr)};
         [requestToolClass postNetworkWithUrl:request_other_complaint andParameter:dicMMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
             
             [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
