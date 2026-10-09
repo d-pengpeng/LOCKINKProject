@@ -25,23 +25,31 @@ workflows:
         script: |
           chmod -R u+w Pods/QCloudCore/
           PING_H="Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h"
-          # 删除之前插入的 @import
-          sed -i '' '/@import Darwin;/d' "$PING_H" 2>/dev/null || true
-          # 删除之前插入的 #include
+          PING_M="Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.m"
+          # 清理之前插入的内容
+          sed -i '' '/@import Darwin/d' "$PING_H" 2>/dev/null || true
           sed -i '' '/#include <sys\/socket.h>/d' "$PING_H" 2>/dev/null || true
           sed -i '' '/#include <netinet\/in.h>/d' "$PING_H" 2>/dev/null || true
           sed -i '' '/#include <sys\/types.h>/d' "$PING_H" 2>/dev/null || true
-          # 用 Python 替换：删除直接头文件导入，改为显式子模块导入
+          # .h 文件：替换直接头文件为显式子模块导入
           python3 -c "
           f = '$PING_H'
           with open(f) as fh: c = fh.read()
           c = c.replace('#import <sys/_types/_sa_family_t.h>', '@import Darwin.POSIX.sys.types._sa_family_t;')
           with open(f, 'w') as fh: fh.write(c)
           "
-          echo "=== Patched QCloudSimplePing.h ==="
+          # .m 文件：在开头插入显式子模块导入
+          python3 -c "
+          f = '$PING_M'
+          with open(f) as fh: c = fh.read()
+          if '@import Darwin' not in c:
+              c = '@import Darwin.POSIX.sys.types._sa_family_t;\n' + c
+          with open(f, 'w') as fh: fh.write(c)
+          "
+          echo "=== Patched .h ==="
           head -16 "$PING_H"
-          echo "=== Verify ==="
-          grep -n 'sa_family_t\|@import' "$PING_H"
+          echo "=== Patched .m ==="
+          head -5 "$PING_M"
 
       - name: Fix pbxproj signing
         script: |
