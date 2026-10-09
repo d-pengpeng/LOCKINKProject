@@ -42,56 +42,6 @@ workflows:
           echo "=== Verify ==="
           grep -n 'sa_family_t' "$PING_H" | head -5
 
-      - name: Patch SVProgressHUD for iOS 27
-        script: |
-          chmod -R u+w Pods/SVProgressHUD/
-          SV_M="Pods/SVProgressHUD/SVProgressHUD/SVProgressHUD.m"
-          # 用 Python 替换 frontWindow 方法为现代 connectedScenes API
-          python3 -c "
-          f = '$SV_M'
-          with open(f) as fh: c = fh.read()
-          old = '''- (UIWindow *)frontWindow {
-#if !defined(SV_APP_EXTENSIONS)
-    NSEnumerator *frontToBackWindows = [UIApplication.sharedApplication.windows reverseObjectEnumerator];
-    for (UIWindow *window in frontToBackWindows) {
-        BOOL windowOnMainScreen = window.screen == UIScreen.mainScreen;
-        BOOL windowIsVisible = !window.hidden && window.alpha > 0;
-        BOOL windowLevelSupported = (window.windowLevel >= UIWindowLevelNormal && window.windowLevel <= self.maxSupportedWindowLevel);
-        BOOL windowKeyWindow = window.isKeyWindow;
-
-        if(windowOnMainScreen && windowIsVisible && windowLevelSupported && windowKeyWindow) {
-            return window;
-        }
-    }
-#endif
-    return nil;
-}'''
-          new = '''- (UIWindow *)frontWindow {
-#if !defined(SV_APP_EXTENSIONS)
-    for (UIScene *scene in [UIApplication.sharedApplication.connectedScenes allObjects]) {
-        if (scene.activationState != UISceneActivationStateForegroundActive) continue;
-        if (![scene isKindOfClass:[UIWindowScene class]]) continue;
-        UIWindowScene *windowScene = (UIWindowScene *)scene;
-        for (UIWindow *window in windowScene.windows) {
-            BOOL windowOnMainScreen = window.screen == UIScreen.mainScreen;
-            BOOL windowIsVisible = !window.hidden && window.alpha > 0;
-            BOOL windowLevelSupported = (window.windowLevel >= UIWindowLevelNormal && window.windowLevel <= self.maxSupportedWindowLevel);
-            if(windowOnMainScreen && windowIsVisible && windowLevelSupported) {
-                return window;
-            }
-        }
-    }
-#endif
-    return nil;
-}'''
-          c = c.replace(old, new)
-          # 替换直接的 keyWindow 调用为 frontWindow
-          c = c.replace('[UIApplication sharedApplication].keyWindow.bounds', '[self frontWindow].bounds')
-          c = c.replace('[[UIApplication sharedApplication] keyWindow].rootViewController', '[self frontWindow].rootViewController')
-          with open(f, 'w') as fh: fh.write(c)
-          "
-          echo "=== Patched SVProgressHUD ==="
-
       - name: Fix pbxproj signing
         script: |
           PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
