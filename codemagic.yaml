@@ -23,7 +23,8 @@ workflows:
 
       - name: Patch QCloudCore for Xcode 26
         script: |
-          # 用 Python 插入头文件（macOS sed 不支持 \n）
+          # 修复文件权限后用 Python 插入头文件
+          chmod -R u+w Pods/QCloudCore/
           python3 -c "
           import os, glob
           for f in glob.glob('Pods/QCloudCore/**/*.m', recursive=True):
