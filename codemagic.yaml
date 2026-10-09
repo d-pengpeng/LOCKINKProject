@@ -24,15 +24,18 @@ workflows:
       - name: Patch QCloudCore for Xcode 26
         script: |
           chmod -R u+w Pods/QCloudCore/
-          # 用 find + while 循环插入头文件
-          find Pods/QCloudCore -name "*.m" -print0 | while IFS= read -r -d '' f; do
-            if ! grep -q '<CFNetwork/CFHost.h>' "$f"; then
-              printf '#import <CFNetwork/CFHost.h>\n%s' "$(cat "$f")" > "$f"
-            fi
-          done
+          # 删除之前可能插入的 CoreServices/AssertMacros.h
+          find Pods/QCloudCore -name "*.m" -exec sed -i '' '/#import <CoreServices\/AssertMacros.h>/d' {} \; 2>/dev/null || true
+          find Pods/QCloudCore -name "*.h" -exec sed -i '' '/#import <CoreServices\/AssertMacros.h>/d' {} \; 2>/dev/null || true
+          find Pods/QCloudCore -name "*.m" -exec sed -i '' '/#include <CoreServices\/AssertMacros.h>/d' {} \; 2>/dev/null || true
+          find Pods/QCloudCore -name "*.h" -exec sed -i '' '/#include <CoreServices\/AssertMacros.h>/d' {} \; 2>/dev/null || true
+          # 插入 CFNetwork/CFHost.h
+          find Pods/QCloudCore -name "*.m" -exec sed -i '' '1s/^/#import <CFNetwork\/CFHost.h>\n/' {} \; 2>/dev/null || true
           echo "=== Patched files ==="
           head -3 Pods/QCloudCore/QCloudCore/Classes/Base/QCloudBundle/UIImage+QCloudBundle.m
           head -3 Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.m
+          echo "=== Verify no CoreServices/AssertMacros.h ==="
+          grep -r "CoreServices/AssertMacros" Pods/QCloudCore/ || echo "None found"
 
       - name: Fix pbxproj signing
         script: |
@@ -66,6 +69,8 @@ workflows:
       - name: Archive
         script: |
           mkdir -p build
+          # 清理 DerivedData 缓存
+          rm -rf ~/Library/Developer/Xcode/DerivedData/BlueEquipProject-*
           set -o pipefail
           xcodebuild archive \
             -workspace BlueEquipProject.xcworkspace \
