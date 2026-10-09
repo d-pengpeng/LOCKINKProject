@@ -34,9 +34,33 @@ workflows:
 
       - name: Setup code signing
         script: |
+          echo "=== ENV vars with CM_ prefix ==="
+          env | grep CM_ | sort || echo "No CM_ vars"
+
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          echo "=== Installed provisioning profiles ==="
+          echo "=== Provisioning Profiles dir before ==="
+          ls -la "$PP_DIR" 2>/dev/null || echo "Empty"
+
+          # Codemagic UI 上传的 profile 会通过 CM_PROVISIONING_PROFILE 环境变量提供
+          # 也可以在 /tmp/codemagic-certs/ 或其他路径
+          echo "=== Searching for profiles in common locations ==="
+          find /tmp -name "*.mobileprovision" 2>/dev/null || true
+          find $HOME -name "*.mobileprovision" 2>/dev/null | head -10 || true
+
+          # 从 Codemagic 环境变量获取 profile 并安装
+          for var in CM_PROVISIONING_PROFILE CM_PROVISIONING_PROFILE_1; do
+            eval "PP_PATH=\$$var"
+            if [ -n "$PP_PATH" ] && [ -f "$PP_PATH" ]; then
+              UUID=$(security cms -d -i "$PP_PATH" 2>/dev/null | plutil -extract UUID raw -o - - 2>/dev/null)
+              if [ -n "$UUID" ]; then
+                cp "$PP_PATH" "$PP_DIR/${UUID}.mobileprovision"
+                echo "Installed profile $var -> UUID: $UUID"
+              fi
+            fi
+          done
+
+          echo "=== Provisioning Profiles dir after ==="
           ls -la "$PP_DIR" 2>/dev/null || echo "Empty"
 
           # 查找已安装 profile 的实际 UUID 和 Bundle ID，更新 pbxproj
@@ -47,7 +71,7 @@ workflows:
           for f in "$PP_DIR"/*.mobileprovision; do
             [ -f "$f" ] || continue
             UUID=$(basename "$f" .mobileprovision)
-            BUNDLE_ID=$(security cms -d -i "$f" 2>/dev/null | plutil -extract com.application-identifier raw -o - - 2>/dev/null | sed 's/.*\.//')
+            BUNDLE_ID=$(security cms -d -i "$f" 2>/dev/null | plutil -extract com.application-identifier raw -o - - 2>/dev/null | sed 's/.*\.\([^.]*\)$/\1/')
             echo "Profile: $UUID -> BundleID: $BUNDLE_ID"
 
             if [ "$BUNDLE_ID" = "com.lockink.qingQuPro" ]; then
@@ -60,13 +84,14 @@ workflows:
           echo "Main App Profile UUID: $MAIN_UUID"
           echo "Extension Profile UUID: $EXT_UUID"
 
-          # 更新 pbxproj 中的 PROVISIONING_PROFILE UUID
+          # 更新 pbxproj 中的 PROVISIONING_PROFILE UUID（匹配任意 UUID 格式）
           if [ -n "$MAIN_UUID" ]; then
-            sed -i '' "s/PROVISIONING_PROFILE = \"53f48a3c-823f-4e48-8911-ddb17f485846\"/PROVISIONING_PROFILE = \"$MAIN_UUID\"/g" "$PBXPROJ"
+            sed -i '' "s/PROVISIONING_PROFILE = \"[0-9a-f-]*\"/PROVISIONING_PROFILE = \"$MAIN_UUID\"/g" "$PBXPROJ" 2>/dev/null || true
             echo "Updated pbxproj main app profile UUID"
           fi
           if [ -n "$EXT_UUID" ]; then
-            sed -i '' "s/PROVISIONING_PROFILE = \"f46ef368-3b06-463b-8e9f-8d3acdfa3ace\"/PROVISIONING_PROFILE = \"$EXT_UUID\"/g" "$PBXPROJ"
+            # 扩展的 UUID 在 pbxproj 中是第二个出现的
+            awk -v uuid="$EXT_UUID" 'NR==FNR{count+=gsub(/PROVISIONING_PROFILE/,"&")} {if(/PROVISIONING_PROFILE/ && ++seen==count) gsub(/"[0-9a-f-]*"/,"\""uuid"\"")} 1' "$PBXPROJ" > /tmp/pbxproj.tmp && mv /tmp/pbxproj.tmp "$PBXPROJ"
             echo "Updated pbxproj extension profile UUID"
           fi
 
