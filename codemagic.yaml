@@ -27,10 +27,17 @@ workflows:
           PING_H="Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h"
           # 删除之前插入的 @import Darwin
           sed -i '' '/@import Darwin;/d' "$PING_H" 2>/dev/null || true
-          # 替换直接头文件导入为模块导入
-          sed -i '' 's/#import <sys\/_types\/_sa_family_t.h>/#include <sys\/socket.h>/' "$PING_H"
+          # 用 Python 替换直接头文件为模块化头文件（BSD sed 不支持 \n）
+          python3 -c "
+          f = '$PING_H'
+          with open(f) as fh: c = fh.read()
+          c = c.replace('#import <sys/_types/_sa_family_t.h>', '#include <sys/socket.h>\n#include <netinet/in.h>\n#include <sys/types.h>')
+          with open(f, 'w') as fh: fh.write(c)
+          "
           echo "=== Patched QCloudSimplePing.h ==="
-          head -15 "$PING_H"
+          head -16 "$PING_H"
+          echo "=== Verify ==="
+          grep "_sa_family_t" "$PING_H" || echo "Clean"
 
       - name: Fix pbxproj signing
         script: |
