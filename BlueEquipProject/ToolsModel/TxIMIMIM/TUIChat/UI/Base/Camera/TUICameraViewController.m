@@ -16,7 +16,7 @@
 #import "TUICommonModel.h"
 #import "TUIDefine.h"
 
-@interface TUICameraViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate, TUICameraViewDelegate>
+@interface TUICameraViewController ()<AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate, TUICameraViewDelegate, AVCapturePhotoCaptureDelegate>
 {
     // 会话
     AVCaptureSession          *_session;
@@ -28,7 +28,7 @@
     AVCaptureConnection       *_videoConnection;
     AVCaptureConnection       *_audioConnection;
     AVCaptureVideoDataOutput  *_videoOutput;
-    AVCaptureStillImageOutput *_imageOutput;
+    AVCapturePhotoOutput *_imageOutput;
 
     // 录制
     BOOL                       _recording;
@@ -177,9 +177,8 @@
     }
     _audioConnection = [audioOut connectionWithMediaType:AVMediaTypeAudio];
     
-    // 静态图片输出
-    AVCaptureStillImageOutput *imageOutput = [[AVCaptureStillImageOutput alloc] init];            
-    imageOutput.outputSettings = @{AVVideoCodecKey:AVVideoCodecJPEG};
+    // 静态图片输出（AVCapturePhotoOutput 替代已废弃的 AVCaptureStillImageOutput）
+    AVCapturePhotoOutput *imageOutput = [[AVCapturePhotoOutput alloc] init];
     if ([_session canAddOutput:imageOutput]) {
         [_session addOutput:imageOutput];
     }
@@ -279,35 +278,45 @@
 #pragma mark - -拍摄照片
 // 拍照
 - (void)takePhotoAction:(TUICameraView *)cameraView {
-    AVCaptureConnection *connection = [_imageOutput connectionWithMediaType:AVMediaTypeVideo];
-    if (connection.isVideoOrientationSupported) {
-        connection.videoOrientation = [self currentVideoOrientation];
+    AVCapturePhotoSettings *settings = [AVCapturePhotoSettings photoSettings];
+    AVCaptureFlashMode flashMode = [_cameraManager flashMode:[self activeCamera]];
+    if ([_imageOutput.supportedFlashModes containsObject:@(flashMode)]) {
+        settings.flashMode = flashMode;
+    } else {
+        settings.flashMode = AVCaptureFlashModeOff;
     }
-    [_imageOutput captureStillImageAsynchronouslyFromConnection:connection completionHandler:^(CMSampleBufferRef _Nullable imageDataSampleBuffer, NSError * _Nullable error) {
-        if (error) {
-            [self showErrorStr:error.localizedDescription];
-            return;
-        }
-        NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-        UIImage *image = [[UIImage alloc]initWithData:imageData];
-        TUICaptureImagePreviewController *vc = [[TUICaptureImagePreviewController alloc]initWithImage:image];
-        [self.navigationController pushViewController:vc animated:YES];
-        __weak __typeof(self) weakSelf = self;
-        vc.commitBlock = ^{
-            __strong __typeof(weakSelf) strongSelf = weakSelf;
-            UIGraphicsBeginImageContext(CGSizeMake(image.size.width, image.size.height));
-            [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
-            UIImage *convertToUpImage = UIGraphicsGetImageFromCurrentImageContext();
-            UIGraphicsEndImageContext();
-            [strongSelf.delegate cameraViewController:strongSelf didFinishPickingMediaWithImage:convertToUpImage];
-            
-            [strongSelf popViewControllerAnimated:YES];
-        };
-        vc.cancelBlock = ^{
-            __strong __typeof(weakSelf) strongSelf = weakSelf;
-            [strongSelf.navigationController popViewControllerAnimated:YES];
-        };
-    }];
+    [_imageOutput capturePhotoWithSettings:settings delegate:self];
+}
+
+#pragma mark - AVCapturePhotoCaptureDelegate
+
+- (void)captureOutput:(AVCapturePhotoOutput *)output didFinishProcessingPhoto:(AVCapturePhoto *)photo error:(NSError *)error {
+    if (error) {
+        [self showErrorStr:error.localizedDescription];
+        return;
+    }
+    NSData *imageData = [photo fileDataRepresentation];
+    if (!imageData) {
+        return;
+    }
+    UIImage *image = [[UIImage alloc] initWithData:imageData];
+    TUICaptureImagePreviewController *vc = [[TUICaptureImagePreviewController alloc] initWithImage:image];
+    [self.navigationController pushViewController:vc animated:YES];
+    __weak __typeof(self) weakSelf = self;
+    vc.commitBlock = ^{
+        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        UIGraphicsBeginImageContext(CGSizeMake(image.size.width, image.size.height));
+        [image drawInRect:CGRectMake(0, 0, image.size.width, image.size.height)];
+        UIImage *convertToUpImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        [strongSelf.delegate cameraViewController:strongSelf didFinishPickingMediaWithImage:convertToUpImage];
+
+        [strongSelf popViewControllerAnimated:YES];
+    };
+    vc.cancelBlock = ^{
+        __strong __typeof(weakSelf) strongSelf = weakSelf;
+        [strongSelf.navigationController popViewControllerAnimated:YES];
+    };
 }
 
 // 取消拍照
