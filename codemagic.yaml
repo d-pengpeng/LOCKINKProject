@@ -34,36 +34,41 @@ workflows:
 
       - name: Setup code signing
         script: |
-          echo "=== Checking Codemagic signing ==="
-          echo "CM_PROVISIONING_PROFILE: ${CM_PROVISIONING_PROFILE:-not set}"
-          echo "CM_CERTIFICATE: ${CM_CERTIFICATE:-not set}"
-
-          # 列出 Codemagic 可能安装的 profile
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          echo "=== Provisioning Profiles dir ==="
+          echo "=== Installed provisioning profiles ==="
           ls -la "$PP_DIR" 2>/dev/null || echo "Empty"
 
-          # 如果 Codemagic 上传了 profile，复制到正确位置
-          if [ -n "$CM_PROVISIONING_PROFILE" ]; then
-            cp "$CM_PROVISIONING_PROFILE" "$PP_DIR/53f48a3c-823f-4e48-8911-ddb17f485846.mobileprovision"
-            echo "Copied main app profile"
-          fi
-          if [ -n "$CM_PROVISIONING_PROFILE_1" ]; then
-            cp "$CM_PROVISIONING_PROFILE_1" "$PP_DIR/f46ef368-3b06-463b-8e9f-8d3acdfa3ace.mobileprovision"
-            echo "Copied extension profile"
-          fi
+          # 查找已安装 profile 的实际 UUID 和 Bundle ID，更新 pbxproj
+          PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
+          MAIN_UUID=""
+          EXT_UUID=""
 
-          # 如果 Codemagic 有证书，导入到 keychain
-          if [ -n "$CM_CERTIFICATE" ]; then
-            KEYCHAIN_PATH="$CM_KEYCHAIN_PATH"
-            security import "$CM_CERTIFICATE" -k "$KEYCHAIN_PATH" -P "$CM_CERTIFICATE_PASSWORD" -T /usr/bin/codesign 2>/dev/null || true
-            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$CM_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" 2>/dev/null || true
-            echo "Imported certificate to keychain"
-          fi
+          for f in "$PP_DIR"/*.mobileprovision; do
+            [ -f "$f" ] || continue
+            UUID=$(basename "$f" .mobileprovision)
+            BUNDLE_ID=$(security cms -d -i "$f" 2>/dev/null | plutil -extract com.application-identifier raw -o - - 2>/dev/null | sed 's/.*\.//')
+            echo "Profile: $UUID -> BundleID: $BUNDLE_ID"
 
-          echo "=== Final profile list ==="
-          ls -la "$PP_DIR"
+            if [ "$BUNDLE_ID" = "com.lockink.qingQuPro" ]; then
+              MAIN_UUID="$UUID"
+            elif [ "$BUNDLE_ID" = "com.lockink.qingQuPro.BlueEquipProjectNotiServier" ]; then
+              EXT_UUID="$UUID"
+            fi
+          done
+
+          echo "Main App Profile UUID: $MAIN_UUID"
+          echo "Extension Profile UUID: $EXT_UUID"
+
+          # 更新 pbxproj 中的 PROVISIONING_PROFILE UUID
+          if [ -n "$MAIN_UUID" ]; then
+            sed -i '' "s/PROVISIONING_PROFILE = \"53f48a3c-823f-4e48-8911-ddb17f485846\"/PROVISIONING_PROFILE = \"$MAIN_UUID\"/g" "$PBXPROJ"
+            echo "Updated pbxproj main app profile UUID"
+          fi
+          if [ -n "$EXT_UUID" ]; then
+            sed -i '' "s/PROVISIONING_PROFILE = \"f46ef368-3b06-463b-8e9f-8d3acdfa3ace\"/PROVISIONING_PROFILE = \"$EXT_UUID\"/g" "$PBXPROJ"
+            echo "Updated pbxproj extension profile UUID"
+          fi
 
       - name: Archive
         script: |
@@ -80,7 +85,12 @@ workflows:
       - name: Export IPA
         script: |
           mkdir -p build/export
-          cat > build/export/ExportOptions.plist << 'EOF'
+          # 从 pbxproj 中读取更新后的 UUID
+          MAIN_UUID=$(grep -m1 'PROVISIONING_PROFILE = ' BlueEquipProject.xcodeproj/project.pbxproj | head -1 | sed 's/.*= "//;s/".*//')
+          EXT_UUID=$(grep 'PROVISIONING_PROFILE = ' BlueEquipProject.xcodeproj/project.pbxproj | tail -1 | sed 's/.*= "//;s/".*//')
+          echo "Export UUIDs - Main: $MAIN_UUID, Ext: $EXT_UUID"
+
+          cat > build/export/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -100,14 +110,14 @@ workflows:
                       <key>signingStyle</key>
                       <string>manual</string>
                       <key>profileUUID</key>
-                      <string>53f48a3c-823f-4e48-8911-ddb17f485846</string>
+                      <string>${MAIN_UUID}</string>
                   </dict>
                   <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
                   <dict>
                       <key>signingStyle</key>
                       <string>manual</string>
                       <key>profileUUID</key>
-                      <string>f46ef368-3b06-463b-8e9f-8d3acdfa3ace</string>
+                      <string>${EXT_UUID}</string>
                   </dict>
               </dict>
           </dict>
