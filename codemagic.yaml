@@ -23,18 +23,16 @@ workflows:
 
       - name: Patch QCloudCore for Xcode 26
         script: |
-          # 修复文件权限后用 Python 插入头文件
           chmod -R u+w Pods/QCloudCore/
-          python3 -c "
-          import os, glob
-          for f in glob.glob('Pods/QCloudCore/**/*.m', recursive=True):
-              with open(f, 'r', errors='ignore') as fh:
-                  content = fh.read()
-              if '<CFNetwork/CFHost.h>' not in content:
-                  with open(f, 'w') as fh:
-                      fh.write('#import <CFNetwork/CFHost.h>\n#import <CoreServices/AssertMacros.h>\n' + content)
-          print('Patched all QCloudCore .m files')
-          "
+          # 用 find + while 循环插入头文件
+          find Pods/QCloudCore -name "*.m" -print0 | while IFS= read -r -d '' f; do
+            if ! grep -q '<CFNetwork/CFHost.h>' "$f"; then
+              printf '#import <CFNetwork/CFHost.h>\n#import <CoreServices/AssertMacros.h>\n%s' "$(cat "$f")" > "$f"
+            fi
+          done
+          echo "=== Patched files ==="
+          head -3 Pods/QCloudCore/QCloudCore/Classes/Base/QCloudBundle/UIImage+QCloudBundle.m
+          head -3 Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.m
 
       - name: Fix pbxproj signing
         script: |
@@ -75,7 +73,8 @@ workflows:
             -destination "generic/platform=iOS" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=L992GPQMS4 \
-            CODE_SIGN_IDENTITY="iPhone Distribution"
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            -verbose 2>&1 | tail -100
 
       - name: Export IPA
         script: |
