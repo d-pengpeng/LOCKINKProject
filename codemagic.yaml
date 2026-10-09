@@ -76,8 +76,11 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=L992GPQMS4 \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
+            CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES=YES \
             2>&1 | tee build/archive.log
           echo "=== Archive exit code: ${PIPESTATUS[0]} ==="
+          echo "=== Error lines ==="
+          grep -i "error:" build/archive.log | head -20
           exit ${PIPESTATUS[0]}
 
       - name: Export IPA
