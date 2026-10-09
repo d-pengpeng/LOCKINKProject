@@ -32,6 +32,39 @@ workflows:
           sed -i '' '/PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos/d' "$PBXPROJ"
           echo "Removed SDK-specific PROVISIONING_PROFILE_SPECIFIER overrides"
 
+      - name: Setup code signing
+        script: |
+          echo "=== Checking Codemagic signing ==="
+          echo "CM_PROVISIONING_PROFILE: ${CM_PROVISIONING_PROFILE:-not set}"
+          echo "CM_CERTIFICATE: ${CM_CERTIFICATE:-not set}"
+
+          # 列出 Codemagic 可能安装的 profile
+          PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PP_DIR"
+          echo "=== Provisioning Profiles dir ==="
+          ls -la "$PP_DIR" 2>/dev/null || echo "Empty"
+
+          # 如果 Codemagic 上传了 profile，复制到正确位置
+          if [ -n "$CM_PROVISIONING_PROFILE" ]; then
+            cp "$CM_PROVISIONING_PROFILE" "$PP_DIR/53f48a3c-823f-4e48-8911-ddb17f485846.mobileprovision"
+            echo "Copied main app profile"
+          fi
+          if [ -n "$CM_PROVISIONING_PROFILE_1" ]; then
+            cp "$CM_PROVISIONING_PROFILE_1" "$PP_DIR/f46ef368-3b06-463b-8e9f-8d3acdfa3ace.mobileprovision"
+            echo "Copied extension profile"
+          fi
+
+          # 如果 Codemagic 有证书，导入到 keychain
+          if [ -n "$CM_CERTIFICATE" ]; then
+            KEYCHAIN_PATH="$CM_KEYCHAIN_PATH"
+            security import "$CM_CERTIFICATE" -k "$KEYCHAIN_PATH" -P "$CM_CERTIFICATE_PASSWORD" -T /usr/bin/codesign 2>/dev/null || true
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$CM_KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" 2>/dev/null || true
+            echo "Imported certificate to keychain"
+          fi
+
+          echo "=== Final profile list ==="
+          ls -la "$PP_DIR"
+
       - name: Archive
         script: |
           xcodebuild archive \
