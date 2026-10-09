@@ -65,6 +65,8 @@ workflows:
 
       - name: Archive
         script: |
+          mkdir -p build
+          set -o pipefail
           xcodebuild archive \
             -workspace BlueEquipProject.xcworkspace \
             -scheme BlueEquipProject \
@@ -74,7 +76,9 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=L992GPQMS4 \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
-            -verbose 2>&1 | tail -100
+            2>&1 | tee build/archive.log
+          echo "=== Archive exit code: ${PIPESTATUS[0]} ==="
+          exit ${PIPESTATUS[0]}
 
       - name: Export IPA
         script: |
