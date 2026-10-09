@@ -6,8 +6,6 @@ workflows:
       xcode: latest
       vars:
         DEVELOPMENT_TEAM: L992GPQMS4
-    caches:
-      - cocoapods
     triggering:
       events:
         - push
