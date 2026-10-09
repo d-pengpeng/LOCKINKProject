@@ -95,19 +95,9 @@ workflows:
               <key>provisioningProfiles</key>
               <dict>
                   <key>com.lockink.qingQuPro</key>
-                  <dict>
-                      <key>signingStyle</key>
-                      <string>manual</string>
-                      <key>profileUUID</key>
-                      <string>53f48a3c-823f-4e48-8911-ddb17f485846</string>
-                  </dict>
+                  <string>lockink-appstore</string>
                   <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
-                  <dict>
-                      <key>signingStyle</key>
-                      <string>manual</string>
-                      <key>profileUUID</key>
-                      <string>f46ef368-3b06-463b-8e9f-8d3acdfa3ace</string>
-                  </dict>
+                  <string>BlueEquipProjectNotiServier</string>
               </dict>
           </dict>
           </plist>
