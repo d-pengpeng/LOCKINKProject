@@ -1,0 +1,93 @@
+workflows:
+  ios-workflow:
+    name: BlueEquipProject Archive & Export
+    max_build_duration: 60
+    environment:
+      xcode: latest
+      vars:
+        DEVELOPMENT_TEAM: L992GPQMS4
+    caches:
+      - cocoapods
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+      cancel_previous_builds: true
+    scripts:
+      - name: Pod install
+        script: |
+          pod repo update
+          pod install
+          echo "=== Pod install done ==="
+
+      - name: Patch QCloudCore for Xcode 26
+        script: |
+          find Pods/QCloudCore -name "*.m" -exec sed -i '' '1s/^/#import <CFNetwork\/CFHost.h>\n/' {} \; 2>/dev/null || true
+          find Pods/QCloudCore -name "*.m" -exec sed -i '' '1s/^/#import <CoreServices\/AssertMacros.h>\n/' {} \; 2>/dev/null || true
+          echo "Patched all QCloudCore .m files"
+
+      - name: Archive
+        script: |
+          xcodebuild archive \
+            -workspace BlueEquipProject.xcworkspace \
+            -scheme BlueEquipProject \
+            -configuration Release \
+            -archivePath build/BlueEquipProject.xcarchive \
+            -destination "generic/platform=iOS" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=L992GPQMS4 \
+            CODE_SIGN_IDENTITY="iPhone Distribution"
+
+      - name: Export IPA
+        script: |
+          mkdir -p build/export
+          cat > build/export/ExportOptions.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>L992GPQMS4</string>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.lockink.qingQuPro</key>
+                  <dict>
+                      <key>signingStyle</key>
+                      <string>manual</string>
+                      <key>profileUUID</key>
+                      <string>53f48a3c-823f-4e48-8911-ddb17f485846</string>
+                  </dict>
+                  <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
+                  <dict>
+                      <key>signingStyle</key>
+                      <string>manual</string>
+                      <key>profileUUID</key>
+                      <string>f46ef368-3b06-463b-8e9f-8d3acdfa3ace</string>
+                  </dict>
+              </dict>
+          </dict>
+          </plist>
+          EOF
+          xcodebuild -exportArchive \
+            -archivePath build/BlueEquipProject.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist build/export/ExportOptions.plist
+
+    artifacts:
+      - build/export/*.ipa
+      - build/BlueEquipProject.xcarchive/dsyms/*.dSYM.zip
+
+    publishing:
+      email:
+        recipients:
+          - dzp998@163.com
+        notify:
+          success: true
+          failure: true
