@@ -27,7 +27,7 @@ workflows:
           # 用 find + while 循环插入头文件
           find Pods/QCloudCore -name "*.m" -print0 | while IFS= read -r -d '' f; do
             if ! grep -q '<CFNetwork/CFHost.h>' "$f"; then
-              printf '#import <CFNetwork/CFHost.h>\n#import <CoreServices/AssertMacros.h>\n%s' "$(cat "$f")" > "$f"
+              printf '#import <CFNetwork/CFHost.h>\n%s' "$(cat "$f")" > "$f"
             fi
           done
           echo "=== Patched files ==="
