@@ -386,7 +386,7 @@
             }];
         }
         
-        if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp] && ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11])) {
+        if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp] && ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]|| [self.devicTyp isEqualToString:kCharactName16]|| [self.devicTyp isEqualToString:kCharactName17])) {
             
             
             CGFloat ww_lef = _window_width/2.f;
@@ -881,7 +881,7 @@
             }else {
                 selBBtn3.selected = !selBBtn3.selected;
                 
-                if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp] && ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11])) {
+                if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp] && ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]|| [self.devicTyp isEqualToString:kCharactName16]|| [self.devicTyp isEqualToString:kCharactName17])) {
                     
                     if (selBBtn3.selected == YES) {
                         
@@ -941,7 +941,7 @@
             break;
     }
     
-    if ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]) {
+    if ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]|| [self.devicTyp isEqualToString:kCharactName16]|| [self.devicTyp isEqualToString:kCharactName17]) {
         
     }else {
         self.isSuijiBoo = selBBtn3.selected;

@@ -2022,7 +2022,7 @@
         
     }else if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.modelM.realName]) {
         
-        if ([self.modelM.realName isEqualToString:kCharactName8] || [self.modelM.realName isEqualToString:kCharactName9] || [self.modelM.realName isEqualToString:kCharactName10] || [self.modelM.realName isEqualToString:kCharactName11]) {
+        if ([self.modelM.realName isEqualToString:kCharactName8] || [self.modelM.realName isEqualToString:kCharactName9] || [self.modelM.realName isEqualToString:kCharactName10] || [self.modelM.realName isEqualToString:kCharactName11]|| [self.modelM.realName isEqualToString:kCharactName16]|| [self.modelM.realName isEqualToString:kCharactName17]) {
             self.lampBtn.hidden = NO;
         }
         

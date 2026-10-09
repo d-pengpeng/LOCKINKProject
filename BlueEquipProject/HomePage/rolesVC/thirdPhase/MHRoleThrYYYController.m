@@ -65,7 +65,8 @@
     
     if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp]) {
         
-        if ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]) {
+        if ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]
+            || [self.devicTyp isEqualToString:kCharactName16]|| [self.devicTyp isEqualToString:kCharactName17]) {
             
             NSArray *nam_ar = @[@"thr_nams8_2"];
             NSArray *img_ar = @[@"three_imgs3_zhendong"];

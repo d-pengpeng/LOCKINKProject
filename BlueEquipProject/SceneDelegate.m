@@ -283,7 +283,7 @@
     NSLog(@"-蓝牙设备名----%@", perName); // RSSI 是信号强度 可以通过强度选择最近的设备
     
     //MARK: 蓝牙连接设备
-    if (([perName isEqualToString:kCharactName] || [perName isEqualToString:kCharactName2] || [perName isEqualToString:kCharactName3] || [perName isEqualToString:kCharactName4] || [perName isEqualToString:kCharactName5] || [perName isEqualToString:kCharactName6] || [perName isEqualToString:kCharactName7] || [perName isEqualToString:kCharactName8] || [perName isEqualToString:kCharactName9] || [perName isEqualToString:kCharactName10] || [perName isEqualToString:kCharactName11] || [perName isEqualToString:kCharactName12] || [perName isEqualToString:kCharactName13] || [perName isEqualToString:kCharactName14] || [perName isEqualToString:kCharactName15]) && peripheral) {
+    if (([perName isEqualToString:kCharactName] || [perName isEqualToString:kCharactName2] || [perName isEqualToString:kCharactName3] || [perName isEqualToString:kCharactName4] || [perName isEqualToString:kCharactName5] || [perName isEqualToString:kCharactName6] || [perName isEqualToString:kCharactName7] || [perName isEqualToString:kCharactName8] || [perName isEqualToString:kCharactName9] || [perName isEqualToString:kCharactName10] || [perName isEqualToString:kCharactName11] || [perName isEqualToString:kCharactName12] || [perName isEqualToString:kCharactName13] || [perName isEqualToString:kCharactName14] || [perName isEqualToString:kCharactName15]|| [perName isEqualToString:kCharactName16] || [perName isEqualToString:kCharactName17]) && peripheral) {
 
         NSData *dataMac = [advertisementData objectForKey:@"kCBAdvDataManufacturerData"];
         NSString *mac = @"";
@@ -685,7 +685,7 @@
             
         }else {
             
-            if([[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName5] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName6] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName7] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName8] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName9] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName10] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName11] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName14]) {
+            if([[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName5] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName6] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName7] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName8] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName9] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName10] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName11] || [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName14]|| [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName16]|| [[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName17]) {
                 
                 [self.peripheral setNotifyValue:YES forCharacteristic:self.characteristic2];
                 

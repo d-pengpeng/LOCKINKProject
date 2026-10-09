@@ -102,7 +102,7 @@
     
     if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp]) {
         
-        if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp] && ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11])) {
+        if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp] && ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]|| [self.devicTyp isEqualToString:kCharactName16]|| [self.devicTyp isEqualToString:kCharactName17])) {
             
             NSArray *imgsAr = @[@"three_imgs6_nor2", @"three_imgs8"];
             NSArray *imgsAr_sel = @[@"three_imgs6_sel2", @"three_imgs8"];

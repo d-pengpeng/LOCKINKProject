@@ -140,7 +140,8 @@
 #define kCharactName13 @"AA-A1013"//@"qiui_Collar" //新灰色UI设备 电击按摩垫片 4个片
 #define kCharactName15 @"AA-A1015" // 锋刺长款贞操锁
 
-
+#define kCharactName16 @"AA-A1016" //d
+#define kCharactName17 @"AA-A1017" //d
 
 #define kServiceUUID @"0x8AC0"
 #define kCharacteristicUUID @"0X8AC1"

@@ -131,7 +131,7 @@
     self.showImgVV = YES;
     
     [FloatingWindowModel shareInstance].devicNameArr = @[kCharactName3];  //MARK: 二期
-    [FloatingWindowModel shareInstance].devicNameArr3 = @[kCharactName4, kCharactName6, kCharactName7, kCharactName8, kCharactName9, kCharactName10, kCharactName11, kCharactName14]; //MARK: 三期
+    [FloatingWindowModel shareInstance].devicNameArr3 = @[kCharactName4, kCharactName6, kCharactName7, kCharactName8, kCharactName9, kCharactName10, kCharactName11, kCharactName14, kCharactName16,kCharactName17]; //MARK: 三期
     
     self.oneIn = 0;
     [LYUserDefault saveMacName:@""];

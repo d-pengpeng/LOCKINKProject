@@ -80,7 +80,7 @@
     
     if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp]) {
         
-        if ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]) {
+        if ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]|| [self.devicTyp isEqualToString:kCharactName16]|| [self.devicTyp isEqualToString:kCharactName17]) {
             
 //            CGFloat ww_lef = (_window_width-200*ww_uuY)/3.f;
             NSArray *nam_ar = @[@"thr_nams8_2"];
