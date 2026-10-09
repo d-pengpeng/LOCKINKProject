@@ -25,6 +25,13 @@ workflows:
           find Pods/QCloudCore -name "*.m" -exec sed -i '' '1s/^/#import <CoreServices\/AssertMacros.h>\n/' {} \; 2>/dev/null || true
           echo "Patched all QCloudCore .m files"
 
+      - name: Fix pbxproj signing (remove SDK-specific SPECIFIER overrides)
+        script: |
+          PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
+          # Remove SDK-specific PROVISIONING_PROFILE_SPECIFIER lines that override UUID-based lookup
+          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos/d' "$PBXPROJ"
+          echo "Removed SDK-specific PROVISIONING_PROFILE_SPECIFIER overrides"
+
       - name: Archive
         script: |
           xcodebuild archive \
