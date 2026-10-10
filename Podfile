@@ -49,7 +49,7 @@ post_install do |installer|
       config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       # 关闭 modules 后需显式链接系统框架
-      config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Foundation -framework UIKit -framework CoreGraphics -framework Security -framework SystemConfiguration -framework MobileCoreServices -framework CFNetwork'
+      config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Foundation -framework UIKit -framework CoreGraphics -framework Security -framework SystemConfiguration -framework MobileCoreServices -framework CFNetwork -framework WebKit'
     end
   end
   puts "✅ Disabled CLANG_ENABLE_MODULES for: #{disable_module_targets.join(', ')}"
