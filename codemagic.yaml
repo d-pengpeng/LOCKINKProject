@@ -17,9 +17,13 @@ workflows:
     scripts:
       - name: Pod install
         script: |
+          rm -rf Pods Podfile.lock
           pod repo update
           pod install
           echo "=== Pod install done ==="
+          # 验证补丁
+          grep "sys/socket.h" Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h || echo "⚠️ QCloudSimplePing.h not patched"
+          grep "netinet/in.h" Pods/AFNetworking/AFNetworking/AFNetworkReachabilityManager.m || echo "⚠️ AFNetworking not patched"
 
       - name: Fix pbxproj signing
         script: |

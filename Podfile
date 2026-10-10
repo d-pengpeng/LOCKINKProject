@@ -41,13 +41,37 @@ post_install do |installer|
     end
   end
 
-  # 修复 AFNetworking 在 Xcode 26 上 netinet6/in6.h 私有头文件错误
+  # 关闭老 OC Pod 的模块校验（Xcode 26 严格模块校验）
+  disable_module_targets = ['QCloudCore', 'AFNetworking', 'Qiniu']
+  installer.pods_project.targets.each do |target|
+    next unless disable_module_targets.include?(target.name)
+    target.build_configurations.each do |config|
+      config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+    end
+  end
+  puts "✅ Disabled CLANG_ENABLE_MODULES for: #{disable_module_targets.join(', ')}"
+
+  # 补丁：QCloudSimplePing.h 替换 @import 为 #import，并添加 sys/socket.h
+  ping_h = installer.sandbox.pod_dir('QCloudCOSXML').to_s + '/QCloudCOSXML/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h'
+  if File.exist?(ping_h)
+    c = File.read(ping_h)
+    c.sub!('@import Foundation;', '#import <Foundation/Foundation.h>')
+    c.sub!('#import <sys/_types/_sa_family_t.h>', '#import <sys/socket.h>') unless c.include?('#import <sys/socket.h>')
+    unless c.include?('#import <sys/socket.h>')
+      c = "#import <sys/socket.h>\n" + c
+    end
+    File.write(ping_h, c)
+    puts "✅ QCloudSimplePing.h patched (@import → #import, +sys/socket.h)"
+  end
+
+  # 补丁：AFNetworking netinet6/in6.h 私有头文件
   afn_path = installer.sandbox.pod_dir('AFNetworking').to_s + '/AFNetworking/AFNetworkReachabilityManager.m'
   if File.exist?(afn_path)
     c = File.read(afn_path)
     c.sub!('#import <netinet6/in6.h>', '#import <netinet/in.h>')
     File.write(afn_path, c)
-    puts "✅ AFNetworking patched for Xcode 26 (netinet6/in6.h → netinet/in.h)"
+    puts "✅ AFNetworking patched (netinet6/in6.h → netinet/in.h)"
   end
 
 end
