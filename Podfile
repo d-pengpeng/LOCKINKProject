@@ -60,16 +60,21 @@ post_install do |installer|
   end
   puts "✅ Disabled CLANG_ENABLE_MODULES for: #{disable_module_targets.join(', ')}"
 
-  # SVGAPlayer 警告抑制（Protobuf 3.29.x 类型冲突）
-  installer.pods_project.targets.each do |target|
-    next unless target.name == 'SVGAPlayer'
-    target.build_configurations.each do |config|
-      config.build_settings['GCC_WARN_INCOMPATIBLE_POINTER_TYPES'] = 'NO'
-      config.build_settings['GCC_WARN_ABOUT_RETURN_TYPE'] = 'NO'
-      config.build_settings['CLANG_WARN__DUPLICATE_METHOD_MATCH'] = 'NO'
+  # SVGAPlayer + Protobuf: OSAtomicCompareAndSwapPtrBarrier 类型冲突
+  ['SVGAPlayer', 'Protobuf'].each do |tname|
+    installer.pods_project.targets.each do |target|
+      next unless target.name == tname
+      target.build_configurations.each do |config|
+        defs = config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] || ['$(inherited)']
+        defs = Array(defs)
+        defs << 'OSATOMIC_USE_INLINED=1' unless defs.include?('OSATOMIC_USE_INLINED=1')
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
+        config.build_settings['GCC_WARN_INCOMPATIBLE_POINTER_TYPES'] = 'NO'
+        config.build_settings['GCC_WARN_ABOUT_RETURN_TYPE'] = 'NO'
+      end
     end
   end
-  puts "✅ SVGAPlayer warnings suppressed"
+  puts "✅ SVGAPlayer + Protobuf OSAtomic conflict resolved"
 
   # 补丁：QCloudSimplePing.h 替换 @import 为 #import，并添加 sys/socket.h
   ping_h = installer.sandbox.pod_dir('QCloudCore').to_s + '/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h'
