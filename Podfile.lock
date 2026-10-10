@@ -14,53 +14,37 @@ PODS:
   - AFNetworking/Serialization (4.0.1)
   - AFNetworking/UIKit (4.0.1):
     - AFNetworking/NSURLSession
-  - BRPickerView (2.9.3):
-    - BRPickerView/All (= 2.9.3)
-  - BRPickerView/All (2.9.3):
-    - BRPickerView/Default
-    - BRPickerView/Deprecated
-  - BRPickerView/Core (2.9.3)
-  - BRPickerView/DatePicker (2.9.3):
+  - BRPickerView (3.0.0):
+    - BRPickerView/Default (= 3.0.0)
+  - BRPickerView/Core (3.0.0)
+  - BRPickerView/DatePicker (3.0.0):
     - BRPickerView/Core
-  - BRPickerView/Default (2.9.3):
+  - BRPickerView/Default (3.0.0):
     - BRPickerView/DatePicker
     - BRPickerView/TextPicker
-  - BRPickerView/Deprecated (2.9.3):
+  - BRPickerView/TextPicker (3.0.0):
     - BRPickerView/Core
-    - BRPickerView/Deprecated/AddressPickerView (= 2.9.3)
-    - BRPickerView/Deprecated/Base (= 2.9.3)
-    - BRPickerView/Deprecated/StringPickerView (= 2.9.3)
-  - BRPickerView/Deprecated/AddressPickerView (2.9.3):
-    - BRPickerView/Core
-    - BRPickerView/Deprecated/Base
-  - BRPickerView/Deprecated/Base (2.9.3):
-    - BRPickerView/Core
-  - BRPickerView/Deprecated/StringPickerView (2.9.3):
-    - BRPickerView/Core
-    - BRPickerView/Deprecated/Base
-  - BRPickerView/TextPicker (2.9.3):
-    - BRPickerView/Core
-  - Bugly (2.5.93)
-  - HappyDNS (1.0.2)
-  - JCore (4.7.0)
-  - JPush (4.8.1):
-    - JCore (>= 2.0.0)
+  - Bugly (2.6.1)
+  - HappyDNS (1.0.4)
+  - JCore (5.5.3)
+  - JPush (6.2.7):
+    - JCore (> 5.5.0)
   - Masonry (1.1.0)
   - MBProgressHUD (1.2.0)
-  - MJExtension (3.4.1)
-  - MJRefresh (3.7.5)
-  - Protobuf (3.21.12)
+  - MJExtension (3.4.2)
+  - MJRefresh (3.7.9)
+  - Protobuf (3.29.6)
   - QCloudCore/WithoutMTA (6.5.7)
   - QCloudCOSXML/Transfer (6.5.7):
     - QCloudCore/WithoutMTA (= 6.5.7)
-  - Qiniu (8.5.0):
-    - HappyDNS (~> 1.0.2)
+  - Qiniu (8.9.2):
+    - HappyDNS (~> 1.0.4)
   - SDCycleScrollView (1.82):
     - SDWebImage (>= 5.0.0)
-  - SDWebImage (5.14.3):
-    - SDWebImage/Core (= 5.14.3)
-  - SDWebImage/Core (5.14.3)
-  - SocketRocket (0.6.0)
+  - SDWebImage (5.21.7):
+    - SDWebImage/Core (= 5.21.7)
+  - SDWebImage/Core (5.21.7)
+  - SocketRocket (0.7.1)
   - SSZipArchive (2.4.3)
   - SVGAPlayer (2.5.7):
     - SVGAPlayer/Core (= 2.5.7)
@@ -70,7 +54,9 @@ PODS:
     - SVGAPlayer/ProtoFiles
   - SVGAPlayer/ProtoFiles (2.5.7):
     - Protobuf (~> 3.4)
-  - SVProgressHUD (2.2.5)
+  - SVProgressHUD (2.3.1):
+    - SVProgressHUD/Core (= 2.3.1)
+  - SVProgressHUD/Core (2.3.1)
 
 DEPENDENCIES:
   - AFNetworking
@@ -81,7 +67,7 @@ DEPENDENCIES:
   - MBProgressHUD
   - MJExtension
   - MJRefresh
-  - QCloudCOSXML/Transfer (~> 6.5.7)
+  - QCloudCOSXML/Transfer
   - Qiniu
   - SDCycleScrollView
   - SocketRocket
@@ -113,26 +99,26 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
-  BRPickerView: 3eb9408f993c27a87badd5e271322f899dbf604a
-  Bugly: b8715e6ec4004b7f7fbffab0643ba80545aee3da
-  HappyDNS: 75eed16b27c6c3abccea34ac349ab7b7e954b25b
-  JCore: 943c8177944bb31c9b7f83245ef89c7a37488a32
-  JPush: 2caabdb6d62d009bc07a9bd115d03c7c42512b5e
+  BRPickerView: cd2e0e3aa87af062bc7a1b6f78d3dfd5f04f04bb
+  Bugly: 217ac2ce5f0f2626d43dbaa4f70764c953a26a31
+  HappyDNS: aefbd28cdcda93cffac64013dfe3342a2f87ed0a
+  JCore: 3e14acb18c4dc2615008c5cb385a9ae627688a01
+  JPush: edcb0b0ee71a30cf0cac4c04b68bb281196d3e69
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  MJExtension: 21c5f6f8c4d5d8844b7ae8fbae08fed0b501f961
-  MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
-  Protobuf: 120350fc38646e2dedc26f49ecba778184ea1de2
+  MJExtension: e97d164cb411aa9795cf576093a1fa208b4a8dd8
+  MJRefresh: ff9e531227924c84ce459338414550a05d2aea78
+  Protobuf: 8d5596f7468be5400861a6bbfb2dfe9d0d1cde34
   QCloudCore: ff21b867b51f1d7e043c5013a3f876cd29bdca63
   QCloudCOSXML: 35ef870a55a58d193eeb62c37c8904630740480e
-  Qiniu: 172360b79f8ced0d407556add290b6e2da5e162c
+  Qiniu: 9a7dd4c7460d70267138a50eac15a167c0a28df0
   SDCycleScrollView: a0d74c3384caa72bdfc81470bdbc8c14b3e1fbcf
-  SDWebImage: 9c36e66c8ce4620b41a7407698dda44211a96764
-  SocketRocket: fccef3f9c5cedea1353a9ef6ada904fde10d6608
+  SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
+  SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   SVGAPlayer: 318b85a78b61292d6ae9dfcd651f3f0d1cdadd86
-  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
+  SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
 
-PODFILE CHECKSUM: fac5850261f0b68609569bc195ca7f5f4d56acb8
+PODFILE CHECKSUM: 1eef97c819656ea399f83b4e3fc4f8d14168ac41
 
 COCOAPODS: 1.16.2

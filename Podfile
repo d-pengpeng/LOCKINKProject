@@ -17,12 +17,12 @@ target 'BlueEquipProject' do
   pod 'SVGAPlayer'
   pod 'MJExtension'
   pod "Qiniu"
-  pod 'JPush'  # 4.8.1 , '~> 4.8.1'
+  pod 'JPush'  
   pod 'MBProgressHUD'
-  pod 'BRPickerView' #2.9.3
+  pod 'BRPickerView' 
   pod 'SocketRocket'
   pod 'Bugly'
-  pod 'QCloudCOSXML/Transfer', '~> 6.5.7'
+  pod 'QCloudCOSXML/Transfer'
   
   # Pods for BlueEquipProject
 
@@ -53,7 +53,7 @@ post_install do |installer|
   puts "✅ Disabled CLANG_ENABLE_MODULES for: #{disable_module_targets.join(', ')}"
 
   # 补丁：QCloudSimplePing.h 替换 @import 为 #import，并添加 sys/socket.h
-  ping_h = installer.sandbox.pod_dir('QCloudCOSXML').to_s + '/QCloudCOSXML/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h'
+  ping_h = installer.sandbox.pod_dir('QCloudCore').to_s + '/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h'
   if File.exist?(ping_h)
     c = File.read(ping_h)
     c.sub!('@import Foundation;', '#import <Foundation/Foundation.h>')
@@ -63,6 +63,8 @@ post_install do |installer|
     end
     File.write(ping_h, c)
     puts "✅ QCloudSimplePing.h patched (@import → #import, +sys/socket.h)"
+  else
+    puts "⚠️ QCloudSimplePing.h not found"
   end
 
   # 补丁：AFNetworking netinet6/in6.h 私有头文件
