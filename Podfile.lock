@@ -50,9 +50,9 @@ PODS:
   - MJExtension (3.4.1)
   - MJRefresh (3.7.5)
   - Protobuf (3.21.12)
-  - QCloudCore/WithoutMTA (6.1.7)
-  - QCloudCOSXML/Transfer (6.1.7):
-    - QCloudCore/WithoutMTA (= 6.1.7)
+  - QCloudCore/WithoutMTA (6.5.7)
+  - QCloudCOSXML/Transfer (6.5.7):
+    - QCloudCore/WithoutMTA (= 6.5.7)
   - Qiniu (8.5.0):
     - HappyDNS (~> 1.0.2)
   - SDCycleScrollView (1.82):
@@ -81,7 +81,7 @@ DEPENDENCIES:
   - MBProgressHUD
   - MJExtension
   - MJRefresh
-  - QCloudCOSXML/Transfer
+  - QCloudCOSXML/Transfer (~> 6.5.7)
   - Qiniu
   - SDCycleScrollView
   - SocketRocket
@@ -123,8 +123,8 @@ SPEC CHECKSUMS:
   MJExtension: 21c5f6f8c4d5d8844b7ae8fbae08fed0b501f961
   MJRefresh: fdf5e979eb406a0341468932d1dfc8b7f9fce961
   Protobuf: 120350fc38646e2dedc26f49ecba778184ea1de2
-  QCloudCore: cbf7f1140ef71c6cc372af0ded71c9188ea8c5b1
-  QCloudCOSXML: 9c208ae9311d62d02c1a34f9f40f4c5aec817100
+  QCloudCore: ff21b867b51f1d7e043c5013a3f876cd29bdca63
+  QCloudCOSXML: 35ef870a55a58d193eeb62c37c8904630740480e
   Qiniu: 172360b79f8ced0d407556add290b6e2da5e162c
   SDCycleScrollView: a0d74c3384caa72bdfc81470bdbc8c14b3e1fbcf
   SDWebImage: 9c36e66c8ce4620b41a7407698dda44211a96764
@@ -133,6 +133,6 @@ SPEC CHECKSUMS:
   SVGAPlayer: 318b85a78b61292d6ae9dfcd651f3f0d1cdadd86
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
 
-PODFILE CHECKSUM: 7a32767b0cff0b0b35b44da1ea93171add9f6de6
+PODFILE CHECKSUM: fac5850261f0b68609569bc195ca7f5f4d56acb8
 
-COCOAPODS: 1.17.0
+COCOAPODS: 1.16.2

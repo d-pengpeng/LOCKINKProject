@@ -22,7 +22,7 @@ target 'BlueEquipProject' do
   pod 'BRPickerView' #2.9.3
   pod 'SocketRocket'
   pod 'Bugly'
-  pod 'QCloudCOSXML/Transfer'
+  pod 'QCloudCOSXML/Transfer', '~> 6.5.7'
   
   # Pods for BlueEquipProject
 
