@@ -15,7 +15,7 @@ target 'BlueEquipProject' do
   pod 'Masonry'
   pod 'MJRefresh'
   pod 'SVGAPlayer'
-  pod 'Protobuf', '3.21.12'  降级以兼容 SVGAPlayer 生成的代码
+  pod 'Protobuf', '3.21.12'
   pod 'MJExtension'
   pod "Qiniu"
   pod 'JPush'  
