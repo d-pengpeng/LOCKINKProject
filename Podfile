@@ -15,7 +15,7 @@ target 'BlueEquipProject' do
   pod 'Masonry'
   pod 'MJRefresh'
   pod 'SVGAPlayer'
-  pod 'Protobuf', '3.21.12'
+  pod 'Protobuf', '~> 3.4'
   pod 'MJExtension'
   pod "Qiniu"
   pod 'JPush'  
@@ -59,6 +59,17 @@ post_install do |installer|
     end
   end
   puts "✅ Disabled CLANG_ENABLE_MODULES for: #{disable_module_targets.join(', ')}"
+
+  # SVGAPlayer 警告抑制（Protobuf 3.29.x 类型冲突）
+  installer.pods_project.targets.each do |target|
+    next unless target.name == 'SVGAPlayer'
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_WARN_INCOMPATIBLE_POINTER_TYPES'] = 'NO'
+      config.build_settings['GCC_WARN_ABOUT_RETURN_TYPE'] = 'NO'
+      config.build_settings['CLANG_WARN__DUPLICATE_METHOD_MATCH'] = 'NO'
+    end
+  end
+  puts "✅ SVGAPlayer warnings suppressed"
 
   # 补丁：QCloudSimplePing.h 替换 @import 为 #import，并添加 sys/socket.h
   ping_h = installer.sandbox.pod_dir('QCloudCore').to_s + '/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h'
