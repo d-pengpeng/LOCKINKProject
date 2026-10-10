@@ -41,6 +41,19 @@ post_install do |installer|
     end
   end
 
+  # 修复 QCloudSimplePing 在 Xcode 26 上的 sa_family_t 模块错误
+  # 创建 prefix header 强制导入 Darwin 模块
+  qcloud_prefix = installer.sandbox.root + 'QCloudPrefixHeader.pch'
+  File.write(qcloud_prefix, "@import Darwin.POSIX.sys.types._sa_family_t;\n")
+  installer.pods_project.targets.each do |target|
+    next unless target.name == 'QCloudCore'
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREFIX_HEADER'] = qcloud_prefix.to_s
+      config.build_settings['GCC_PRECOMPILE_PREFIX_HEADER'] = 'YES'
+    end
+  end
+  puts "✅ QCloudCore prefix header set for sa_family_t"
+
   # 修复 SVProgressHUD 在 iOS 27 上提示信息跑到左上角的问题
   sv_path = installer.sandbox.pod_dir('SVProgressHUD').to_s + '/SVProgressHUD/SVProgressHUD.m'
   if File.exist?(sv_path)
