@@ -21,27 +21,6 @@ workflows:
           pod install
           echo "=== Pod install done ==="
 
-      - name: Patch QCloudSimplePing for Xcode 26
-        script: |
-          chmod -R u+w Pods/QCloudCore/
-          PING_H="Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h"
-          # 清理之前所有插入的内容
-          sed -i '' '/@import Darwin/d' "$PING_H" 2>/dev/null || true
-          sed -i '' '/#include <sys\/socket.h>/d' "$PING_H" 2>/dev/null || true
-          sed -i '' '/#include <netinet\/in.h>/d' "$PING_H" 2>/dev/null || true
-          sed -i '' '/#include <sys\/types.h>/d' "$PING_H" 2>/dev/null || true
-          # 用 typedef 替代模块导入，彻底绕过 Xcode 26 模块系统
-          python3 -c "
-          f = '$PING_H'
-          with open(f) as fh: c = fh.read()
-          c = c.replace('#import <sys/_types/_sa_family_t.h>', 'typedef __uint8_t sa_family_t;')
-          with open(f, 'w') as fh: fh.write(c)
-          "
-          echo "=== Patched .h ==="
-          head -16 "$PING_H"
-          echo "=== Verify ==="
-          grep -n 'sa_family_t' "$PING_H" | head -5
-
       - name: Fix pbxproj signing
         script: |
           PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
