@@ -41,4 +41,13 @@ post_install do |installer|
     end
   end
 
+  # 修复 AFNetworking 在 Xcode 26 上 netinet6/in6.h 私有头文件错误
+  afn_path = installer.sandbox.pod_dir('AFNetworking').to_s + '/AFNetworking/AFNetworkReachabilityManager.m'
+  if File.exist?(afn_path)
+    c = File.read(afn_path)
+    c.sub!('#import <netinet6/in6.h>', '#import <netinet/in.h>')
+    File.write(afn_path, c)
+    puts "✅ AFNetworking patched for Xcode 26 (netinet6/in6.h → netinet/in.h)"
+  end
+
 end
