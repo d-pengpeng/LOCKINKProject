@@ -57,6 +57,8 @@ post_install do |installer|
   # 补丁：QCloudSimplePing.h 替换 @import 为 #import，并添加 sys/socket.h
   ping_h = installer.sandbox.pod_dir('QCloudCore').to_s + '/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h'
   if File.exist?(ping_h)
+    chmod_path = ping_h
+    system("chmod u+w '#{chmod_path}'")
     c = File.read(ping_h)
     c.sub!('@import Foundation;', '#import <Foundation/Foundation.h>')
     c.sub!('#import <sys/_types/_sa_family_t.h>', '#import <sys/socket.h>') unless c.include?('#import <sys/socket.h>')
@@ -72,6 +74,7 @@ post_install do |installer|
   # 补丁：AFNetworking netinet6/in6.h 私有头文件
   afn_path = installer.sandbox.pod_dir('AFNetworking').to_s + '/AFNetworking/AFNetworkReachabilityManager.m'
   if File.exist?(afn_path)
+    system("chmod u+w '#{afn_path}'")
     c = File.read(afn_path)
     c.sub!('#import <netinet6/in6.h>', '#import <netinet/in.h>')
     File.write(afn_path, c)
