@@ -97,7 +97,7 @@ workflows:
                   <key>com.lockink.qingQuPro</key>
                   <string>lockink-appstore</string>
                   <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
-                  <string>BlueEquipProjectNotiServier</string>
+                  <string>com.lockink.qingQuPro.BlueEquipProjectNotiServier</string>
               </dict>
           </dict>
           </plist>
