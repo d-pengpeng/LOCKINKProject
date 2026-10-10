@@ -41,15 +41,4 @@ post_install do |installer|
     end
   end
 
-  # 修复 QCloudSimplePing 在 Xcode 26 上的 sa_family_t 模块错误
-  # 关闭 QCloudCore 的 Clang Modules，规避类型模块校验错误
-  installer.pods_project.targets.each do |target|
-    next unless target.name == 'QCloudCore'
-    target.build_configurations.each do |config|
-      config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
-      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-    end
-  end
-  puts "✅ QCloudCore modules disabled for sa_family_t"
-
 end
