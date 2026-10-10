@@ -52,18 +52,4 @@ post_install do |installer|
   end
   puts "✅ QCloudCore modules disabled for sa_family_t"
 
-  # 修复 SVProgressHUD 在 iOS 27 上提示信息跑到左上角的问题
-  sv_path = installer.sandbox.pod_dir('SVProgressHUD').to_s + '/SVProgressHUD/SVProgressHUD.m'
-  if File.exist?(sv_path)
-    c = File.read(sv_path)
-    # 替换 frontWindow 方法
-    c.gsub!(/- \(UIWindow \*\)frontWindow \{.*?\n\}/m) do |old|
-      "- (UIWindow *)frontWindow {\n#if !defined(SV_APP_EXTENSIONS)\n    for (UIScene *scene in [UIApplication.sharedApplication.connectedScenes allObjects]) {\n        if (scene.activationState != UISceneActivationStateForegroundActive) continue;\n        if (![scene isKindOfClass:[UIWindowScene class]]) continue;\n        UIWindowScene *windowScene = (UIWindowScene *)scene;\n        for (UIWindow *window in windowScene.windows) {\n            BOOL windowOnMainScreen = window.screen == UIScreen.mainScreen;\n            BOOL windowIsVisible = !window.hidden && window.alpha > 0;\n            BOOL windowLevelSupported = (window.windowLevel >= UIWindowLevelNormal && window.windowLevel <= self.maxSupportedWindowLevel);\n            if(windowOnMainScreen && windowIsVisible && windowLevelSupported) {\n                return window;\n            }\n        }\n    }\n#endif\n    return nil;\n}"
-    end
-    # 替换 keyWindow 调用
-    c.gsub!('[UIApplication sharedApplication].keyWindow.bounds', '[self frontWindow].bounds')
-    c.gsub!('[[UIApplication sharedApplication] keyWindow].rootViewController', '[self frontWindow].rootViewController')
-    File.write(sv_path, c)
-    puts "✅ SVProgressHUD patched for iOS 27"
-  end
 end
