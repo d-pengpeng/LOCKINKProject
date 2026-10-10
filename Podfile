@@ -20,7 +20,7 @@ target 'BlueEquipProject' do
   pod "Qiniu"
   pod 'JPush'  
   pod 'MBProgressHUD'
-  pod 'BRPickerView' 
+  pod 'BRPickerView', '2.9.9'
   pod 'SocketRocket'
   pod 'Bugly'
   pod 'QCloudCOSXML/Transfer'
