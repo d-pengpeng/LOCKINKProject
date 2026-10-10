@@ -14,15 +14,31 @@ PODS:
   - AFNetworking/Serialization (4.0.1)
   - AFNetworking/UIKit (4.0.1):
     - AFNetworking/NSURLSession
-  - BRPickerView (3.0.0):
-    - BRPickerView/Default (= 3.0.0)
-  - BRPickerView/Core (3.0.0)
-  - BRPickerView/DatePicker (3.0.0):
+  - BRPickerView (2.9.9):
+    - BRPickerView/All (= 2.9.9)
+  - BRPickerView/All (2.9.9):
+    - BRPickerView/Default
+    - BRPickerView/Deprecated
+  - BRPickerView/Core (2.9.9)
+  - BRPickerView/DatePicker (2.9.9):
     - BRPickerView/Core
-  - BRPickerView/Default (3.0.0):
+  - BRPickerView/Default (2.9.9):
     - BRPickerView/DatePicker
     - BRPickerView/TextPicker
-  - BRPickerView/TextPicker (3.0.0):
+  - BRPickerView/Deprecated (2.9.9):
+    - BRPickerView/Core
+    - BRPickerView/Deprecated/AddressPickerView (= 2.9.9)
+    - BRPickerView/Deprecated/Base (= 2.9.9)
+    - BRPickerView/Deprecated/StringPickerView (= 2.9.9)
+  - BRPickerView/Deprecated/AddressPickerView (2.9.9):
+    - BRPickerView/Core
+    - BRPickerView/Deprecated/Base
+  - BRPickerView/Deprecated/Base (2.9.9):
+    - BRPickerView/Core
+  - BRPickerView/Deprecated/StringPickerView (2.9.9):
+    - BRPickerView/Core
+    - BRPickerView/Deprecated/Base
+  - BRPickerView/TextPicker (2.9.9):
     - BRPickerView/Core
   - Bugly (2.6.1)
   - HappyDNS (1.0.4)
@@ -60,13 +76,14 @@ PODS:
 
 DEPENDENCIES:
   - AFNetworking
-  - BRPickerView
+  - BRPickerView (= 2.9.9)
   - Bugly
   - JPush
   - Masonry
   - MBProgressHUD
   - MJExtension
   - MJRefresh
+  - Protobuf (~> 3.4)
   - QCloudCOSXML/Transfer
   - Qiniu
   - SDCycleScrollView
@@ -99,7 +116,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
-  BRPickerView: cd2e0e3aa87af062bc7a1b6f78d3dfd5f04f04bb
+  BRPickerView: 84b2effb81f3b9ebd27f1d31de867ae0b37024f7
   Bugly: 217ac2ce5f0f2626d43dbaa4f70764c953a26a31
   HappyDNS: aefbd28cdcda93cffac64013dfe3342a2f87ed0a
   JCore: 3e14acb18c4dc2615008c5cb385a9ae627688a01
@@ -119,6 +136,6 @@ SPEC CHECKSUMS:
   SVGAPlayer: 318b85a78b61292d6ae9dfcd651f3f0d1cdadd86
   SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
 
-PODFILE CHECKSUM: 1eef97c819656ea399f83b4e3fc4f8d14168ac41
+PODFILE CHECKSUM: 8afd7a099e38b69c5f6ac701b7d5e0fc6f0a1da3
 
 COCOAPODS: 1.16.2
