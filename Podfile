@@ -49,7 +49,12 @@ post_install do |installer|
       config.build_settings['CLANG_ENABLE_MODULES'] = 'NO'
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       # 关闭 modules 后需显式链接系统框架
-      config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Foundation -framework UIKit -framework CoreGraphics -framework Security -framework SystemConfiguration -framework MobileCoreServices -framework CFNetwork -framework WebKit'
+      base_flags = '$(inherited) -framework Foundation -framework UIKit -framework CoreGraphics -framework Security -framework SystemConfiguration -framework MobileCoreServices -framework CFNetwork -framework WebKit'
+      # Qiniu 额外需要 Photos/AVFoundation/AssetsLibrary
+      if target.name == 'Qiniu'
+        base_flags += ' -framework Photos -framework AVFoundation -framework AssetsLibrary -framework CoreMedia'
+      end
+      config.build_settings['OTHER_LDFLAGS'] = base_flags
     end
   end
   puts "✅ Disabled CLANG_ENABLE_MODULES for: #{disable_module_targets.join(', ')}"
