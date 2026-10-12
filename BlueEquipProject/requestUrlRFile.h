@@ -11,10 +11,11 @@
 
 
 //外网
-#define INTERFACEADDRESS @"http://106.55.181.135:8081/"
-#define socketWSUrl @"ws://106.55.181.135:8081/ws"
+//#define INTERFACEADDRESS @"http://106.55.181.135:8081/"
+//#define socketWSUrl @"ws://106.55.181.135:8081/ws"
 
-
+#define INTERFACEADDRESS @"http://api.app.lockink.cn/"
+#define socketWSUrl @"ws://api.app.lockink.cn/ws"
 //三期开发
 #define request_waveform_ab_save @"waveform/ab/save"
 #define request_waveform_ab_pageWaveform @"waveform/ab/pageWaveform"
