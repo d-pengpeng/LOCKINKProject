@@ -6176,7 +6176,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -6234,7 +6234,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
