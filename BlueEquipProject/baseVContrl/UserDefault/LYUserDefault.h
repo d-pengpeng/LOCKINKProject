@@ -71,6 +71,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic ,assign) NSInteger timebox_sec;
 
 @property (nonatomic ,assign) BOOL is_EnterBackground;
+@property (nonatomic ,assign) BOOL isAppIosReviewBoo;
 
 @property (nonatomic ,assign) NSInteger difference;
 @property (nonatomic ,assign) NSInteger current_exp;
@@ -201,6 +202,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)saveIsLoginBoo:(BOOL)isShow;
 
 + (void)saveIsEnterBackground:(BOOL)isShow;
++ (void)saveAppIosReviewBoo:(BOOL)isShow;
 
 + (void)saveIsRoomnum:(NSString *)isShow hostAnnoun:(NSString *)announ;
 

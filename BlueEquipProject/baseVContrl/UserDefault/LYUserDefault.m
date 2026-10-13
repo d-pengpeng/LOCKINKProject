@@ -504,6 +504,15 @@
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"is_EnterBackground"];
 }
 
++ (void)saveAppIosReviewBoo:(BOOL)isShow
+{
+    [[NSUserDefaults standardUserDefaults] setBool:isShow forKey:@"isAppIosReviewBoo"];
+}
+- (BOOL)isAppIosReviewBoo
+{
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"isAppIosReviewBoo"];
+}
+
 + (void)saveTimeSignUser:(NSString *)dateStr
 {
     [[NSUserDefaults standardUserDefaults] setValue:dateStr forKey:@"timeSignUser"];

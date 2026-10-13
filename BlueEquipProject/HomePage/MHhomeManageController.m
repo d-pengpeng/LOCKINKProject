@@ -233,6 +233,21 @@
             if([info[@"adList"] isKindOfClass:[NSArray class]]) {
                 [LYUserDefault saveAdListArr:info[@"adList"]];
             }
+            //MARK: 读取 app_ios_review(String)，与App版本号比较，判断是否为审核版本
+            NSString *reviewStr = @"";
+            if([info[@"app_ios_review"] isKindOfClass:[NSString class]]) {
+                reviewStr = info[@"app_ios_review"];
+            }
+            NSString *versionStr = @"";
+            if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]) {
+                versionStr = [NSString stringWithFormat:@"%@", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+            }
+            BOOL isReviewBoo = NO;
+            if(reviewStr.length > 0 && [reviewStr isEqualToString:versionStr]) {
+                isReviewBoo = YES;
+            }
+            [LYUserDefault saveAppIosReviewBoo:isReviewBoo];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"appIosReviewNotif" object:nil];
         }
         
     } fail:^(NSString * _Nonnull msg) {

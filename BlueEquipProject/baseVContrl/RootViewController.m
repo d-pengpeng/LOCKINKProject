@@ -13,12 +13,14 @@
 #import "MHMessageMangerController.h"
 #import "MHMyController.h"
 #import "MHConnectLinkController.h"
+#import "MHSystemMessageController.h"
 
 @interface RootViewController ()<V2TIMFriendshipListener, V2TIMConversationListener>
 
 @property (nonatomic, strong) UILabel *msgitem;
 @property (nonatomic, strong) UIView *tabVVVV;
 @property (nonatomic, strong) MHMessageMangerController *MHMessageMangerC;
+@property (nonatomic, assign) BOOL isMessageSystemBoo;
 @property (nonatomic, assign) BOOL isBB;
 @property (nonatomic, assign) int redNum;
 @property (nonatomic, assign) BOOL selecTabbarBoo;
@@ -45,6 +47,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tabbarHiddenNotifffMethod:) name:customTabbaNotifi object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tabbarHiddenNotifffMethodTwo:) name:customTabbaNotifi2 object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appIosReviewNotifMethod) name:@"appIosReviewNotif" object:nil];
     
     self.tabBar.hidden = YES;
     
@@ -291,19 +294,56 @@
     MHhomeManageController  *homeVV = [[MHhomeManageController alloc]init];
     MHfindController *auctionVV2 = [[MHfindController alloc] init];
     MHConnectLinkController *auctionVV = [[MHConnectLinkController alloc] init];
-    MHMessageMangerController *messageIMVV = [[MHMessageMangerController alloc] init];
     MHMyController *minVC = [[MHMyController alloc] init];
     
-    self.MHMessageMangerC = messageIMVV;
-
+    //MARK: 审核版本(app_ios_review与App版本号相等)时，消息界面使用 MHSystemMessageController
+    BOOL isReviewBoo = [LYUserDefault userDefault].isAppIosReviewBoo;
+    
     [self setUpOneChildVcWithVc:homeVV Image:@"tabbarIcon1" selectedImage:@"tabbarIcon1" title:@""];
     [self setUpOneChildVcWithVc:auctionVV2 Image:@"tabbarIcon1" selectedImage:@"tabbarIcon1" title:@""];
     [self setUpOneChildVcWithVc:auctionVV Image:@"tabbarIcon1" selectedImage:@"tabbarIcon1" title:@""];
-    [self setUpOneChildVcWithVc:messageIMVV Image:@"tabbarIcon1" selectedImage:@"tabbarIcon1" title:@""];
+    if (isReviewBoo) {
+        MHSystemMessageController *systemVV = [[MHSystemMessageController alloc] init];
+        [self setUpOneChildVcWithVc:systemVV Image:@"tabbarIcon1" selectedImage:@"tabbarIcon1" title:@""];
+        self.isMessageSystemBoo = YES;
+    }else {
+        MHMessageMangerController *messageIMVV = [[MHMessageMangerController alloc] init];
+        self.MHMessageMangerC = messageIMVV;
+        [self setUpOneChildVcWithVc:messageIMVV Image:@"tabbarIcon1" selectedImage:@"tabbarIcon1" title:@""];
+        self.isMessageSystemBoo = NO;
+    }
     [self setUpOneChildVcWithVc:minVC Image:@"tabbarIcon1" selectedImage:@"tabbarIcon1" title:@""];
     
 //    msgitem = messageIMVV.tabBarItem;
     self.selectedIndex = 0;
+}
+
+//MARK: app_ios_review 变化时刷新「消息」界面
+- (void)appIosReviewNotifMethod
+{
+    BOOL isReviewBoo = [LYUserDefault userDefault].isAppIosReviewBoo;
+    if (isReviewBoo == self.isMessageSystemBoo) {
+        return;
+    }
+    NSMutableArray *vcsMAr = [self.viewControllers mutableCopy];
+    if (vcsMAr.count < 5) {
+        return;
+    }
+    if (isReviewBoo) {
+        MHSystemMessageController *systemVV = [[MHSystemMessageController alloc] init];
+        CJNavigationController *nav = [[CJNavigationController alloc] initWithRootViewController:systemVV];
+        vcsMAr[3] = nav;
+        self.MHMessageMangerC = nil;
+    }else {
+        MHMessageMangerController *messageIMVV = [[MHMessageMangerController alloc] init];
+        self.MHMessageMangerC = messageIMVV;
+        CJNavigationController *nav = [[CJNavigationController alloc] initWithRootViewController:messageIMVV];
+        vcsMAr[3] = nav;
+    }
+    NSInteger selIndex = self.selectedIndex;
+    self.viewControllers = vcsMAr;
+    self.selectedIndex = selIndex;
+    self.isMessageSystemBoo = isReviewBoo;
 }
 
 - (void)getUnreadMsg
