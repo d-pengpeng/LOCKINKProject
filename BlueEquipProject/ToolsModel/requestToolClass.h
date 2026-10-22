@@ -18,6 +18,11 @@ typedef void (^networkFailBlock)(NSString *msg);
 + (instancetype)sharedInstance;
 
 /**
+ 当前 App 版本号（CFBundleShortVersionString），随所有请求的 appVersion 请求头下发
+ */
++ (NSString *)appVersionString;
+
+/**
  网络请求成功的回调
  */
 @property(nonatomic,copy)networkSuccessBlock successB;

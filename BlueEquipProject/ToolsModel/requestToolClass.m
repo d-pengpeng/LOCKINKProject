@@ -30,6 +30,12 @@ static requestToolClass* kSingleObject = nil;
     return [self sharedInstance];
 }
 
+// 当前 App 版本号
++ (NSString *)appVersionString {
+    NSString *version = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    return version.length > 0 ? version : @"";
+}
+
 /**
  网络请求
  
@@ -63,7 +69,7 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull uploadProgress) {
+    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
@@ -149,7 +155,7 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull uploadProgress) {
+    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
@@ -332,7 +338,7 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
 
-    [session POST:requestUrl parameters:parameter headers:@{@"token":TOKEN?TOKEN:@""} constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+    [session POST:requestUrl parameters:parameter headers:@{@"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
 
         //上传文件参数
         [formData appendPartWithFileData:dataVoice name:@"file" fileName: [NSString stringWithFormat:@"%@.m4a", @"voiceName"] mimeType:@"amr/mp3/wmr/m4a"];
@@ -396,7 +402,7 @@ static requestToolClass* kSingleObject = nil;
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
     
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull uploadProgress) {
+    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
@@ -466,7 +472,7 @@ static requestToolClass* kSingleObject = nil;
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
     
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull uploadProgress) {
+    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
@@ -533,7 +539,7 @@ static requestToolClass* kSingleObject = nil;
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
     
-    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull downloadProgress) {
+    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
@@ -585,7 +591,9 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull downloadProgress) {
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ? pDic : @{});
+    [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
@@ -663,7 +671,7 @@ static requestToolClass* kSingleObject = nil;
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = @{};
     
-    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull downloadProgress) {
+    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
@@ -749,7 +757,7 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@""} progress:^(NSProgress * _Nonnull downloadProgress) {
+    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;

@@ -227,7 +227,7 @@
 
     [session POST:requestUrl
        parameters:nil
-          headers:@{@"token": token, @"Accept-Language": lang}
+          headers:@{@"token": token, @"Accept-Language": lang, @"appVersion": [requestToolClass appVersionString]}
 constructingBodyWithBlock:^(id<AFMultipartFormData> _Nonnull formData) {
         [formData appendPartWithFormData:[jsonString dataUsingEncoding:NSUTF8StringEncoding] name:@"data"];
         if (imageData.length > 0) {
