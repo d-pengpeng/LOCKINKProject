@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8AF80625DA39903286378D17 /* UIViewController+MHAgeGate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5410401132F51DE5D51B43D5 /* UIViewController+MHAgeGate.m */; };
+		E0C000687CABC3994119C6AD /* MHAgeAssurance.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFD0E442C9340E3460B99A3 /* MHAgeAssurance.swift */; };
 		E8005C972D0BE06C00F63FE5 /* MHNewDrawingView.m in Sources */ = {isa = PBXBuildFile; fileRef = E8005C962D0BE06C00F63FE5 /* MHNewDrawingView.m */; };
 		E8021A0E2EB2F06B00F64FD9 /* AESCipher.m in Sources */ = {isa = PBXBuildFile; fileRef = E8021A0C2EB2F06B00F64FD9 /* AESCipher.m */; };
 		E80224AF2B92F8A3006BD677 /* UIButton+MyBtn.m in Sources */ = {isa = PBXBuildFile; fileRef = E80224AE2B92F8A3006BD677 /* UIButton+MyBtn.m */; };
@@ -782,8 +784,11 @@
 
 /* Begin PBXFileReference section */
 		13D48463FC6D5F93409FE8A5 /* Pods-BlueEquipProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlueEquipProject.debug.xcconfig"; path = "Target Support Files/Pods-BlueEquipProject/Pods-BlueEquipProject.debug.xcconfig"; sourceTree = "<group>"; };
+		5410401132F51DE5D51B43D5 /* UIViewController+MHAgeGate.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+MHAgeGate.m"; sourceTree = "<group>"; };
 		9EA13104BDDD5DBF6BE62EDC /* Pods_BlueEquipProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BlueEquipProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEFD0E442C9340E3460B99A3 /* MHAgeAssurance.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MHAgeAssurance.swift; sourceTree = "<group>"; };
 		D0F6902D909FDAC74A9BE7FF /* Pods-BlueEquipProject.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlueEquipProject.release.xcconfig"; path = "Target Support Files/Pods-BlueEquipProject/Pods-BlueEquipProject.release.xcconfig"; sourceTree = "<group>"; };
+		E1885F0B69BC2D8DFB9DF555 /* MHAgeAssurance.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = MHAgeAssurance.h; sourceTree = "<group>"; };
 		E8005C952D0BE06C00F63FE5 /* MHNewDrawingView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHNewDrawingView.h; sourceTree = "<group>"; };
 		E8005C962D0BE06C00F63FE5 /* MHNewDrawingView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHNewDrawingView.m; sourceTree = "<group>"; };
 		E8021A0B2EB2F06B00F64FD9 /* AESCipher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AESCipher.h; sourceTree = "<group>"; };
@@ -2217,6 +2222,7 @@
 		E8FDA2ED2AEF4F2900B28B0C /* MHAddTOYSController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHAddTOYSController.m; sourceTree = "<group>"; };
 		E8FDA2F32AEFB09D00B28B0C /* myBlackListController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myBlackListController.h; sourceTree = "<group>"; };
 		E8FDA2F42AEFB09D00B28B0C /* myBlackListController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = myBlackListController.m; sourceTree = "<group>"; };
+		ECCBCC728F47E4231ADBDF28 /* UIViewController+MHAgeGate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "UIViewController+MHAgeGate.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -3801,6 +3807,10 @@
 				E88CC6932AAB00EB0019E488 /* UIImage */,
 				E88CC8EC2AAB00EC0019E488 /* WebView */,
 				E88CCA6E2AAB00ED0019E488 /* WSImagebroswerVC */,
+				CEFD0E442C9340E3460B99A3 /* MHAgeAssurance.swift */,
+				E1885F0B69BC2D8DFB9DF555 /* MHAgeAssurance.h */,
+				ECCBCC728F47E4231ADBDF28 /* UIViewController+MHAgeGate.h */,
+				5410401132F51DE5D51B43D5 /* UIViewController+MHAgeGate.m */,
 			);
 			path = ToolsModel;
 			sourceTree = "<group>";
@@ -5945,6 +5955,8 @@
 				E81FCDBD2B551D6100F936CD /* MHfindDetailSubCell.m in Sources */,
 				E8378F382AECB342008D67F0 /* NSObject+RACPropertySubscribing.m in Sources */,
 				E82BF1282B512CF9009D7B3C /* MHrankingOneCell.m in Sources */,
+				E0C000687CABC3994119C6AD /* MHAgeAssurance.swift in Sources */,
+				8AF80625DA39903286378D17 /* UIViewController+MHAgeGate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6176,7 +6188,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -6212,6 +6224,11 @@
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
 				MARKETING_VERSION = 1.6.3;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					DeclaredAgeRange,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -6220,6 +6237,7 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -6232,11 +6250,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 9;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = L992GPQMS4;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 10;
+				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM",
@@ -6271,16 +6287,20 @@
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
 				MARKETING_VERSION = 1.6.3;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					DeclaredAgeRange,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "53f48a3c-823f-4e48-8911-ddb17f485846";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "lockink-appstore";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;

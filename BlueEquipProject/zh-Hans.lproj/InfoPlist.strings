@@ -613,3 +613,6 @@ NSBluetoothPeripheralUsageDescription = "需要使用您的蓝牙,  用来搜索
 "cancel" = "取消";
 "send_anyway" = "仍然发送";
 
+"age_gate_title" = "年龄限制";
+"age_gate_message" = "该功能仅面向年满 18 周岁的用户开放。";
+

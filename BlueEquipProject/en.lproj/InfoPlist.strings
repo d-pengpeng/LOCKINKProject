@@ -938,3 +938,6 @@ NSBluetoothPeripheralUsageDescription = "Your Bluetooth allows you to search for
 "violation_skip_tip" = "Content violates policy, skipped";
 "cancel" = "Cancel";
 "send_anyway" = "Send anyway";
+
+"age_gate_title" = "Age Restriction";
+"age_gate_message" = "This feature is only available to users aged 18 and over.";

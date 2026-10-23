@@ -13,6 +13,7 @@
 #import "MHGearSetView.h"
 #import "MHLimitsAuthorityView.h"
 #import "MHPostSquareController.h"
+#import "UIViewController+MHAgeGate.h"
 
 @interface MHRoleSetSubController ()<TPVerticalVideoSliderViewDelegate>
 
@@ -1352,6 +1353,9 @@
                 NSString *btn_sel2 = @"false";
                 NSString *kai_dy = @"0";
                 
+                if (![self mh_requireAdult]) {
+                    return;
+                }
                 MHPostSquareController *vc = [[MHPostSquareController alloc] init];
                 vc.isRoleGongTouBoo = YES;
                 if ([[FloatingWindowModel shareInstance].devicNameArr containsObject:self.devicTyy]) {
@@ -1368,6 +1372,9 @@
                 NSString *btn_sel2 = oneBtn2.selected==YES ? @"true":@"false";
                 NSString *kai_dy = [NSString stringWithFormat:@"%.f", self.twoScrollV.value*100];
                 
+                if (![self mh_requireAdult]) {
+                    return;
+                }
                 MHPostSquareController *vc = [[MHPostSquareController alloc] init];
                 vc.isRoleGongTouBoo = YES;
                 if ([[FloatingWindowModel shareInstance].devicNameArr containsObject:self.devicTyy]) {

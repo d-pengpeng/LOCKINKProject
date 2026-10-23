@@ -14,6 +14,8 @@
 #import "MHMyController.h"
 #import "MHConnectLinkController.h"
 #import "MHSystemMessageController.h"
+#import "MHAgeAssurance.h"
+#import "UIViewController+MHAgeGate.h"
 
 @interface RootViewController ()<V2TIMFriendshipListener, V2TIMConversationListener>
 
@@ -28,6 +30,25 @@
 @end
 
 @implementation RootViewController
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+
+    // 每个进程只请求一次，系统会缓存用户的授权结果
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [self requestAgeAssurance];
+    });
+}
+
+- (void)requestAgeAssurance {
+    if (@available(iOS 26.0, *)) {
+        [MHAgeAssurance.shared requestAgeRangeFrom:self completion:^(NSDictionary *result) {
+            // 结果已由 MHAgeAssurance 持久化，业务侧读取 MHAgeAssurance.isAdultConfirmed 即可
+            NSLog(@"[AgeAssurance] %@", result);
+        }];
+    }
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -175,6 +196,10 @@
 
 - (void)fivBtnMethods:(UIButton *)btn
 {
+    // 未满 18 岁禁止进入 IM
+    if (btn.tag == 9803 && ![self mh_requireAdult]) {
+        return;
+    }
     
     if (self.selTabbar1 != (int)(btn.tag-9800+1)) {
         self.selecTabbarBoo = YES;

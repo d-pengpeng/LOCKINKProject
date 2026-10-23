@@ -16,6 +16,7 @@
 #import "PopBottomView.h"
 #import "MHRoleFriendSelectController.h"
 #import "MHPostRoleController.h"
+#import "UIViewController+MHAgeGate.h"
 #import "MHRoleOneModel.h"
 #import "MHOthrMyController.h"
 #import "MHRoleConnectView.h"
@@ -1367,6 +1368,9 @@
                 [self.navigationController pushViewController:vc animated:YES];
             }else if ([dictionary[@"id"]intValue] == 2) {
                 
+                if (![self mh_requireAdult]) {
+                    return;
+                }
                 MHPostRoleController *vc = [[MHPostRoleController alloc] init];
                 vc.modelM = self.modelM;
                 [self.navigationController pushViewController:vc animated:YES];
