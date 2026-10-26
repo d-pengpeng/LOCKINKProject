@@ -21,7 +21,6 @@ workflows:
           pod repo update
           pod install
           echo "=== Pod install done ==="
-          # 验证补丁
           grep "sys/socket.h" Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h || echo "⚠️ QCloudSimplePing.h not patched"
           grep "netinet/in.h" Pods/AFNetworking/AFNetworking/AFNetworkReachabilityManager.m || echo "⚠️ AFNetworking not patched"
 
@@ -33,19 +32,64 @@ workflows:
 
       - name: Setup code signing
         script: |
-          # Codemagic Settings 里上传的 profile / p12 会自动放到系统 keychain 和 Provisioning Profiles 目录
-          # 这里只负责确保它们可被访问
+          # 说明：Codemagic Settings → iOS code signing 上传的 profile / p12 不会自动放系统目录
+          # 它们会以 base64 形式注入以下环境变量：
+          #   BUILD_CERTIFICATE_BASE64 / BUILD_CERTIFICATE_PASSWORD  （.p12）
+          #   PROVISIONING_PROFILE_BASE64                             （主 App App Store profile）
+          #   PROVISIONING_PROFILE_EXT_BASE64                         （Noti 扩展 profile）
+          # 这里手动解码 + 动态读取 UUID 作为文件名，以后换 profile 不用改 yaml
+
+          KEYCHAIN_PATH="$HOME/codemagic.keychain"
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          echo "=== 已安装的 provisioning profiles ==="
-          ls -la "$PP_DIR" 2>/dev/null || echo "⚠️ $PP_DIR 不存在"
+
+          # —— 1. 创建临时 keychain ——
+          security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          # —— 2. 导入 .p12 证书（Settings 上传后环境变量会被自动覆盖为新值）——
+          if [ -n "$BUILD_CERTIFICATE_BASE64" ]; then
+            echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/certificate.p12
+            security import /tmp/certificate.p12 -k "$KEYCHAIN_PATH" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            echo "✅ Certificate imported"
+          else
+            echo "⚠️ BUILD_CERTIFICATE_BASE64 未设置"
+          fi
+
+          # —— 3. 安装主 App provisioning profile（从 profile 自身读取 UUID 作文件名）——
+          mkdir -p "$PP_DIR"
+          if [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
+            echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > /tmp/main.mobileprovision
+            MAIN_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
+              "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
+            cp /tmp/main.mobileprovision "$PP_DIR/${MAIN_UUID}.mobileprovision"
+            echo "✅ Main profile installed: ${MAIN_UUID}.mobileprovision"
+          else
+            echo "⚠️ PROVISIONING_PROFILE_BASE64 未设置"
+          fi
+
+          # —— 4. 安装 Noti 扩展 profile ——
+          if [ -n "$PROVISIONING_PROFILE_EXT_BASE64" ]; then
+            echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > /tmp/ext.mobileprovision
+            EXT_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
+              "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
+            cp /tmp/ext.mobileprovision "$PP_DIR/${EXT_UUID}.mobileprovision"
+            echo "✅ Ext profile installed: ${EXT_UUID}.mobileprovision"
+          else
+            echo "⚠️ PROVISIONING_PROFILE_EXT_BASE64 未设置"
+          fi
+
           echo ""
-          echo "=== 当前钥匙串里的 Distribution identities ==="
-          security find-identity -v -p codesigning 2>&1 | grep -i "distribution\|identity" | head -10
+          echo "=== 钥匙串里的 identities ==="
+          security find-identity -v -p codesigning 2>&1 | head -5
+          echo "=== Provisioning Profiles 目录 ==="
+          ls -la "$PP_DIR"
 
       - name: Archive
         script: |
           mkdir -p build
-          # 清理 DerivedData 缓存
           rm -rf ~/Library/Developer/Xcode/DerivedData/BlueEquipProject-*
           set -o pipefail
           xcodebuild archive \
@@ -56,7 +100,7 @@ workflows:
             -destination "generic/platform=iOS" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=L992GPQMS4 \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
             CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES=YES \
             2>&1 | tee build/archive.log
           echo "=== Archive exit code: ${PIPESTATUS[0]} ==="
@@ -98,7 +142,7 @@ workflows:
       - name: Cleanup keychain
         script: |
           security delete-keychain "$HOME/codemagic.keychain" 2>/dev/null || true
-          rm -f /tmp/certificate.p12
+          rm -f /tmp/certificate.p12 /tmp/main.mobileprovision /tmp/ext.mobileprovision
 
     artifacts:
       - build/export/*.ipa
