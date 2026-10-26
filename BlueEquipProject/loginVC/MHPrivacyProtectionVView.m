@@ -118,7 +118,7 @@
         }
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
         vc.typeNN = 0;
-        vc.guide_id = [LYUserDefault userDefault].privacyPolicyUrl;
+        vc.guide_id = [LYUserDefault userDefault].userAgreementUrl;
         [selfVC.navigationController pushViewController:vc animated:YES];
         
     }else {
@@ -127,7 +127,7 @@
         }
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
         vc.typeNN = 1;
-        vc.guide_id = [LYUserDefault userDefault].userAgreementUrl;
+        vc.guide_id = [LYUserDefault userDefault].privacyPolicyUrl;
         [selfVC.navigationController pushViewController:vc animated:YES];
     }
     return NO;
