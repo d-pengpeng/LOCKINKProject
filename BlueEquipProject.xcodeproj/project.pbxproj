@@ -6226,8 +6226,6 @@
 				MARKETING_VERSION = 1.6.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-weak_framework",
-					DeclaredAgeRange,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -6289,8 +6287,6 @@
 				MARKETING_VERSION = 1.6.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-weak_framework",
-					DeclaredAgeRange,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";

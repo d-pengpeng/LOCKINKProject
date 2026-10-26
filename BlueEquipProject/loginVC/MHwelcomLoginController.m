@@ -309,16 +309,17 @@
     textV.attributedText = mutAttString;
     
     
-    if(![LYUserDefault userDefault].isFirstStart) {
+    if(![LYUserDefault userDefault].isPrivacyAgreeBoo) {
         
         self.privacyProtectionVV = [[MHPrivacyProtectionVView alloc] initWithFrame:CGRectMake(0, 0, _window_width, _window_height)];
         [self.view addSubview:self.privacyProtectionVV];
         WEAKSELF
         self.privacyProtectionVV.block_ = ^(NSInteger typ) {
             if(typ == 1) {
+                [LYUserDefault saveIsPrivacyAgreeBoo:YES];
+                [LYUserDefault saveIsFirstStart:YES];
                 weakSelf.privacyProtectionVV.hidden = YES;
                 [weakSelf.privacyProtectionVV removeFromSuperview];
-                [LYUserDefault saveIsFirstStart:YES];
                 weakSelf.isTYBoo = YES;
                 if(weakSelf.isTYBoo) {
                     weakSelf.selImgV.image = [UIImage imageNamed:@"selSelect_img"];
@@ -465,6 +466,9 @@
 - (void)loginBtnMethod
 {
     [self.view endEditing:YES];
+    if (![self ensurePrivacyAgreeOrShowPopup]) {
+        return;
+    }
     if((self.textFF.text.length>0)&&(self.textCodeFF.text.length>0)) {
         if(!self.isTYBoo) {
             [SVProgressHUD showInfoWithStatus:eLocalizedString(@"login_all15")];
@@ -551,6 +555,9 @@
 
 - (void)sigUpBtnMethod
 {
+    if (![self ensurePrivacyAgreeOrShowPopup]) {
+        return;
+    }
     MHRegisterLController *vc = [[MHRegisterLController alloc] init];
     vc.isTYBoo = self.isTYBoo;
     [self.navigationController pushViewController:vc animated:YES];
@@ -618,6 +625,33 @@
     }else {
         self.selImgV.image = [UIImage imageNamed:@"selNor_img"];
     }
+}
+
+/// 每次登录/注册前都检查是否已同意隐私协议，未同意则弹窗拦住，返回 NO
+- (BOOL)ensurePrivacyAgreeOrShowPopup
+{
+    if ([LYUserDefault userDefault].isPrivacyAgreeBoo) {
+        return YES;
+    }
+    if (self.privacyProtectionVV) {
+        self.privacyProtectionVV.hidden = NO;
+        return NO;
+    }
+    self.privacyProtectionVV = [[MHPrivacyProtectionVView alloc] initWithFrame:CGRectMake(0, 0, _window_width, _window_height)];
+    [self.view addSubview:self.privacyProtectionVV];
+    WEAKSELF
+    self.privacyProtectionVV.block_ = ^(NSInteger typ) {
+        if(typ == 1) {
+            [LYUserDefault saveIsPrivacyAgreeBoo:YES];
+            weakSelf.privacyProtectionVV.hidden = YES;
+            [weakSelf.privacyProtectionVV removeFromSuperview];
+            weakSelf.isTYBoo = YES;
+            weakSelf.selImgV.image = [UIImage imageNamed:@"selSelect_img"];
+        }else {
+            weakSelf.privacyProtectionVV.hidden = YES;
+        }
+    };
+    return NO;
 }
 
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange interaction:(UITextItemInteraction)interaction

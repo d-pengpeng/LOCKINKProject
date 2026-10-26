@@ -734,6 +734,15 @@
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"user_isFirstStart"];
 }
 
++ (void)saveIsPrivacyAgreeBoo:(BOOL)isAgree
+{
+    [[NSUserDefaults standardUserDefaults] setBool:isAgree forKey:@"user_isPrivacyAgreeBoo"];
+}
+- (BOOL)isPrivacyAgreeBoo
+{
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"user_isPrivacyAgreeBoo"];
+}
+
 + (void)saveJoinballVoice:(BOOL)isShow
 {
     [[NSUserDefaults standardUserDefaults] setBool:isShow forKey:@"user_joinballVoice"];

@@ -3,10 +3,13 @@
 //  BlueEquipProject
 //
 //  Apple Declared Age Range（Age Assurance）接入封装
-//  iOS 26.0 及以上生效，低版本返回 unavailable
+//  - iOS 26+ 且 Xcode 26 SDK 环境：走完整实现
+//  - 低版本 Xcode（无 DeclaredAgeRange 模块）：走 stub，不做年龄拦截
 //
 
 import UIKit
+
+#if canImport(DeclaredAgeRange)
 import DeclaredAgeRange
 
 @objcMembers
@@ -116,3 +119,32 @@ final class MHAgeAssurance: NSObject {
         defaults.set((lowerBound ?? 0) >= adultAgeGate, forKey: DefaultsKey.isAdult)
     }
 }
+
+#else
+
+// MARK: - Stub（低版本 Xcode 无 DeclaredAgeRange 模块时使用）
+// 所有状态默认"不拦截"，让老用户不受影响；等升级 Xcode 到 26 后自动走上面的完整实现。
+
+@objcMembers
+@objc(MHAgeAssurance)
+final class MHAgeAssurance: NSObject {
+
+    @objc static let adultAgeGate: Int = 18
+
+    @objc static let shared = MHAgeAssurance()
+
+    /// Stub 版本不做年龄拦截，默认视为成年
+    @objc static var isAdultConfirmed: Bool { true }
+
+    @objc static var assuranceStatus: String { "unavailable" }
+
+    /// Stub 版本永远返回 NO，不做拦截
+    @objc static var isAgeRestricted: Bool { false }
+
+    @objc func requestAgeRange(from viewController: UIViewController,
+                               completion: (([String: Any]) -> Void)?) {
+        completion?(["status": "unavailable"])
+    }
+}
+
+#endif

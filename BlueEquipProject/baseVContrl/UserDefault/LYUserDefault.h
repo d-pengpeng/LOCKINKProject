@@ -129,6 +129,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSString *macElec;
 
 @property (nonatomic ,assign) BOOL isFirstStart;
+@property (nonatomic, assign) BOOL isPrivacyAgreeBoo; // 是否已同意隐私协议（用于每次登录/注册前检查）
 @property (nonatomic ,assign) NSInteger isPEmail;
 
 @property (nonatomic, strong) NSArray *countries_Arr;
@@ -231,6 +232,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 + (void)saveIsFirstStart:(BOOL)isShow;
++ (void)saveIsPrivacyAgreeBoo:(BOOL)isAgree;
 
 
 @end
