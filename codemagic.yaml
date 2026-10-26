@@ -24,12 +24,6 @@ workflows:
           grep "sys/socket.h" Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h || echo "⚠️ QCloudSimplePing.h not patched"
           grep "netinet/in.h" Pods/AFNetworking/AFNetworking/AFNetworkReachabilityManager.m || echo "⚠️ AFNetworking not patched"
 
-      - name: Fix pbxproj signing
-        script: |
-          PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
-          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos/d' "$PBXPROJ"
-          echo "Removed SDK-specific SPECIFIER overrides"
-
       - name: Setup code signing
         script: |
           # 说明：Codemagic Settings → iOS code signing 上传的 profile / p12 不会自动放系统目录
