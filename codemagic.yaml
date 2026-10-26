@@ -76,8 +76,17 @@ workflows:
           fi
 
           echo ""
-          echo "=== 钥匙串里的 identities ==="
-          security find-identity -v -p codesigning 2>&1 | head -5
+          echo "=== 钥匙串里的所有 identities ==="
+          security find-identity -v -p codesigning 2>&1
+          echo ""
+          echo "=== 钥匙串里的证书详情 ==="
+          security find-certificate -a -c "Apple Distribution" -Z "$KEYCHAIN_PATH" 2>&1 | head -20
+          security find-certificate -a -c "iOS Distribution" -Z "$KEYCHAIN_PATH" 2>&1 | head -20
+          security find-certificate -a -c "iPhone Distribution" -Z "$KEYCHAIN_PATH" 2>&1 | head -20
+          echo ""
+          echo "=== 钥匙串里所有证书名称 ==="
+          security find-certificate -a "$KEYCHAIN_PATH" -p 2>/dev/null \
+            | openssl x509 -noout -subject 2>/dev/null | sort -u
           echo "=== Provisioning Profiles 目录 ==="
           ls -la "$PP_DIR"
 
