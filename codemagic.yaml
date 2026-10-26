@@ -33,26 +33,14 @@ workflows:
 
       - name: Setup code signing
         script: |
-          # 创建临时 keychain
-          KEYCHAIN_PATH="$HOME/codemagic.keychain"
-          security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security default-keychain -s "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-
-          # 导入证书
-          echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/certificate.p12
-          security import /tmp/certificate.p12 -k "$KEYCHAIN_PATH" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          echo "Certificate imported"
-
-          # 安装 provisioning profiles
+          # Codemagic Settings 里上传的 profile / p12 会自动放到系统 keychain 和 Provisioning Profiles 目录
+          # 这里只负责确保它们可被访问
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PP_DIR"
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PP_DIR/53f48a3c-823f-4e48-8911-ddb17f485846.mobileprovision"
-          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$PP_DIR/f46ef368-3b06-463b-8e9f-8d3acdfa3ace.mobileprovision"
-          echo "Provisioning profiles installed"
-          ls -la "$PP_DIR"
+          echo "=== 已安装的 provisioning profiles ==="
+          ls -la "$PP_DIR" 2>/dev/null || echo "⚠️ $PP_DIR 不存在"
+          echo ""
+          echo "=== 当前钥匙串里的 Distribution identities ==="
+          security find-identity -v -p codesigning 2>&1 | grep -i "distribution\|identity" | head -10
 
       - name: Archive
         script: |
