@@ -45,11 +45,19 @@ workflows:
           # —— 2. 导入 .p12 证书（Settings 上传后环境变量会被自动覆盖为新值）——
           if [ -n "$BUILD_CERTIFICATE_BASE64" ]; then
             echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/certificate.p12
-            security import /tmp/certificate.p12 -k "$KEYCHAIN_PATH" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            IMPORT_OUT=$(security import /tmp/certificate.p12 -k "$KEYCHAIN_PATH" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign 2>&1)
+            IMPORT_RC=$?
+            echo "$IMPORT_OUT"
+            if [ $IMPORT_RC -ne 0 ]; then
+              echo "❌ .p12 导入失败！BUILD_CERTIFICATE_PASSWORD 当前值: [${BUILD_CERTIFICATE_PASSWORD:-(空)}]"
+              echo "❌ 请在 Codemagic Settings → Environment variables → signing 分组里把 BUILD_CERTIFICATE_PASSWORD 设为 131010"
+              exit 1
+            fi
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
             echo "✅ Certificate imported"
           else
-            echo "⚠️ BUILD_CERTIFICATE_BASE64 未设置"
+            echo "❌ BUILD_CERTIFICATE_BASE64 未设置！请在 Codemagic Settings 里上传证书"
+            exit 1
           fi
 
           # —— 3. 安装主 App provisioning profile（从 profile 自身读取 UUID 作文件名）——
