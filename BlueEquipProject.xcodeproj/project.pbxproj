@@ -6188,7 +6188,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -6224,9 +6224,7 @@
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
 				MARKETING_VERSION = 1.6.3;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -6249,7 +6247,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 11;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -6285,9 +6283,7 @@
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
 				MARKETING_VERSION = 1.6.3;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
