@@ -658,13 +658,15 @@
 {
     NSInteger one_num2 = eLocalizedString(@"login_all11").length;
     if(characterRange.location == one_num2) {
+        // 登录页文本顺序：《用户协议》在前 → typeNN=1（标题"用户协议"）+ userAgreementUrl
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
-        vc.typeNN = 0;
+        vc.typeNN = 1;
         vc.guide_id = [LYUserDefault userDefault].userAgreementUrl;
         [self.navigationController pushViewController:vc animated:YES];
     }else {
+        // 《隐私政策》在后 → typeNN=0（标题"隐私政策"）+ privacyPolicyUrl
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
-        vc.typeNN = 1;
+        vc.typeNN = 0;
         vc.guide_id = [LYUserDefault userDefault].privacyPolicyUrl;
         [self.navigationController pushViewController:vc animated:YES];
     }

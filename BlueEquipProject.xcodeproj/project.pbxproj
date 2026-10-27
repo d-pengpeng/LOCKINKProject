@@ -6181,14 +6181,14 @@
 		E88CC66F2AAAEB430019E488 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 13D48463FC6D5F93409FE8A5 /* Pods-BlueEquipProject.debug.xcconfig */;
-				buildSettings = {
-					APS_ENVIRONMENT = development;
-					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-					ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+			buildSettings = {
+				APS_ENVIRONMENT = development;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -6241,14 +6241,14 @@
 		E88CC6702AAAEB430019E488 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D0F6902D909FDAC74A9BE7FF /* Pods-BlueEquipProject.release.xcconfig */;
-				buildSettings = {
-					APS_ENVIRONMENT = production;
-					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			buildSettings = {
+				APS_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

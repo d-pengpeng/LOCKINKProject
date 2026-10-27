@@ -355,12 +355,12 @@
     NSInteger one_num2 = eLocalizedString(@"login_all11").length;
     if(characterRange.location == one_num2) {
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
-        vc.typeNN = 0;
+        vc.typeNN = 1;
         vc.guide_id = [LYUserDefault userDefault].userAgreementUrl;
         [self.navigationController pushViewController:vc animated:YES];
     }else {
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
-        vc.typeNN = 1;
+        vc.typeNN = 0;
         vc.guide_id = [LYUserDefault userDefault].privacyPolicyUrl;
         [self.navigationController pushViewController:vc animated:YES];
     }
