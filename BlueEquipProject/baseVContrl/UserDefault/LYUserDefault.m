@@ -24,6 +24,7 @@
     [[NSUserDefaults standardUserDefaults] setValue:@"" forKey:@"AppToken"];
     [[NSUserDefaults standardUserDefaults] setValue:@"" forKey:@"imUserSig"];
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"isLoginBoo"];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"user_isPrivacyAgreeBoo"];
 }
 
 + (void)saveQCloudDic:(NSDictionary *)cloudDic
