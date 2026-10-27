@@ -113,21 +113,24 @@
     
     UIViewController *selfVC = [[FloatingWindowModel shareInstance] getCurrentViewController];
     if(characterRange.location == one_num2) {
+        // EULA 弹窗文本顺序：《隐私政策》在前、《用户协议》在后
+        // 第一个高亮链接（文本显示《隐私政策》）→ privacyPolicyUrl
         if(self.block_) {
             self.block_(2);
         }
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
-        vc.typeNN = 0;
-        vc.guide_id = [LYUserDefault userDefault].userAgreementUrl;
+        vc.typeNN = 1;
+        vc.guide_id = [LYUserDefault userDefault].privacyPolicyUrl;
         [selfVC.navigationController pushViewController:vc animated:YES];
         
     }else {
+        // 第二个高亮链接（文本显示《用户协议》）→ userAgreementUrl
         if(self.block_) {
             self.block_(3);
         }
         MHAboutSubController *vc = [[MHAboutSubController alloc] init];
-        vc.typeNN = 1;
-        vc.guide_id = [LYUserDefault userDefault].privacyPolicyUrl;
+        vc.typeNN = 0;
+        vc.guide_id = [LYUserDefault userDefault].userAgreementUrl;
         [selfVC.navigationController pushViewController:vc animated:YES];
     }
     return NO;
