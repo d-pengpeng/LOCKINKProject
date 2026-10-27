@@ -151,8 +151,6 @@
     [self.switBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(oneVV2_3.mas_right).offset(-12);
         make.centerY.equalTo(mesgmdrLab.mas_centerY);
-        make.width.offset(43);
-        make.height.offset(26);
     }];
     
     self.switBtn.on = conv.recvOpt==V2TIM_RECEIVE_NOT_NOTIFY_MESSAGE?YES:NO;
@@ -183,8 +181,6 @@
     [self.switBtn2 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(oneVV2_4.mas_right).offset(-12);
         make.centerY.equalTo(oneVV2_4.mas_centerY);
-        make.width.offset(43);
-        make.height.offset(26);
     }];
     [self.switBtn2 setOn:conv.isPinned];
     
@@ -234,8 +230,6 @@
     [self.switBtn3 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.right.equalTo(oneVV2_5.mas_right).offset(-12);
         make.centerY.equalTo(oneVV2_5.mas_centerY);
-        make.width.offset(43);
-        make.height.offset(26);
     }];
     
     [[V2TIMManager sharedInstance] getBlackList:^(NSArray<V2TIMFriendInfo *> *infoList) {
