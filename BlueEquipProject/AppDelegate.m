@@ -10,12 +10,15 @@
 #import "TUILoginCache.h"
 #import <Bugly/Bugly.h>
 #import <QCloudCOSXML/QCloudCOSXMLTransfer.h>
+#import <QuartzCore/QuartzCore.h>
 
 #import <JPUSHService.h>
 #import <UserNotifications/UserNotifications.h>
 #import <UserNotificationsUI/UserNotificationsUI.h>
 #import "AppVersionManager.h"
 #import "MHBehaviorReporter.h"
+
+static CFTimeInterval _appLaunchStart = 0;
 
 @interface AppDelegate ()<QCloudSignatureProvider, QCloudCredentailFenceQueueDelegate, JPUSHRegisterDelegate>
 @property (nonatomic, assign) int IMgin;
@@ -37,6 +40,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    if (_appLaunchStart == 0) _appLaunchStart = CACurrentMediaTime();
     
     [[SwichLanguage shareInstance] setUserlanguage:@""];
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents]; //锁屏情况控制播放
@@ -60,6 +65,9 @@
 
     // 启动行为上报
     [[MHBehaviorReporter shared] start];
+
+    NSTimeInterval launchMs = (CACurrentMediaTime() - _appLaunchStart) * 1000;
+    [[MHBehaviorReporter shared] trackPerf:@"app_launch" costMs:(NSInteger)launchMs ext:nil];
 
     return YES;
 }
@@ -178,6 +186,7 @@
     else {
        // 本地通知
     }
+    [[MHBehaviorReporter shared] trackAction:@"push_click" page:nil ext:@{@"type": @"system"}];
     completionHandler();  // 系统要求执行这个方法
 }
 

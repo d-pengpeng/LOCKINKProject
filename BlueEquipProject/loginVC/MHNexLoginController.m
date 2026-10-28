@@ -6,6 +6,8 @@
 //
 
 #import "MHNexLoginController.h"
+#import "MHBehaviorReporter.h"
+#import "MHloginController.h"
 
 @interface MHNexLoginController ()
 
@@ -244,6 +246,18 @@
 
 - (void)nextBtnmethod
 {
+    [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                            key:@"register_step"
+                                           page:NSStringFromClass([self class])
+                                       fromPage:NSStringFromClass([MHloginController class])
+                                     targetType:nil
+                                       targetId:nil
+                                            ext:@{@"step": @"final_submit"}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
     if(self.oneSt.length > 0) {
         if(self.isRequBoo) {
             return;
@@ -253,9 +267,34 @@
         NSDictionary *dicMM = @{@"contact":self.phoneStr, @"password":self.passworStr, @"code":self.codeStr, @"birthday":self.ymdStr, @"height":self.ymdStr2, @"weight":self.ymdStr3, @"locationId":self.ymdStr4, @"gender":self.oneSt, @"genderPreference":self.oneSt2, @"rolePreference":self.oneSt3, @"channel":@"IOS"};
         [requestToolClass postRegisterLogNetworkWithUrl:request_login_register andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
 
+            [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                                    key:@"register_step"
+                                                   page:NSStringFromClass([self class])
+                                               fromPage:nil
+                                             targetType:nil
+                                               targetId:nil
+                                                    ext:@{@"step": @"register_success"}
+                                                 result:1
+                                               errorCode:nil
+                                              durationMs:nil
+                                                 costMs:nil];
+            [[MHBehaviorReporter shared] flushNow];
+            
             [self loginMethodUIUIU];
         } fail:^(NSString * _Nonnull msg) {
             self.isRequBoo = NO;
+            NSString *msgStr = msg ?: @"";
+            [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                                    key:@"register_step"
+                                                   page:NSStringFromClass([self class])
+                                               fromPage:nil
+                                             targetType:nil
+                                               targetId:nil
+                                                    ext:@{@"step": @"register_fail", @"message": msgStr}
+                                                 result:2
+                                               errorCode:nil
+                                              durationMs:nil
+                                                 costMs:nil];
         }];
     }else {
         [SVProgressHUD showInfoWithStatus:eLocalizedString(@"login_err3")];

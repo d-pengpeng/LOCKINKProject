@@ -8,6 +8,7 @@
 
 #import "LBSenderManager.h"
 #import <UIKit/UIKit.h>
+#import "MHBehaviorReporter.h"
 @interface LBSenderManager ()<CLLocationManagerDelegate>
 @property (nonatomic, strong) CLLocationManager *manager;
 @property (nonatomic, strong) CMMotionManager *motionManager;
@@ -31,6 +32,12 @@
 {
     _manager = [[CLLocationManager alloc]init];
     _manager.delegate = self;
+    CLAuthorizationStatus status = _manager.authorizationStatus;
+    if (status == kCLAuthorizationStatusDenied || status == kCLAuthorizationStatusRestricted) {
+        [[MHBehaviorReporter shared] trackError:@"permission_denied"
+                                           ext:@{@"source": @"location"}];
+    }
+    
     if ([_manager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
         // 申请前后台权限
         [_manager requestAlwaysAuthorization];

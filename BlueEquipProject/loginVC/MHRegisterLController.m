@@ -9,6 +9,7 @@
 #import "MHAboutSubController.h"
 #import "MHloginController.h"
 #import "eSelectCountryCodeView.h"
+#import "MHBehaviorReporter.h"
 
 @interface MHRegisterLController ()<UITextFieldDelegate, UITextViewDelegate>
 {
@@ -403,6 +404,18 @@
 
 - (void)loginBtnMethod
 {
+    [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                            key:@"register_step"
+                                           page:NSStringFromClass([self class])
+                                       fromPage:nil
+                                     targetType:nil
+                                       targetId:nil
+                                            ext:@{@"step": @"verify_code_submit"}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
     if((self.textFF.text.length>0)&&(self.textCodeFF.text.length>0)&&(self.textPasswordFF.text.length>0)&&(self.textPasswordFF2.text.length>0)) {
         
         if(!self.isTYBoo) {
@@ -481,9 +494,13 @@
     }
     NSDictionary *dicdic = @{@"contact":phoneStr, @"type":@"1"};
     [requestToolClass postNetworkWithUrl:request_login_sendVerificationCode andParameter:dicdic success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-        
+        [[MHBehaviorReporter shared] trackAction:@"code_request"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"scene": @"register", @"result": @1}];
     } fail:^(NSString * _Nonnull msg) {
-        
+        [[MHBehaviorReporter shared] trackAction:@"code_request"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"scene": @"register", @"result": @0}];
     }];
    
 }
@@ -576,6 +593,9 @@
     self.textFF.attributedPlaceholder = attrString;
     
     self.isEmilBoo = NO;
+    [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"method": @"phone"}];
 }
 
 - (void)onebtnMethodTwo
@@ -594,6 +614,9 @@
     self.textFF.attributedPlaceholder = attrString;
     
     self.isEmilBoo = YES;
+    [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"method": @"email"}];
 }
 
 - (void)clickLookAction:(UIButton *)btn

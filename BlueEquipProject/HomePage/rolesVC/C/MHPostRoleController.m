@@ -16,6 +16,7 @@
 #import <BRDatePickerView.h>
 #import "MHPostConditionsController.h"
 #import "MHSearchLocationController.h"
+#import "MHBehaviorReporter.h"
 
 @interface MHPostRoleController ()<UITextViewDelegate, LFImagePickerControllerDelegate, CLLocationManagerDelegate, AVAudioPlayerDelegate>
 
@@ -391,6 +392,18 @@
 - (void)pulishImageAction
 {
     [self.view endEditing:YES];
+    [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                            key:@"publish_step"
+                                           page:NSStringFromClass([self class])
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:minIntStr(self.modelM.id)
+                                            ext:@{@"step": @"publish_click"}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
 //    if((self.textV.text.length>0) && ((self.photos.count>0) || (self.pathOne.length>0))) {
     if(self.settingLab2.text.length>0) {
         NSInteger num_ty = 1;
@@ -615,10 +628,33 @@
     }
     [requestToolClass postNetworkWithUrl:request_seekingMasterRecord_post andParameter:dicMMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         
+        [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                                key:@"publish_step"
+                                               page:NSStringFromClass([self class])
+                                           fromPage:nil
+                                         targetType:@"device"
+                                           targetId:minIntStr(self.modelM.id)
+                                                ext:@{@"step": @"publish_success"}
+                                             result:1
+                                           errorCode:nil
+                                          durationMs:nil
+                                             costMs:nil];
+        [[MHBehaviorReporter shared] flushNow];
+        
         [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
         [self.navigationController popViewControllerAnimated:YES];
     } fail:^(NSString * _Nonnull msg) {
-        
+        [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                                key:@"publish_step"
+                                               page:NSStringFromClass([self class])
+                                           fromPage:nil
+                                         targetType:@"device"
+                                           targetId:minIntStr(self.modelM.id)
+                                                ext:@{@"step": @"publish_fail", @"message": msg ?: @""}
+                                             result:2
+                                           errorCode:nil
+                                          durationMs:nil
+                                             costMs:nil];
     }];
 }
 

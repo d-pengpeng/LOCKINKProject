@@ -15,6 +15,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "MHEquipmentModel.h"
 #import "AESCipher.h"
+#import "MHBehaviorReporter.h"
 
 @interface SceneDelegate ()<CBCentralManagerDelegate, CBPeripheralDelegate>
 
@@ -262,6 +263,8 @@
             break;
         case CBManagerStateUnauthorized: {
             strMessage = eLocalizedString(@"toys_all11");
+            [[MHBehaviorReporter shared] trackError:@"permission_denied"
+                                               ext:@{@"source": @"bluetooth"}];
         }
             break;
         default:
@@ -438,6 +441,20 @@
 - (void)centralManager:(CBCentralManager*)central didConnectPeripheral:(CBPeripheral*)peripheral
 {
     NSLog(@"连接成功");
+    NSString *devMac = [FloatingWindowModel shareInstance].macStMMM ?: @"";
+    NSString *devName = [FloatingWindowModel shareInstance].namStMMM ?: @"";
+    [[MHBehaviorReporter shared] trackWithType:MHBTAction
+                                            key:@"device_connect"
+                                           page:nil
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:devMac
+                                            ext:@{@"deviceName": devName}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
     if(self.peripheral && (self.peripheral != nil)) {
         self.peripheral.delegate = self;
         //外围设备开始寻找服务
@@ -456,6 +473,21 @@
 //MARK: 连接失败
 - (void)centralManager:(CBCentralManager*)central didFailToConnectPeripheral:(CBPeripheral*)peripheral error:(nullable NSError*)error
 {
+    NSString *devMac = [FloatingWindowModel shareInstance].macStMMM2 ?: ([FloatingWindowModel shareInstance].macStMMM ?: @"");
+    NSString *errMsg = error.localizedDescription ?: @"";
+    NSString *errCode = [NSString stringWithFormat:@"%ld", (long)error.code];
+    [[MHBehaviorReporter shared] trackWithType:MHBTError
+                                            key:@"device_connect_fail"
+                                           page:nil
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:devMac
+                                            ext:@{@"message": errMsg}
+                                         result:2
+                                       errorCode:errCode
+                                      durationMs:nil
+                                         costMs:nil];
+    
 //    _oneNumLab.text = eLocalizedString(@"home_nam1");
     [[NSNotificationCenter defaultCenter] postNotificationName:@"blueNameStatusNotiffName" object:eLocalizedString(@"home_nam1")];
     
@@ -532,6 +564,19 @@
 //MARK: 断开连接结果
 - (void)centralManager:(CBCentralManager*)central didDisconnectPeripheral:(CBPeripheral*)peripheral error:(nullable NSError*)error
 {
+    NSString *devMac = [FloatingWindowModel shareInstance].macStMMM2 ?: ([FloatingWindowModel shareInstance].macStMMM ?: @"");
+    [[MHBehaviorReporter shared] trackWithType:MHBTAction
+                                            key:@"device_disconnect"
+                                           page:nil
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:devMac
+                                            ext:nil
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
 //    _oneNumLab.text = eLocalizedString(@"home_nam1");
     [[NSNotificationCenter defaultCenter] postNotificationName:@"blueNameStatusNotiffName" object:eLocalizedString(@"home_nam1")];
     
@@ -732,6 +777,18 @@
 - (void)getElectricQuantityMethod
 {
     NSLog(@"发送电池模式--电量");
+    [[MHBehaviorReporter shared] trackWithType:MHBTAction
+                                            key:@"device_cmd"
+                                           page:nil
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:([FloatingWindowModel shareInstance].macStMMM2 ?: @"")
+                                            ext:@{@"cmd": @"battery"}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
     if(self.peripheral && (self.peripheral != nil)) {
         if(self.characteristic && (self.characteristic != nil)) {
  
@@ -808,7 +865,20 @@
 - (void)app_sendCustomNotifNameMMethodUIUI:(NSNotification *)notifff
 {
     NSDictionary *notiDic = notifff.userInfo;
-
+    NSString *motor = minStr(notiDic[@"motor"]);
+    NSString *devMac = [FloatingWindowModel shareInstance].macStMMM2 ?: @"";
+    [[MHBehaviorReporter shared] trackWithType:MHBTAction
+                                            key:@"device_cmd"
+                                           page:nil
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:devMac
+                                            ext:@{@"cmd": motor.length > 0 ? motor : @"unknown"}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
     if([minStr(notiDic[@"motor"]) isEqualToString:@"2"]) {
         
         //电击

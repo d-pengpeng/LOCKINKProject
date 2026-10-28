@@ -7,6 +7,7 @@
 
 #import "MHRedoPasswordController.h"
 #import "eSelectCountryCodeView.h"
+#import "MHBehaviorReporter.h"
 
 @interface MHRedoPasswordController ()<UITextFieldDelegate>
 {
@@ -379,6 +380,9 @@
                 dicMM = @{@"contact":minStr(self.textFF.text), @"code":minStr(self.textCodeFF.text)};
             }
             [requestToolClass postNetworkWithUrl:request_login_changeBinding andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                [[MHBehaviorReporter shared] trackAction:@"account_change"
+                                                    page:NSStringFromClass([self class])
+                                                     ext:@{@"action": @"changeBinding"}];
                 self.isRRRR = NO;
                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
                 [self.navigationController popToRootViewControllerAnimated:YES];
@@ -400,7 +404,9 @@
             NSString *smmmStr = [[LYUserDefault userDefault].emailAuccount stringByReplacingOccurrencesOfString:@" " withString:@""];
             NSDictionary *dicMM = @{@"contact":smmmStr, @"code":minStr(self.textCodeFF.text)};
             [requestToolClass postNetworkWithUrl:request_login_logout andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-                
+                [[MHBehaviorReporter shared] trackAction:@"account_change"
+                                                    page:NSStringFromClass([self class])
+                                                     ext:@{@"action": @"logout"}];
                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
                 [LYUserDefault clearLoginCache];
                 [LYUserDefault saveIsLoginBoo:NO];
@@ -429,6 +435,9 @@
 
             NSDictionary *dicMM = @{@"password":minStr(self.textPasswordFF.text), @"code":minStr(self.textCodeFF.text)};
             [requestToolClass postNetworkWithUrl:request_login_modifyPassword andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                [[MHBehaviorReporter shared] trackAction:@"account_change"
+                                                    page:NSStringFromClass([self class])
+                                                     ext:@{@"action": @"password"}];
                 self.isRRRR = NO;
                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
                 [self.navigationController popViewControllerAnimated:YES];

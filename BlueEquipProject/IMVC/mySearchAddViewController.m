@@ -9,6 +9,7 @@
 #import "myConversationListCell.h"
 //#import "expertRewardView.h"
 #import "searchFriendAddModel.h"
+#import "MHBehaviorReporter.h"
 
 @interface mySearchAddViewController ()<UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, myConversationListCellDelegate, UITextFieldDelegate>
 
@@ -254,6 +255,9 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
+    [[MHBehaviorReporter shared] trackAction:@"search_submit"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"scene": @"user"}];
     [SVProgressHUD show];
     NSString *key_url = [NSString stringWithFormat:@"%@?nickName=%@", request_user_userSearch, textField.text];
     [requestToolClass getNetworkWithUrl:key_url andParameter:@{} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {

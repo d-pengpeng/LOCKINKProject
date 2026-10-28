@@ -9,6 +9,8 @@
 #import <BRPickerView/BRPickerView.h>
 #import <BRPickerView/BRStringPickerView.h>
 #import "MHNexLoginController.h"
+#import "MHRegisterLController.h"
+#import "MHBehaviorReporter.h"
 
 @interface MHloginController ()<UITextFieldDelegate>
 
@@ -232,6 +234,18 @@
 
 - (void)nextBtnmethod
 {
+    [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                            key:@"register_step"
+                                           page:NSStringFromClass([self class])
+                                       fromPage:NSStringFromClass([MHRegisterLController class])
+                                     targetType:nil
+                                       targetId:nil
+                                            ext:@{@"step": @"profile_submit"}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+    
     if((self.ymdLab2.text.length>0)&&((self.ymdLab3.text.length>0))) {
         NSLog(@"%@", self.ymdLab.text);
         MHNexLoginController *vc = [[MHNexLoginController alloc] init];

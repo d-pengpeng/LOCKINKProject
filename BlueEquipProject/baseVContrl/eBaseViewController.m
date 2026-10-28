@@ -7,8 +7,30 @@
 
 #import "eBaseViewController.h"
 //#import "SVProgressHUD.h"
+#import "MHBehaviorReporter.h"
+
+static NSMutableDictionary *_enterTimeMap(void) {
+    static NSMutableDictionary *map = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        map = [NSMutableDictionary dictionary];
+    });
+    return map;
+}
+
+/// 曝光去重：记录每个页面类名最后一次上报时间（5分钟内不重复）
+static NSMutableDictionary *_exposureLastTimeMap(void) {
+    static NSMutableDictionary *map = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        map = [NSMutableDictionary dictionary];
+    });
+    return map;
+}
 
 @interface eBaseViewController ()
+
+@property (nonatomic, assign) BOOL exposureCancelled;
 
 @end
 
@@ -73,6 +95,53 @@
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    NSString *page = NSStringFromClass([self class]);
+    if (page.length > 0) {
+        NSString *key = [NSString stringWithFormat:@"%p", self];
+        _enterTimeMap()[key] = @([[NSDate date] timeIntervalSince1970]);
+        [[MHBehaviorReporter shared] trackPageView:page fromPage:nil];
+        
+        // exposure: 500ms 可见度检测 + 5分钟去重
+        self.exposureCancelled = NO;
+        __weak typeof(self) weakSelf = self;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (!strongSelf || strongSelf.exposureCancelled) return;
+            if (strongSelf.view.window == nil) return; // 页面已不可见
+            NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+            NSNumber *last = _exposureLastTimeMap()[page];
+            if (last && (now - last.doubleValue) < 300) return; // 5分钟内已上报过
+            _exposureLastTimeMap()[page] = @(now);
+            [[MHBehaviorReporter shared] trackWithType:MHBTPage
+                                                    key:@"exposure"
+                                                   page:page
+                                               fromPage:nil
+                                             targetType:nil
+                                               targetId:nil
+                                                    ext:nil
+                                                 result:1
+                                               errorCode:nil
+                                              durationMs:nil
+                                                 costMs:nil];
+        });
+    }
+}
+
+-(void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    self.exposureCancelled = YES;
+    NSString *page = NSStringFromClass([self class]);
+    NSString *key = [NSString stringWithFormat:@"%p", self];
+    NSNumber *enter = _enterTimeMap()[key];
+    if (page.length > 0 && enter) {
+        NSTimeInterval durationMs = MAX(0, ([[NSDate date] timeIntervalSince1970] - enter.doubleValue) * 1000);
+        [[MHBehaviorReporter shared] trackPageLeave:page durationMs:(NSInteger)durationMs];
+        [_enterTimeMap() removeObjectForKey:key];
+    }
 }
 
 -(void)setHideBackBnt:(BOOL)hideBackBnt{

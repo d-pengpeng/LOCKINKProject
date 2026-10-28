@@ -19,6 +19,7 @@
 #import "MHPlaceVCell.h"
 
 #import "MHFourthRoleOneController.h"
+#import "MHBehaviorReporter.h"
 
 
 @interface MHhomeManageController ()<UITableViewDelegate, UITableViewDataSource, SDCycleScrollViewDelegate>
@@ -341,6 +342,15 @@
 //MARK:  轮播图点击
 - (void)cycleScrollView:(SDCycleScrollView *)cycleScrollView didSelectItemAtIndex:(NSInteger)index
 {
+    NSObject *banner = self.cycLisAr.count > index ? self.cycLisAr[index] : nil;
+    NSString *bannerId = @"";
+    if ([banner isKindOfClass:[NSDictionary class]]) {
+        bannerId = [(NSDictionary *)banner objectForKey:@"id"] ?: @"";
+    }
+    [[MHBehaviorReporter shared] trackAction:@"banner_click"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"pos": @(index), @"adId": bannerId ?: @""}];
+
     if (self.cycLisAr.count > index) {
         MHEquipmentModel_linkUrl *model = [MHEquipmentModel_linkUrl mj_objectWithKeyValues:self.cycLisAr[index]];
         if (model.linkUrl && model.linkUrl.length>0) {
@@ -664,10 +674,48 @@
 {
     if([FloatingWindowModel shareInstance].macStMMM2.length > 0) {
         
+        NSString *devMac = [FloatingWindowModel shareInstance].macStMMM2 ?: @"";
+        NSString *devName = [FloatingWindowModel shareInstance].namStMMM ?: @"";
+        [[MHBehaviorReporter shared] trackWithType:MHBTAction
+                                                key:@"add_device_click"
+                                               page:NSStringFromClass([self class])
+                                           fromPage:nil
+                                         targetType:@"device"
+                                           targetId:devMac
+                                                ext:@{@"deviceName": devName}
+                                             result:1
+                                           errorCode:nil
+                                          durationMs:nil
+                                             costMs:nil];
+        [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                                key:@"bind_step"
+                                               page:NSStringFromClass([self class])
+                                           fromPage:nil
+                                         targetType:@"device"
+                                           targetId:devMac
+                                                ext:@{@"step": @"bind_submit"}
+                                             result:1
+                                           errorCode:nil
+                                          durationMs:nil
+                                             costMs:nil];
+        
         NSDictionary *dicWW = @{@"realName":[FloatingWindowModel shareInstance].namStMMM, @"mac":[FloatingWindowModel shareInstance].macStMMM2, @"model":@"", @"remainingCharge":[FloatingWindowModel shareInstance].ElecStr};
         NSLog(@"添加设备1-- %@", dicWW);
         [requestToolClass postNetworkWithUrl:request_device_saveOrUpdate andParameter:dicWW success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
 
+            [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                                    key:@"bind_step"
+                                                   page:NSStringFromClass([self class])
+                                               fromPage:nil
+                                             targetType:@"device"
+                                               targetId:devMac
+                                                    ext:@{@"step": @"bind_success"}
+                                                 result:1
+                                               errorCode:nil
+                                              durationMs:nil
+                                                 costMs:nil];
+            [[MHBehaviorReporter shared] flushNow];
+            
             self.oneNumLab.text = eLocalizedString(@"home_nam3");
             [[NSNotificationCenter defaultCenter] postNotificationName:@"bluuConnectedNotif" object:@{@"status":@"1", @"mac":[FloatingWindowModel shareInstance].macStMMM2}];
             
@@ -675,6 +723,18 @@
             
             [self loadHeadData];
         } fail:^(NSString * _Nonnull msg) {
+            [[MHBehaviorReporter shared] trackWithType:MHBTFlow
+                                                    key:@"bind_step"
+                                                   page:NSStringFromClass([self class])
+                                               fromPage:nil
+                                             targetType:@"device"
+                                               targetId:devMac
+                                                    ext:@{@"step": @"bind_fail", @"message": msg ?: @""}
+                                                 result:2
+                                               errorCode:nil
+                                              durationMs:nil
+                                                 costMs:nil];
+            
             NSArray *arrM = [msg componentsSeparatedByString:@","];
             if(arrM.count == 2) {
                 if([minStr(arrM[0]) isEqualToString:@"60056"]) {//MARK: 第三个设备连接 提示语

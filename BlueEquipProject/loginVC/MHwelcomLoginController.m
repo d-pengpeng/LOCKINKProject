@@ -11,6 +11,7 @@
 #import "MHPrivacyProtectionVView.h"
 #import "MHAboutSubController.h"
 #import "eSelectCountryCodeView.h"
+#import "MHBehaviorReporter.h"
 
 @interface MHwelcomLoginController ()<UITextViewDelegate>
 {
@@ -442,6 +443,9 @@
     self.textFF.attributedPlaceholder = attrString;
     
     self.isEmilBoo = NO;
+    [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"method": @"phone"}];
 }
 
 - (void)onebtnMethodTwo
@@ -460,6 +464,9 @@
     self.textFF.attributedPlaceholder = attrString;
     
     self.isEmilBoo = YES;
+    [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"method": @"email"}];
 }
 
 
@@ -594,9 +601,13 @@
     }
     NSDictionary *dicdic = @{@"contact":phoneStr, @"type":@"2"};
     [requestToolClass postNetworkWithUrl:request_login_sendVerificationCode andParameter:dicdic success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-        
+        [[MHBehaviorReporter shared] trackAction:@"code_request"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"scene": @"login", @"result": @1}];
     } fail:^(NSString * _Nonnull msg) {
-        
+        [[MHBehaviorReporter shared] trackAction:@"code_request"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"scene": @"login", @"result": @0}];
     }];
 }
 

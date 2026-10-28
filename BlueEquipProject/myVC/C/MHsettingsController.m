@@ -18,6 +18,7 @@
 #import "MHRedoPasswordController.h"
 #import "MHToggleAccountController.h"
 #import "MHBlacklistController.h"
+#import "MHBehaviorReporter.h"
 
 @interface MHsettingsController ()
 
@@ -143,6 +144,19 @@
 
 - (void)clicListTagsMethod:(UIButton *)btn
 {
+    NSArray *tagsAr = @[@500, @510, @501, @502, @503, @504, @505, @506, @507, @508, @509];
+    NSArray *namsAr = @[@"my_settings1", @"message_tile5", @"my_settings2", @"my_settings3", @"my_settings4", @"my_settings5", @"my_settings6", @"my_settings7", @"my_settings8", @"my_settings9", @"my_settings10"];
+    NSString *itemName = @"";
+    for (NSUInteger i = 0; i < tagsAr.count; i++) {
+        if ([tagsAr[i] integerValue] == btn.tag) {
+            itemName = eLocalizedString(namsAr[i]);
+            break;
+        }
+    }
+    [[MHBehaviorReporter shared] trackAction:@"setting_click"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"item": itemName ?: @""}];
+
     switch (btn.tag) {
         case 500:
         {

@@ -23,6 +23,7 @@
 #import "MHInviteIMFriendView.h"
 
 #import "TUISystemMessageCellData.h"
+#import "MHBehaviorReporter.h"
 
 @interface c2cChatController ()<TUIChatControllerListener>
 
@@ -205,6 +206,9 @@
     
 //    + (UIImage *)outgoingBubble 气泡 conversationIDList 会话唯一 ID 列表，C2C 单聊组成方式：[NSString stringWithFormat:@"c2c_%@",userID]；群聊组成方式为 [NSString stringWithFormat:@"group_%@",groupID]
     
+    [[MHBehaviorReporter shared] trackAction:@"chat_enter"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"from": @"conversation", @"targetType": @"user"}];
 }
 
 #pragma mark - 反诈提示条

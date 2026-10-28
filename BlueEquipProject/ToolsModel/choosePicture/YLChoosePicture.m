@@ -9,6 +9,7 @@
 #import "YLChoosePicture.h"
 #import <AVFoundation/AVCaptureDevice.h>
 #import <Photos/PHPhotoLibrary.h>
+#import "MHBehaviorReporter.h"
 
 @interface YLChoosePicture ()<UIImagePickerControllerDelegate,UINavigationControllerDelegate>
 {
@@ -59,6 +60,8 @@
         if (status == AVAuthorizationStatusRestricted || status == AVAuthorizationStatusDenied)
         {
             // 无权限
+            [[MHBehaviorReporter shared] trackError:@"permission_denied"
+                                               ext:@{@"source": @"camera", @"scene": @"album"}];
         }else{
             [_selPhotoImgPicker setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
             [selfNav presentViewController:_selPhotoImgPicker animated:YES completion:nil];
@@ -68,6 +71,8 @@
         PHAuthorizationStatus status = [PHPhotoLibrary authorizationStatus];
         if (status == PHAuthorizationStatusRestricted || status == PHAuthorizationStatusDenied) {
             // 无权限
+            [[MHBehaviorReporter shared] trackError:@"permission_denied"
+                                               ext:@{@"source": @"photo_library", @"scene": @"camera"}];
         }else {
             [_selPhotoImgPicker setSourceType:UIImagePickerControllerSourceTypeCamera];
             _selPhotoImgPicker.cameraDevice = UIImagePickerControllerCameraDeviceFront;

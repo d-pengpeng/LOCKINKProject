@@ -7,6 +7,7 @@
 //
 
 #import "TUIMessageController.h"
+#import "MHBehaviorReporter.h"
 #import "TUITextMessageCell.h"
 #import "TUISystemMessageCell.h"
 #import "TUIVoiceMessageCell.h"
@@ -510,6 +511,22 @@ ReceiveReadMsgWithUserID:(NSString *)userId
     } SuccBlock:^{
         @strongify(self);
         [self changeMsg:cellData status:Msg_Status_Succ];
+        NSString *msgType = @"text";
+        if (cellData.innerMessage) {
+            switch (cellData.innerMessage.elemType) {
+                case V2TIM_ELEM_TYPE_TEXT: msgType = @"text"; break;
+                case V2TIM_ELEM_TYPE_IMAGE: msgType = @"image"; break;
+                case V2TIM_ELEM_TYPE_SOUND: msgType = @"voice"; break;
+                case V2TIM_ELEM_TYPE_VIDEO: msgType = @"video"; break;
+                case V2TIM_ELEM_TYPE_CUSTOM: msgType = @"custom"; break;
+                case V2TIM_ELEM_TYPE_MERGER: msgType = @"merger"; break;
+                case V2TIM_ELEM_TYPE_GROUP_TIPS: msgType = @"group_tips"; break;
+                default: msgType = @"other"; break;
+            }
+        }
+        [[MHBehaviorReporter shared] trackAction:@"chat_send"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"msgType": msgType, @"blocked": @NO}];
     } FailBlock:^(int code, NSString *desc) {
         @strongify(self)
         [TUITool makeToastError:code msg:desc];

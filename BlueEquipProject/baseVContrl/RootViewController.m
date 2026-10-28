@@ -16,6 +16,7 @@
 #import "MHSystemMessageController.h"
 #import "MHAgeAssurance.h"
 #import "UIViewController+MHAgeGate.h"
+#import "MHBehaviorReporter.h"
 
 @interface RootViewController ()<V2TIMFriendshipListener, V2TIMConversationListener>
 
@@ -266,6 +267,18 @@
     }
     
     self.tabVVVV.hidden = NO;
+
+    if (self.viewControllers.count > self.selTabbar1 - 1) {
+        UIViewController *nav = self.viewControllers[self.selTabbar1 - 1];
+        UIViewController *root = nil;
+        if ([nav isKindOfClass:[UINavigationController class]]) {
+            root = ((UINavigationController *)nav).topViewController;
+        }
+        NSString *toClass = root ? NSStringFromClass([root class]) : @"";
+        [[MHBehaviorReporter shared] trackAction:@"tab_switch"
+                                            page:nil
+                                             ext:@{@"to": toClass ?: @""}];
+    }
 }
 
 - (void)tabbarHiddenNotifffMethod:(NSNotification *)notiff
