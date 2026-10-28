@@ -339,6 +339,31 @@ static const int kMaxEventExtBytes  = 1024;
 
 #pragma mark - Internal: Enqueue
 
+/// 兜底：找当前顶层 VC，page 为空时自动填充
++ (UIViewController *)_topViewController {
+    UIWindow *window = nil;
+    if (@available(iOS 13.0, *)) {
+        for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+            if ([scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *ws = (UIWindowScene *)scene;
+                for (UIWindow *w in ws.windows) {
+                    if (w.isKeyWindow) { window = w; break; }
+                }
+            }
+        }
+    }
+    if (!window) window = [UIApplication sharedApplication].keyWindow;
+    UIViewController *vc = window.rootViewController;
+    while (vc.presentedViewController) vc = vc.presentedViewController;
+    if ([vc isKindOfClass:[UITabBarController class]]) {
+        vc = ((UITabBarController *)vc).selectedViewController;
+    }
+    if ([vc isKindOfClass:[UINavigationController class]]) {
+        vc = ((UINavigationController *)vc).visibleViewController;
+    }
+    return vc;
+}
+
 - (void)_enqueueEventWithType:(NSString *)type
                           key:(NSString *)key
                          page:(NSString *)page
@@ -351,6 +376,12 @@ static const int kMaxEventExtBytes  = 1024;
                     durationMs:(NSNumber *)durationMs
                        costMs:(NSNumber *)costMs {
     NSMutableDictionary *event = [NSMutableDictionary dictionary];
+    
+    // 兜底：page 为空时自动取当前 topVC
+    if (page.length == 0) {
+        UIViewController *topVC = [MHBehaviorReporter _topViewController];
+        if (topVC) page = NSStringFromClass([topVC class]);
+    }
     
     // 必填
     event[@"eventId"]     = [MHBehaviorReporter uuidString];
