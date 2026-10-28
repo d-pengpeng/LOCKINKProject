@@ -483,6 +483,7 @@
 		E88CCBB02AAB00EE0019E488 /* eSliderNewView.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9052AAB00EC0019E488 /* eSliderNewView.m */; };
 		E88CCBB12AAB00EE0019E488 /* SelVideoSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9062AAB00EC0019E488 /* SelVideoSlider.m */; };
 		E88CCBB22AAB00EE0019E488 /* requestToolClass.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9072AAB00EC0019E488 /* requestToolClass.m */; };
+		6AA0ABE22F324E2BAFAFD2E6 /* MHRealNameManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 917C26FDEFEA4CA6B8BA5399 /* MHRealNameManager.m */; };
 		E88CCBB32AAB00EE0019E488 /* ACShowMediaTypeView.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC90B2AAB00EC0019E488 /* ACShowMediaTypeView.m */; };
 		E88CCBB42AAB00EE0019E488 /* ACMediaFrame.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E88CC90E2AAB00EC0019E488 /* ACMediaFrame.bundle */; };
 		E88CCBB52AAB00EE0019E488 /* UIViewController+ACMediaExt.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9122AAB00EC0019E488 /* UIViewController+ACMediaExt.m */; };
@@ -1736,6 +1737,7 @@
 		E88CC9052AAB00EC0019E488 /* eSliderNewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = eSliderNewView.m; sourceTree = "<group>"; };
 		E88CC9062AAB00EC0019E488 /* SelVideoSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelVideoSlider.m; sourceTree = "<group>"; };
 		E88CC9072AAB00EC0019E488 /* requestToolClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = requestToolClass.m; sourceTree = "<group>"; };
+		917C26FDEFEA4CA6B8BA5399 /* MHRealNameManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MHRealNameManager.m; sourceTree = "<group>"; };
 		E88CC9082AAB00EC0019E488 /* DashLineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DashLineView.h; sourceTree = "<group>"; };
 		E88CC90B2AAB00EC0019E488 /* ACShowMediaTypeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ACShowMediaTypeView.m; sourceTree = "<group>"; };
 		E88CC90C2AAB00EC0019E488 /* ACMediaModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ACMediaModel.h; sourceTree = "<group>"; };
@@ -1967,6 +1969,7 @@
 		E88CCA8B2AAB00ED0019E488 /* AudioSpectrumRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioSpectrumRecorder.h; sourceTree = "<group>"; };
 		E88CCA8C2AAB00ED0019E488 /* DashLineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DashLineView.m; sourceTree = "<group>"; };
 		E88CCA8D2AAB00ED0019E488 /* requestToolClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = requestToolClass.h; sourceTree = "<group>"; };
+		26995977CD7E40FCB67EAA5B /* MHRealNameManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MHRealNameManager.h; sourceTree = "<group>"; };
 		E88CCC712AAB031D0019E488 /* requestUrlRFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = requestUrlRFile.h; sourceTree = "<group>"; };
 		E88CCC722AAB031D0019E488 /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		E88CCC762AAB09A20019E488 /* LFToGIF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFToGIF.h; sourceTree = "<group>"; };
@@ -3797,6 +3800,8 @@
 				E88CCA552AAB00ED0019E488 /* QiNiu */,
 				E88CCA8D2AAB00ED0019E488 /* requestToolClass.h */,
 				E88CC9072AAB00EC0019E488 /* requestToolClass.m */,
+				26995977CD7E40FCB67EAA5B /* MHRealNameManager.h */,
+				917C26FDEFEA4CA6B8BA5399 /* MHRealNameManager.m */,
 				E88CCA782AAB00ED0019E488 /* SGActionView */,
 				E88CCA772AAB00ED0019E488 /* SwichLanguage.h */,
 				E88CC8E82AAB00EC0019E488 /* SwichLanguage.m */,
@@ -5431,6 +5436,7 @@
 				E8378F7D2AECB343008D67F0 /* TUIGroupConversationListViewDataProvider.m in Sources */,
 				E8378F802AECB343008D67F0 /* TUIContactActionCellData.m in Sources */,
 				E88CCBB22AAB00EE0019E488 /* requestToolClass.m in Sources */,
+				6AA0ABE22F324E2BAFAFD2E6 /* MHRealNameManager.m in Sources */,
 				E8378F682AECB342008D67F0 /* GenerateTestUserSig.m in Sources */,
 				E8378EDA2AECB342008D67F0 /* EMVoiceConverter.mm in Sources */,
 				E8378F822AECB343008D67F0 /* TUICommonPendencyCellData.m in Sources */,

@@ -177,6 +177,11 @@
 //聊天门卫：发送消息前校验是否放行
 #define request_im_beforeSendCheck @"im/beforeSendCheck"
 
+//实名认证
+#define request_realname_status    @"realname/status"
+#define request_realname_submit    @"realname/submit"
+#define request_realname_prompt    @"realname/prompt"
+
 
 //七牛
 #define request_Member_getQiniuToken @"api/Member/getQiniuToken"

@@ -30,6 +30,7 @@
 #import "TUICore.h"
 #import "TUIDefine.h"
 #import "NSDictionary+TUISafe.h"
+#import "../../../../MHRealNameManager.h"
 
 @interface TUIBaseChatViewController () <TUIMessageControllerDelegate, TInputControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, UINavigationControllerDelegate, TUIMessageMultiChooseViewDelegate, TUIChatDataProviderForwardDelegate, TUICameraViewControllerDelegate, TUINotificationProtocol>
 @property (nonatomic, strong) TUIMessageMultiChooseView *multiChooseView;
@@ -119,6 +120,7 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     self.responseKeyboard = YES;
+    [self mh_checkRealnameOnEnterChat];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -1213,6 +1215,147 @@ constructingBodyWithBlock:^(id<AFMultipartFormData> _Nonnull formData) {
     if(![fileManager fileExistsAtPath:TUIKit_DB_Path]){
         [fileManager createDirectoryAtPath:TUIKit_DB_Path withIntermediateDirectories:YES attributes:nil error:nil];
     }
+}
+
+#pragma mark - 进入 IM 前的实名认证检查
+
+- (void)mh_checkRealnameOnEnterChat {
+    MHRealNameStatus cached = [[MHRealNameManager shared] cachedStatus];
+    if (cached == MHRealNameStatusApproved) return;
+
+    @weakify(self);
+    [[MHRealNameManager shared] fetchStatus:^(BOOL required, MHRealNameStatus status, MHRealNameInfo * _Nullable info, NSError * _Nullable error) {
+        @strongify(self);
+        if (!self) return;
+        if (!required) return; // 后台开关关闭，或非中国大陆用户
+        if (status == MHRealNameStatusApproved) return; // 已实名
+        if (error) return; // 网络问题，不阻止进入
+
+        // 未通过实名，弹覆盖层
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self mh_showRealnameOverlayWithInfo:info];
+        });
+    }];
+}
+
+- (void)mh_showRealnameOverlayWithInfo:(MHRealNameInfo *)info {
+    UIView *existing = [self.view viewWithTag:90001];
+    if (existing) return;
+
+    UIView *mask = [[UIView alloc] initWithFrame:self.view.bounds];
+    mask.tag = 90001;
+    mask.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.45];
+    mask.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [self.view addSubview:mask];
+
+    // 弹窗卡片
+    CGFloat cardW = 290;
+    CGFloat cardH = 180;
+    UIView *card = [[UIView alloc] init];
+    card.backgroundColor = UIColor.whiteColor;
+    card.layer.cornerRadius = 12;
+    card.clipsToBounds = YES;
+    card.translatesAutoresizingMaskIntoConstraints = NO;
+    [mask addSubview:card];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [card.centerXAnchor constraintEqualToAnchor:mask.centerXAnchor],
+        [card.centerYAnchor constraintEqualToAnchor:mask.centerYAnchor],
+        [card.widthAnchor constraintEqualToConstant:cardW],
+        [card.heightAnchor constraintEqualToConstant:cardH],
+    ]];
+
+    // 标题 / 提示文案（先占位，接口回来再填）
+    UILabel *msgLabel = [[UILabel alloc] init];
+    msgLabel.numberOfLines = 0;
+    msgLabel.textAlignment = NSTextAlignmentCenter;
+    msgLabel.font = [UIFont systemFontOfSize:14];
+    msgLabel.textColor = [UIColor colorWithRed:0.2 green:0.2 blue:0.2 alpha:1];
+    msgLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [card addSubview:msgLabel];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [msgLabel.topAnchor constraintEqualToAnchor:card.topAnchor constant:18],
+        [msgLabel.leftAnchor constraintEqualToAnchor:card.leftAnchor constant:16],
+        [msgLabel.rightAnchor constraintEqualToAnchor:card.rightAnchor constant:-16],
+    ]];
+
+    // 从接口取 prompt 文案
+    __weak UIView *weakMask = mask;
+    __weak UILabel *weakLabel = msgLabel;
+    [[MHRealNameManager shared] fetchPrompt:^(NSString * _Nullable text, NSError * _Nullable error) {
+        if (text.length > 0) {
+            weakLabel.text = text;
+        } else {
+            weakLabel.text = @"根据监管要求，使用聊天功能前需完成实名认证\nReal-name verification is required before chatting.";
+        }
+    }];
+
+    // 底部按钮：关闭 / 去认证
+    UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+    [closeBtn setTitle:@"关闭" forState:UIControlStateNormal];
+    closeBtn.titleLabel.font = [UIFont systemFontOfSize:15];
+    closeBtn.translatesAutoresizingMaskIntoConstraints = NO;
+    [closeBtn addTarget:self action:@selector(mh_realnameCloseBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+    [card addSubview:closeBtn];
+
+    UIButton *goBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+    [goBtn setTitle:@"去认证" forState:UIControlStateNormal];
+    goBtn.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+    [goBtn setTitleColor:[UIColor systemBlueColor] forState:UIControlStateNormal];
+    goBtn.translatesAutoresizingMaskIntoConstraints = NO;
+    [goBtn addTarget:self action:@selector(mh_realnameGoBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+    [card addSubview:goBtn];
+
+    UIView *sep = [[UIView alloc] init];
+    sep.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1];
+    sep.translatesAutoresizingMaskIntoConstraints = NO;
+    [card addSubview:sep];
+
+    [NSLayoutConstraint activateConstraints:@[
+        [sep.bottomAnchor constraintEqualToAnchor:card.bottomAnchor constant:-50],
+        [sep.leftAnchor constraintEqualToAnchor:card.leftAnchor],
+        [sep.rightAnchor constraintEqualToAnchor:card.rightAnchor],
+        [sep.heightAnchor constraintEqualToConstant:0.5],
+
+        [closeBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
+        [closeBtn.leftAnchor constraintEqualToAnchor:card.leftAnchor],
+        [closeBtn.heightAnchor constraintEqualToConstant:50],
+        [closeBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
+
+        [goBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
+        [goBtn.rightAnchor constraintEqualToAnchor:card.rightAnchor],
+        [goBtn.heightAnchor constraintEqualToConstant:50],
+        [goBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
+    ]];
+
+    // 记录一下 mask 引用，去认证成功后可以移除
+    mask.layer.name = @"mh_realname_mask";
+}
+
+- (void)mh_realnameCloseBtnClick:(UIButton *)sender {
+    UIView *mask = [self.view viewWithTag:90001];
+    [mask removeFromSuperview];
+}
+
+- (void)mh_realnameGoBtnClick:(UIButton *)sender {
+    // 移除遮罩（等 verify VC 返回后再检查是否需要重新弹）
+    UIView *mask = [self.view viewWithTag:90001];
+    [mask removeFromSuperview];
+
+    Class cls = NSClassFromString(@"MHRealNameVerifyViewController");
+    if (!cls) {
+        // 未实现实名表单 VC，临时兜底：只提示
+        UIAlertController *ac = [UIAlertController alertControllerWithTitle:nil
+                                                                      message:@"实名认证页面即将上线"
+                                                               preferredStyle:UIAlertControllerStyleAlert];
+        [ac addAction:[UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:ac animated:YES completion:nil];
+        return;
+    }
+    UIViewController *vc = [[cls alloc] init];
+    vc.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 @end
