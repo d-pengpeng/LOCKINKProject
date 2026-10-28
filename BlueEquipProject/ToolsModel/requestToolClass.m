@@ -9,6 +9,7 @@
 #import "requestToolClass.h"
 #import <AFNetworking.h>
 #import <QCloudCOSXML/QCloudCOSXMLTransfer.h>
+#import "MHBehaviorReporter.h"
 
 static CGFloat const TIMEOUT = 60.f;
 @implementation requestToolClass
@@ -71,9 +72,11 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *pDic = parameter;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
@@ -81,6 +84,9 @@ static requestToolClass* kSingleObject = nil;
         
         [SVProgressHUD dismiss];
         if (jsonError) {
+            NSString *extUrl86 = url ?: @"";
+            NSDictionary *extDic86 = @{@"url": extUrl86, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic86];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -93,6 +99,15 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
                 NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl99 = url ?: @"";
+                NSString *perfCode99 = number ?: @"";
+                NSDictionary *perfDic99 = @{@"url": perfUrl99, @"code": perfCode99};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic99];
+                NSString *errUrl100 = url ?: @"";
+                NSString *errCode100 = number ?: @"";
+                NSString *errMsg100 = strMessage ?: @"";
+                NSDictionary *errDic100 = @{@"url": errUrl100, @"code": errCode100, @"message": errMsg100};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic100];
                 if ([number intValue] == 403) {
 
                     [LYUserDefault clearLoginCache];
@@ -123,7 +138,12 @@ static requestToolClass* kSingleObject = nil;
         NSData *data = error.userInfo[@"com.alamofire.serialization.response.error.data"] ;
         NSString *errorStr = [[ NSString alloc ] initWithData:data encoding:NSUTF8StringEncoding];
         NSLog(@"[HTTP ERROR] %@ → %@ | detail: %@", requestUrl, error.localizedDescription, errorStr);
-        failBlock(@"失败");
+        // api_error 上报（网络层失败）
+        [[MHBehaviorReporter shared] trackError:@"api_error"
+                                            ext:@{@"url": url ?: @"",
+                                                   @"code": @(error.code),
+                                                   @"message": error.localizedDescription ?: @""}];
+        failBlock(error.localizedDescription ?: @"失败");
     }];
 }
 
@@ -155,9 +175,11 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *pDic = parameter;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
@@ -165,6 +187,9 @@ static requestToolClass* kSingleObject = nil;
         
         [SVProgressHUD dismiss];
         if (jsonError) {
+            NSString *extUrl180 = url ?: @"";
+            NSDictionary *extDic180 = @{@"url": extUrl180, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic180];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -177,6 +202,15 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
                 NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl193 = url ?: @"";
+                NSString *perfCode193 = number ?: @"";
+                NSDictionary *perfDic193 = @{@"url": perfUrl193, @"code": perfCode193};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic193];
+                NSString *errUrl194 = url ?: @"";
+                NSString *errCode194 = number ?: @"";
+                NSString *errMsg194 = strMessage ?: @"";
+                NSDictionary *errDic194 = @{@"url": errUrl194, @"code": errCode194, @"message": errMsg194};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic194];
                 if ([number intValue] == 403) {
 
                     [LYUserDefault clearLoginCache];
@@ -346,6 +380,7 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *headersDic = @{@"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST multipart] %@\n[headers] %@\n[voiceDataSize] %lu\n[params] %@", requestUrl, headersDic, (unsigned long)dataVoice.length, parameter ?: @{});
 
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session POST:requestUrl parameters:parameter headers:headersDic constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
 
         //上传文件参数
@@ -354,12 +389,16 @@ static requestToolClass* kSingleObject = nil;
     } progress:^(NSProgress * _Nonnull uploadProgress) {
 
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
         NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
 
         [SVProgressHUD dismiss];
         if (jsonError) {
+            NSString *extUrl380 = url ?: @"";
+            NSDictionary *extDic380 = @{@"url": extUrl380, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic380];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -372,6 +411,15 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
                 NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl393 = url ?: @"";
+                NSString *perfCode393 = number ?: @"";
+                NSDictionary *perfDic393 = @{@"url": perfUrl393, @"code": perfCode393};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic393];
+                NSString *errUrl394 = url ?: @"";
+                NSString *errCode394 = number ?: @"";
+                NSString *errMsg394 = strMessage ?: @"";
+                NSDictionary *errDic394 = @{@"url": errUrl394, @"code": errCode394, @"message": errMsg394};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic394];
                 [SVProgressHUD showErrorWithStatus:strMessage];
                 failBlock(@"失败");
             }
@@ -414,15 +462,20 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
         NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         
         if (jsonError) {
+            NSString *extUrl448 = url ?: @"";
+            NSDictionary *extDic448 = @{@"url": extUrl448, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic448];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -435,6 +488,15 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
                 NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl461 = url ?: @"";
+                NSString *perfCode461 = number ?: @"";
+                NSDictionary *perfDic461 = @{@"url": perfUrl461, @"code": perfCode461};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic461];
+                NSString *errUrl462 = url ?: @"";
+                NSString *errCode462 = number ?: @"";
+                NSString *errMsg462 = strMessage ?: @"";
+                NSDictionary *errDic462 = @{@"url": errUrl462, @"code": errCode462, @"message": errMsg462};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic462];
                 if ([number intValue] == 403) {
 
                     [LYUserDefault clearLoginCache];
@@ -486,15 +548,20 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
         NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
 
         if (jsonError) {
+            NSString *extUrl525 = url ?: @"";
+            NSDictionary *extDic525 = @{@"url": extUrl525, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic525];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -507,6 +574,15 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
                 NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl538 = url ?: @"";
+                NSString *perfCode538 = number ?: @"";
+                NSDictionary *perfDic538 = @{@"url": perfUrl538, @"code": perfCode538};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic538];
+                NSString *errUrl539 = url ?: @"";
+                NSString *errCode539 = number ?: @"";
+                NSString *errMsg539 = strMessage ?: @"";
+                NSDictionary *errDic539 = @{@"url": errUrl539, @"code": errCode539, @"message": errMsg539};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic539];
                 if ([number intValue] == 403) {
                     [LYUserDefault clearLoginCache];
 //                    [HistoryRecordModel deletAllDataPlist];
@@ -556,14 +632,19 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
         NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         [SVProgressHUD dismiss];
         if (jsonError) {
+            NSString *extUrl599 = url ?: @"";
+            NSDictionary *extDic599 = @{@"url": extUrl599, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic599];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -576,6 +657,16 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
              
+                NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl613 = url ?: @"";
+                NSString *perfCode613 = number ?: @"";
+                NSDictionary *perfDic613 = @{@"url": perfUrl613, @"code": perfCode613};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic613];
+                NSString *errUrl614 = url ?: @"";
+                NSString *errCode614 = number ?: @"";
+                NSString *errMsg614 = strMessage ?: @"";
+                NSDictionary *errDic614 = @{@"url": errUrl614, @"code": errCode614, @"message": errMsg614};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic614];
                 failBlock(@"失败1");
             }
         }
@@ -612,15 +703,20 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *pDic = parameter;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ? pDic : @{});
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
         NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         
         [SVProgressHUD dismiss];
         if (jsonError) {
+            NSString *extUrl662 = url ?: @"";
+            NSDictionary *extDic662 = @{@"url": extUrl662, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic662];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -633,6 +729,15 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
                 NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl675 = url ?: @"";
+                NSString *perfCode675 = number ?: @"";
+                NSDictionary *perfDic675 = @{@"url": perfUrl675, @"code": perfCode675};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic675];
+                NSString *errUrl676 = url ?: @"";
+                NSString *errCode676 = number ?: @"";
+                NSString *errMsg676 = strMessage ?: @"";
+                NSDictionary *errDic676 = @{@"url": errUrl676, @"code": errCode676, @"message": errMsg676};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic676];
                 if ([number intValue] == 403) {
                     [LYUserDefault clearLoginCache];
 //                    [HistoryRecordModel deletAllDataPlist];
@@ -688,9 +793,11 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic);
     
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
         
@@ -703,6 +810,9 @@ static requestToolClass* kSingleObject = nil;
         }
         
         if (jsonError) {
+            NSString *extUrl749 = url ?: @"";
+            NSDictionary *extDic749 = @{@"url": extUrl749, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic749];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -715,6 +825,15 @@ static requestToolClass* kSingleObject = nil;
 
             }else{
                 NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl762 = url ?: @"";
+                NSString *perfCode762 = number ?: @"";
+                NSDictionary *perfDic762 = @{@"url": perfUrl762, @"code": perfCode762};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic762];
+                NSString *errUrl763 = url ?: @"";
+                NSString *errCode763 = number ?: @"";
+                NSString *errMsg763 = strMessage ?: @"";
+                NSDictionary *errDic763 = @{@"url": errUrl763, @"code": errCode763, @"message": errMsg763};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic763];
                 if ([number intValue] == 403) {
                     [LYUserDefault clearLoginCache];
 //                    [HistoryRecordModel deletAllDataPlist];
@@ -776,14 +895,19 @@ static requestToolClass* kSingleObject = nil;
     NSDictionary *pDic = parameter;
     NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
+    NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSTimeInterval costMs = ([[NSDate date] timeIntervalSince1970] - reqStart) * 1000;
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
         NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         [SVProgressHUD dismiss];
         if (jsonError) {
+            NSString *extUrl835 = url ?: @"";
+            NSDictionary *extDic835 = @{@"url": extUrl835, @"code": @(-1), @"message": @"JSON parse error"};
+            [[MHBehaviorReporter shared] trackError:@"api_error" ext:extDic835];
             failBlock(@"失败");
         }else {
             NSString *number = [NSString stringWithFormat:@"%@", resultDict[@"code"]];
@@ -795,6 +919,16 @@ static requestToolClass* kSingleObject = nil;
                 successBlock(code, datainfo,strMessage);
 
             }else{
+                NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                NSString *perfUrl848 = url ?: @"";
+                NSString *perfCode848 = number ?: @"";
+                NSDictionary *perfDic848 = @{@"url": perfUrl848, @"code": perfCode848};
+                [[MHBehaviorReporter shared] trackPerf:@"api_perf" costMs:(NSInteger)costMs ext:perfDic848];
+                NSString *errUrl849 = url ?: @"";
+                NSString *errCode849 = number ?: @"";
+                NSString *errMsg849 = strMessage ?: @"";
+                NSDictionary *errDic849 = @{@"url": errUrl849, @"code": errCode849, @"message": errMsg849};
+                [[MHBehaviorReporter shared] trackError:@"api_error" ext:errDic849];
                 failBlock(@"失败1");
             }
         }

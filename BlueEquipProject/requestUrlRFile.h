@@ -182,6 +182,9 @@
 #define request_realname_submit    @"realname/submit"
 #define request_realname_prompt    @"realname/prompt"
 
+//用户行为上报
+#define request_behavior_report    @"behavior/report"
+
 
 //七牛
 #define request_Member_getQiniuToken @"api/Member/getQiniuToken"

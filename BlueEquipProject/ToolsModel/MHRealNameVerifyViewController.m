@@ -11,6 +11,7 @@
 #import "MHRealNameVerifyViewController.h"
 #import "MHRealNameManager.h"
 #import "requestToolClass.h"
+#import "MHBehaviorReporter.h"
 #import "requestUrlRFile.h"
 #import "LYUserDefault.h"
 #import "SVProgressHUD.h"
@@ -609,6 +610,14 @@
                 return;
             }
             [SVProgressHUD showSuccessWithStatus:@"提交成功"];
+            
+            // realname_submit 行为上报
+            [[MHBehaviorReporter shared] trackAction:@"realname_submit"
+                                                page:NSStringFromClass([self class])
+                                                 ext:@{@"result": success ? @1 : @0,
+                                                       @"status": @(status)}];
+            [[MHBehaviorReporter shared] flushNow];
+            
             strongSelf.currentStatus = status;
             [strongSelf loadRealnameStatus];
 

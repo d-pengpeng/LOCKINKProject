@@ -6,6 +6,7 @@
 //
 
 #import "LYUserDefault.h"
+#import "MHBehaviorReporter.h"
 
 @implementation LYUserDefault
 
@@ -303,6 +304,17 @@
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"userId"]) forKey:@"user_id"];
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"token"]) forKey:@"AppToken"];
     [[NSUserDefaults standardUserDefaults] synchronize];
+
+    // login_success 行为上报（登录/注册成功拿到 token 后立即上报，必须带 token）
+    NSString *token = minStr(dicT[@"token"]);
+    [[MHBehaviorReporter shared] trackAction:@"login_success"
+                                        page:nil
+                                         ext:@{
+        @"method": [dicT[@"bindingMethod"] isKindOfClass:[NSString class]] ? dicT[@"bindingMethod"] : @"code",
+        @"isNewUser": @([dicT[@"isNewUser"] boolValue]),
+        @"token": token ?: @""
+    }];
+    [[MHBehaviorReporter shared] flushNow];  // 立即 flush，确保登录事件能尽快上送
 }
 
 + (void)saveUserDefault:(NSDictionary *)dicT

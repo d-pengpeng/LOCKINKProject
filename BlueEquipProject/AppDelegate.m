@@ -15,6 +15,7 @@
 #import <UserNotifications/UserNotifications.h>
 #import <UserNotificationsUI/UserNotificationsUI.h>
 #import "AppVersionManager.h"
+#import "MHBehaviorReporter.h"
 
 @interface AppDelegate ()<QCloudSignatureProvider, QCloudCredentailFenceQueueDelegate, JPUSHRegisterDelegate>
 @property (nonatomic, assign) int IMgin;
@@ -56,6 +57,9 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [AppVersionManager silentCheckAppStoreVersionWithAppId:@"6615071633"];
     });
+
+    // 启动行为上报
+    [[MHBehaviorReporter shared] start];
 
     return YES;
 }
@@ -248,6 +252,14 @@
     } fail:^(NSString * _Nonnull msg) {
         
     }];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    [[MHBehaviorReporter shared] markAppForeground];
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    [[MHBehaviorReporter shared] markAppBackground];
 }
 
 - (void)isLoginOutIMIMisLoginOutIMIM
