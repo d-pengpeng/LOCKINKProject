@@ -100,7 +100,7 @@
         if (data[@"status"]) st = [data[@"status"] integerValue];
         !completion ?: completion(YES, st, msg, nil);
     } fail:^(NSString * _Nonnull errorStr) {
-        !completion ?: completion(NO, MHRealNameStatusUnknown, nil, [NSError errorWithDomain:@"MHRealName" code:-1 userInfo:@{NSLocalizedDescriptionKey: errorStr ?: @""}]);
+        !completion ?: completion(NO, MHRealNameStatusUnknown, errorStr, [NSError errorWithDomain:@"MHRealName" code:-1 userInfo:@{NSLocalizedDescriptionKey: errorStr ?: @"提交失败"}]);
     }];
 }
 

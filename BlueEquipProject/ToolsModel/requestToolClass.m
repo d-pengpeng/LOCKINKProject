@@ -69,17 +69,15 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
+    [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
-        
-//        NSData *strData = responseObject;
-//        NSString *resultDict =  [[NSString alloc]initWithData:strData encoding:NSUTF8StringEncoding];
-        
-//        NSLog(@"-结果-%@", resultDict);
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         
         [SVProgressHUD dismiss];
         if (jsonError) {
@@ -104,16 +102,16 @@ static requestToolClass* kSingleObject = nil;
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"LogoutImNotifFF" object:nil];
 //                    [SVProgressHUD showErrorWithStatus:eLocalizedString(@"please_login")];
                     [SVProgressHUD showErrorWithStatus:strMessage];
-                    failBlock(@"登陆已失效");
+                    failBlock(strMessage.length > 0 ? strMessage : @"登陆已失效");
                 }else if ([number intValue] == 500) {
-                    failBlock(strMessage);
+                    failBlock(strMessage.length > 0 ? strMessage : @"服务器错误");
                 }else if ([number intValue] == 50008) {
-                    failBlock(@"50008");
+                    failBlock(strMessage.length > 0 ? strMessage : @"50008");
                 }else if ([number intValue] == 60056) {
-                    failBlock([NSString stringWithFormat:@"60056,%@", strMessage]);
+                    failBlock([NSString stringWithFormat:@"60056,%@", strMessage.length > 0 ? strMessage : @""]);
                 }else {
                     [SVProgressHUD showErrorWithStatus:strMessage];
-                    failBlock(@"失败");
+                    failBlock(strMessage.length > 0 ? strMessage : @"失败");
                 }
             }
         }
@@ -124,7 +122,7 @@ static requestToolClass* kSingleObject = nil;
         
         NSData *data = error.userInfo[@"com.alamofire.serialization.response.error.data"] ;
         NSString *errorStr = [[ NSString alloc ] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"-报错-%@", errorStr);
+        NSLog(@"[HTTP ERROR] %@ → %@ | detail: %@", requestUrl, error.localizedDescription, errorStr);
         failBlock(@"失败");
     }];
 }
@@ -155,14 +153,15 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
+    [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
-        
-//        NSLog(@"-结果-%@", resultDict);
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         
         [SVProgressHUD dismiss];
         if (jsonError) {
@@ -198,13 +197,14 @@ static requestToolClass* kSingleObject = nil;
         
         NSData *data = error.userInfo[@"com.alamofire.serialization.response.error.data"] ;
         NSString *errorStr = [[ NSString alloc ] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"-报错-%@", errorStr);
+        NSLog(@"[HTTP ERROR] %@ → %@ | detail: %@", requestUrl, error.localizedDescription, errorStr);
         failBlock(@"失败");
     }];
 }
 
 + (void)postNetworkHeadImageWithUrl:(NSString *)url typMehtod:(NSInteger)typeM andImageData:(NSArray *)parameter success:(networkSuccessBlock)successBlock fail:(networkFailBlock)failBlock
 {
+    NSLog(@"\n[COS UPLOAD] bucket=cos-lockink-1324404581 count=%ld typeM=%ld", (long)parameter.count, (long)typeM);
     NSMutableArray *arrList = [NSMutableArray array];
     for (int i=0; i<parameter.count; i++) {
         
@@ -231,6 +231,7 @@ static requestToolClass* kSingleObject = nil;
         // 需要上传的对象内容。可以传入NSData*或者NSURL*类型的变量
     //    put.body = [@"My Example Content" dataUsingEncoding:NSUTF8StringEncoding];
         put.body = parameter[i];
+        NSLog(@"[COS UPLOAD] → object=%@ dataSize=%lu", put.object, (unsigned long)[parameter[i] length]);
         // 监听上传进度
         [put setSendProcessBlock:^(int64_t bytesSent, int64_t totalBytesSent, int64_t totalBytesExpectedToSend) {
             // bytesSent                   新增字节数
@@ -240,9 +241,14 @@ static requestToolClass* kSingleObject = nil;
 
         // 监听上传结果
         [put setFinishBlock:^(QCloudUploadObjectResult *result, NSError *error) {
-            // 在上传结果 result.location 中获取上传文件的下载链接
-            NSString * fileUrl = result.location;
-            [arrList addObject:fileUrl];
+            if (error) {
+                NSLog(@"[COS ERROR] object=%@ → %@", put.object, error.localizedDescription);
+            } else {
+                // 在上传结果 result.location 中获取上传文件的下载链接
+                NSString * fileUrl = result.location;
+                NSLog(@"[COS RESP] object=%@ → %@", put.object, fileUrl);
+                [arrList addObject:fileUrl];
+            }
             if(arrList.count == parameter.count) {
                 successBlock(200, arrList, @"");
             }
@@ -337,8 +343,10 @@ static requestToolClass* kSingleObject = nil;
     session.responseSerializer = [AFHTTPResponseSerializer serializer];
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    NSDictionary *headersDic = @{@"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP POST multipart] %@\n[headers] %@\n[voiceDataSize] %lu\n[params] %@", requestUrl, headersDic, (unsigned long)dataVoice.length, parameter ?: @{});
 
-    [session POST:requestUrl parameters:parameter headers:@{@"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+    [session POST:requestUrl parameters:parameter headers:headersDic constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
 
         //上传文件参数
         [formData appendPartWithFileData:dataVoice name:@"file" fileName: [NSString stringWithFormat:@"%@.m4a", @"voiceName"] mimeType:@"amr/mp3/wmr/m4a"];
@@ -348,6 +356,7 @@ static requestToolClass* kSingleObject = nil;
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
 
         [SVProgressHUD dismiss];
         if (jsonError) {
@@ -368,6 +377,7 @@ static requestToolClass* kSingleObject = nil;
             }
         }
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        NSLog(@"[HTTP ERROR] %@ → %@", requestUrl, error.localizedDescription);
         [SVProgressHUD showErrorWithStatus:@"Error 500"];
         failBlock(@"500");
     }];
@@ -401,14 +411,16 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
+    [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
-        NSLog(@"-结果-%@", resultDict);
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         
         if (jsonError) {
             failBlock(@"失败");
@@ -444,7 +456,7 @@ static requestToolClass* kSingleObject = nil;
         
         NSData *data = error.userInfo[@"com.alamofire.serialization.response.error.data"] ;
         NSString *errorStr = [[ NSString alloc ] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"-报错-%@", errorStr);
+        NSLog(@"[HTTP ERROR] %@ → %@ | detail: %@", requestUrl, error.localizedDescription, errorStr);
         failBlock(@"失败");
     }];
 }
@@ -471,13 +483,16 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
-    [session POST:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull uploadProgress) {
+    [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
 
         if (jsonError) {
             failBlock(@"失败");
@@ -511,7 +526,7 @@ static requestToolClass* kSingleObject = nil;
         
         NSData *data = error.userInfo[@"com.alamofire.serialization.response.error.data"] ;
         NSString *errorStr = [[ NSString alloc ] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"-报错-%@", errorStr);
+        NSLog(@"[HTTP ERROR] %@ → %@ | detail: %@", requestUrl, error.localizedDescription, errorStr);
         failBlock(@"失败");
     }];
 }
@@ -538,12 +553,15 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
-    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull downloadProgress) {
+    [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         [SVProgressHUD dismiss];
         if (jsonError) {
             failBlock(@"失败");
@@ -562,6 +580,7 @@ static requestToolClass* kSingleObject = nil;
             }
         }
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        NSLog(@"[HTTP ERROR] %@ → %@", requestUrl, error.localizedDescription);
         [SVProgressHUD dismiss];
      
         failBlock(@"失败1");
@@ -598,11 +617,7 @@ static requestToolClass* kSingleObject = nil;
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
-        
-//        NSData *strData = responseObject;
-//        NSString *resultDict =  [[NSString alloc]initWithData:strData encoding:NSUTF8StringEncoding];
-        
-//        NSLog(@"-结果-%@", resultDict);
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         
         [SVProgressHUD dismiss];
         if (jsonError) {
@@ -641,7 +656,7 @@ static requestToolClass* kSingleObject = nil;
         
         NSData *data = error.userInfo[@"com.alamofire.serialization.response.error.data"] ;
         NSString *errorStr = [[ NSString alloc ] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"-报错-%@", errorStr);
+        NSLog(@"[HTTP ERROR] %@ → %@ | detail: %@", requestUrl, error.localizedDescription, errorStr);
         failBlock(@"失败1");
     }];
     
@@ -670,8 +685,10 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = @{};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic);
     
-    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull downloadProgress) {
+    [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
@@ -680,7 +697,7 @@ static requestToolClass* kSingleObject = nil;
 //        NSData *strData = responseObject;
 //        NSString *resultDict =  [[NSString alloc]initWithData:strData encoding:NSUTF8StringEncoding];
         
-        NSLog(@"-结果-%@", resultDict);
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         if (isShow) {
             [SVProgressHUD dismiss];
         }
@@ -723,7 +740,7 @@ static requestToolClass* kSingleObject = nil;
         
         NSData *data = error.userInfo[@"com.alamofire.serialization.response.error.data"] ;
         NSString *errorStr = [[ NSString alloc ] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"-报错-%@", errorStr);
+        NSLog(@"[HTTP ERROR] %@ → %@ | detail: %@", requestUrl, error.localizedDescription, errorStr);
         failBlock(@"失败1");
     }];
     
@@ -757,11 +774,14 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    [session GET:requestUrl parameters:pDic headers:@{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]} progress:^(NSProgress * _Nonnull downloadProgress) {
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
+    [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
             
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         NSError *jsonError;
         NSDictionary *resultDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&jsonError];
+        NSLog(@"[HTTP RESP] %@ → %@", requestUrl, resultDict);
         [SVProgressHUD dismiss];
         if (jsonError) {
             failBlock(@"失败");
@@ -779,6 +799,7 @@ static requestToolClass* kSingleObject = nil;
             }
         }
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        NSLog(@"[HTTP ERROR] %@ → %@", requestUrl, error.localizedDescription);
         [SVProgressHUD dismiss];
         failBlock(@"失败1");
     }];

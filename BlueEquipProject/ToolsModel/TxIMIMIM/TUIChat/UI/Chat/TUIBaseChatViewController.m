@@ -1227,18 +1227,18 @@ constructingBodyWithBlock:^(id<AFMultipartFormData> _Nonnull formData) {
     [[MHRealNameManager shared] fetchStatus:^(BOOL required, MHRealNameStatus status, MHRealNameInfo * _Nullable info, NSError * _Nullable error) {
         @strongify(self);
         if (!self) return;
-        if (!required) return; // 后台开关关闭，或非中国大陆用户
-        if (status == MHRealNameStatusApproved) return; // 已实名
         if (error) return; // 网络问题，不阻止进入
+        if (!required) return; // 后台开关关闭，或非中国大陆用户
+        if (status == MHRealNameStatusApproved) return; // 已实名，不弹任何东西
 
         // 未通过实名，弹覆盖层
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self mh_showRealnameOverlayWithInfo:info];
+            [self mh_showRealnameOverlayWithStatus:status info:info];
         });
     }];
 }
 
-- (void)mh_showRealnameOverlayWithInfo:(MHRealNameInfo *)info {
+- (void)mh_showRealnameOverlayWithStatus:(MHRealNameStatus)status info:(MHRealNameInfo * _Nullable)info {
     UIView *existing = [self.view viewWithTag:90001];
     if (existing) return;
 
@@ -1265,84 +1265,186 @@ constructingBodyWithBlock:^(id<AFMultipartFormData> _Nonnull formData) {
         [card.heightAnchor constraintEqualToConstant:cardH],
     ]];
 
-    // 标题 / 提示文案（先占位，接口回来再填）
+    // 标题 label（先加，固定在 card 顶部）
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.textAlignment = NSTextAlignmentCenter;
+    titleLabel.font = [UIFont boldSystemFontOfSize:16];
+    titleLabel.textColor = [UIColor blackColor];
+    [card addSubview:titleLabel];
+    [titleLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(card).offset(18);
+        make.left.right.equalTo(card).inset(16);
+        make.height.mas_equalTo(22);
+    }];
+
+    // 文案 label（固定在 titleLabel 下方）
     UILabel *msgLabel = [[UILabel alloc] init];
     msgLabel.numberOfLines = 0;
     msgLabel.textAlignment = NSTextAlignmentCenter;
     msgLabel.font = [UIFont systemFontOfSize:14];
     msgLabel.textColor = [UIColor colorWithRed:0.2 green:0.2 blue:0.2 alpha:1];
-    msgLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [card addSubview:msgLabel];
-
-    [NSLayoutConstraint activateConstraints:@[
-        [msgLabel.topAnchor constraintEqualToAnchor:card.topAnchor constant:18],
-        [msgLabel.leftAnchor constraintEqualToAnchor:card.leftAnchor constant:16],
-        [msgLabel.rightAnchor constraintEqualToAnchor:card.rightAnchor constant:-16],
-    ]];
-
-    // 从接口取 prompt 文案
-    __weak UIView *weakMask = mask;
-    __weak UILabel *weakLabel = msgLabel;
-    [[MHRealNameManager shared] fetchPrompt:^(NSString * _Nullable text, NSError * _Nullable error) {
-        if (text.length > 0) {
-            weakLabel.text = text;
-        } else {
-            weakLabel.text = @"根据监管要求，使用聊天功能前需完成实名认证\nReal-name verification is required before chatting.";
-        }
+    [msgLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(titleLabel.mas_bottom).offset(10);
+        make.left.right.equalTo(card).inset(16);
     }];
 
-    // 底部按钮：关闭 / 去认证
-    UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    [closeBtn setTitle:@"关闭" forState:UIControlStateNormal];
-    closeBtn.titleLabel.font = [UIFont systemFontOfSize:15];
-    closeBtn.translatesAutoresizingMaskIntoConstraints = NO;
-    [closeBtn addTarget:self action:@selector(mh_realnameCloseBtnClick:) forControlEvents:UIControlEventTouchUpInside];
-    [card addSubview:closeBtn];
+    // ===== 根据 status 精确分支 =====
+    // 按接口契约：不同状态 → 不同文案来源
+    if (status == MHRealNameStatusPending) {
+        // status=0 审核中：直接显示 2.1 返回的 statusText
+        titleLabel.text = @"实名认证审核中";
+        msgLabel.text = info.statusText.length > 0 ? info.statusText : @"请耐心等待审核结果";
+        // 审核中：不需要"去认证"按钮，只有关闭
+        [titleLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(card).offset(18);
+            make.left.right.equalTo(card).inset(16);
+        }];
+        [msgLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(titleLabel.mas_bottom).offset(10);
+            make.left.right.equalTo(card).inset(16);
+        }];
 
-    UIButton *goBtn = [UIButton buttonWithType:UIButtonTypeSystem];
-    [goBtn setTitle:@"去认证" forState:UIControlStateNormal];
-    goBtn.titleLabel.font = [UIFont boldSystemFontOfSize:15];
-    [goBtn setTitleColor:[UIColor systemBlueColor] forState:UIControlStateNormal];
-    goBtn.translatesAutoresizingMaskIntoConstraints = NO;
-    [goBtn addTarget:self action:@selector(mh_realnameGoBtnClick:) forControlEvents:UIControlEventTouchUpInside];
-    [card addSubview:goBtn];
+        UIButton *okBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [okBtn setTitle:@"好的" forState:UIControlStateNormal];
+        okBtn.titleLabel.font = [UIFont boldSystemFontOfSize:16];
+        okBtn.translatesAutoresizingMaskIntoConstraints = NO;
+        [okBtn addTarget:self action:@selector(mh_realnameCloseBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [card addSubview:okBtn];
+        [NSLayoutConstraint activateConstraints:@[
+            [okBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
+            [okBtn.centerXAnchor constraintEqualToAnchor:card.centerXAnchor],
+            [okBtn.heightAnchor constraintEqualToConstant:50],
+            [okBtn.widthAnchor constraintEqualToConstant:cardW],
+        ]];
 
-    UIView *sep = [[UIView alloc] init];
-    sep.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1];
-    sep.translatesAutoresizingMaskIntoConstraints = NO;
-    [card addSubview:sep];
+    } else if (status == MHRealNameStatusRejected) {
+        // status=2 驳回：标题"认证未通过"，内容直接是 rejectReason
+        titleLabel.text = @"认证未通过";
+        msgLabel.text = info.rejectReason.length > 0 ? info.rejectReason : @"认证信息不符合要求，请修改后重新提交";
+        [titleLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(card).offset(18);
+            make.left.right.equalTo(card).inset(16);
+        }];
+        [msgLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(titleLabel.mas_bottom).offset(10);
+            make.left.right.equalTo(card).inset(16);
+        }];
 
-    [NSLayoutConstraint activateConstraints:@[
-        [sep.bottomAnchor constraintEqualToAnchor:card.bottomAnchor constant:-50],
-        [sep.leftAnchor constraintEqualToAnchor:card.leftAnchor],
-        [sep.rightAnchor constraintEqualToAnchor:card.rightAnchor],
-        [sep.heightAnchor constraintEqualToConstant:0.5],
+        // 关闭 + 去修改（双按钮）
+        UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [closeBtn setTitle:@"关闭" forState:UIControlStateNormal];
+        closeBtn.titleLabel.font = [UIFont systemFontOfSize:15];
+        closeBtn.translatesAutoresizingMaskIntoConstraints = NO;
+        [closeBtn addTarget:self action:@selector(mh_realnameCloseBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [card addSubview:closeBtn];
 
-        [closeBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
-        [closeBtn.leftAnchor constraintEqualToAnchor:card.leftAnchor],
-        [closeBtn.heightAnchor constraintEqualToConstant:50],
-        [closeBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
+        UIButton *goBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [goBtn setTitle:@"去修改" forState:UIControlStateNormal];
+        goBtn.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+        [goBtn setTitleColor:[UIColor systemBlueColor] forState:UIControlStateNormal];
+        goBtn.translatesAutoresizingMaskIntoConstraints = NO;
+        [goBtn addTarget:self action:@selector(mh_realnameGoBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [card addSubview:goBtn];
 
-        [goBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
-        [goBtn.rightAnchor constraintEqualToAnchor:card.rightAnchor],
-        [goBtn.heightAnchor constraintEqualToConstant:50],
-        [goBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
-    ]];
+        UIView *sep = [[UIView alloc] init];
+        sep.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1];
+        sep.translatesAutoresizingMaskIntoConstraints = NO;
+        [card addSubview:sep];
 
-    // 记录一下 mask 引用，去认证成功后可以移除
+        [NSLayoutConstraint activateConstraints:@[
+            [sep.bottomAnchor constraintEqualToAnchor:card.bottomAnchor constant:-50],
+            [sep.leftAnchor constraintEqualToAnchor:card.leftAnchor],
+            [sep.rightAnchor constraintEqualToAnchor:card.rightAnchor],
+            [sep.heightAnchor constraintEqualToConstant:0.5],
+
+            [closeBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
+            [closeBtn.leftAnchor constraintEqualToAnchor:card.leftAnchor],
+            [closeBtn.heightAnchor constraintEqualToConstant:50],
+            [closeBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
+
+            [goBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
+            [goBtn.rightAnchor constraintEqualToAnchor:card.rightAnchor],
+            [goBtn.heightAnchor constraintEqualToConstant:50],
+            [goBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
+        ]];
+
+    } else {
+        // status=3 (未提交) 或 Unknown：走 2.3 接口拿 prompt
+        titleLabel.text = @"实名认证";
+        [titleLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(card).offset(18);
+            make.left.right.equalTo(card).inset(16);
+        }];
+        [msgLabel mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(titleLabel.mas_bottom).offset(10);
+            make.left.right.equalTo(card).inset(16);
+        }];
+        msgLabel.text = @"根据监管要求，使用聊天功能前需完成实名认证\nReal-name verification is required before chatting.";
+
+        __weak UILabel *weakLabel = msgLabel;
+        [[MHRealNameManager shared] fetchPrompt:^(NSString * _Nullable text, NSError * _Nullable error) {
+            if (text.length > 0) {
+                weakLabel.text = text;
+            }
+        }];
+
+        // 关闭 + 去认证（双按钮）
+        UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [closeBtn setTitle:@"关闭" forState:UIControlStateNormal];
+        closeBtn.titleLabel.font = [UIFont systemFontOfSize:15];
+        closeBtn.translatesAutoresizingMaskIntoConstraints = NO;
+        [closeBtn addTarget:self action:@selector(mh_realnameCloseBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [card addSubview:closeBtn];
+
+        UIButton *goBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+        [goBtn setTitle:@"去认证" forState:UIControlStateNormal];
+        goBtn.titleLabel.font = [UIFont boldSystemFontOfSize:15];
+        [goBtn setTitleColor:[UIColor systemBlueColor] forState:UIControlStateNormal];
+        goBtn.translatesAutoresizingMaskIntoConstraints = NO;
+        [goBtn addTarget:self action:@selector(mh_realnameGoBtnClick:) forControlEvents:UIControlEventTouchUpInside];
+        [card addSubview:goBtn];
+
+        UIView *sep = [[UIView alloc] init];
+        sep.backgroundColor = [UIColor colorWithWhite:0.9 alpha:1];
+        sep.translatesAutoresizingMaskIntoConstraints = NO;
+        [card addSubview:sep];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [sep.bottomAnchor constraintEqualToAnchor:card.bottomAnchor constant:-50],
+            [sep.leftAnchor constraintEqualToAnchor:card.leftAnchor],
+            [sep.rightAnchor constraintEqualToAnchor:card.rightAnchor],
+            [sep.heightAnchor constraintEqualToConstant:0.5],
+
+            [closeBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
+            [closeBtn.leftAnchor constraintEqualToAnchor:card.leftAnchor],
+            [closeBtn.heightAnchor constraintEqualToConstant:50],
+            [closeBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
+
+            [goBtn.bottomAnchor constraintEqualToAnchor:card.bottomAnchor],
+            [goBtn.rightAnchor constraintEqualToAnchor:card.rightAnchor],
+            [goBtn.heightAnchor constraintEqualToConstant:50],
+            [goBtn.widthAnchor constraintEqualToConstant:cardW/2.0],
+        ]];
+    }
+
+    // 记录一下 mask 引用
     mask.layer.name = @"mh_realname_mask";
 }
 
 - (void)mh_realnameCloseBtnClick:(UIButton *)sender {
-    UIView *mask = [self.view viewWithTag:90001];
-    [mask removeFromSuperview];
+    // 遮罩不移除，保持半透明+不可点击
+    // 关闭按钮 = 退出聊天页（status != 1 时不允许进入聊天）
+    if (self.navigationController) {
+        [self.navigationController popViewControllerAnimated:YES];
+    } else {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
 }
 
 - (void)mh_realnameGoBtnClick:(UIButton *)sender {
-    // 移除遮罩（等 verify VC 返回后再检查是否需要重新弹）
-    UIView *mask = [self.view viewWithTag:90001];
-    [mask removeFromSuperview];
-
+    // 遮罩不移除，保持覆盖。去认证 VC push 到栈上，聊天页在遮罩底下没问题。
+    // verifyVC 完成后 pop 回来 → viewDidAppear → mh_checkRealnameOnEnterChat 重新查 status
     Class cls = NSClassFromString(@"MHRealNameVerifyViewController");
     if (!cls) {
         // 未实现实名表单 VC，临时兜底：只提示
