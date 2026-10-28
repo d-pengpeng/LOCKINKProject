@@ -69,8 +69,16 @@ FOUNDATION_EXPORT NSString *const MHBTPerf;     // perf 性能
 /// 便捷：只有 type + key + ext
 - (void)trackWithType:(NSString *)type key:(NSString *)key ext:(nullable NSDictionary *)ext;
 
-/// 便捷：action 事件
+/// 便捷：action 事件（简版）
 - (void)trackAction:(NSString *)key page:(nullable NSString *)page ext:(nullable NSDictionary *)ext;
+
+/// 便捷：action 事件（完整版，fromPage/targetType/targetId 可传）
+- (void)trackAction:(NSString *)key
+               page:(nullable NSString *)page
+           fromPage:(nullable NSString *)fromPage
+         targetType:(nullable NSString *)targetType
+           targetId:(nullable NSString *)targetId
+                ext:(nullable NSDictionary *)ext;
 
 /// 便捷：page_view
 - (void)trackPageView:(NSString *)page fromPage:(nullable NSString *)fromPage;

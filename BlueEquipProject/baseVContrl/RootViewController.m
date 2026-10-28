@@ -277,7 +277,10 @@
         NSString *toClass = root ? NSStringFromClass([root class]) : @"";
         [[MHBehaviorReporter shared] trackAction:@"tab_switch"
                                             page:nil
-                                             ext:@{@"to": toClass ?: @""}];
+                                        fromPage:nil
+                                      targetType:@"tab"
+                                        targetId:toClass ?: @""
+                                             ext:nil];
     }
 }
 

@@ -380,8 +380,12 @@
                 dicMM = @{@"contact":minStr(self.textFF.text), @"code":minStr(self.textCodeFF.text)};
             }
             [requestToolClass postNetworkWithUrl:request_login_changeBinding andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                NSString *userId = [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"] ?: @"" ?: @"";
                 [[MHBehaviorReporter shared] trackAction:@"account_change"
                                                     page:NSStringFromClass([self class])
+                                                fromPage:nil
+                                              targetType:@"user"
+                                                targetId:userId
                                                      ext:@{@"action": @"changeBinding"}];
                 self.isRRRR = NO;
                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
@@ -404,8 +408,12 @@
             NSString *smmmStr = [[LYUserDefault userDefault].emailAuccount stringByReplacingOccurrencesOfString:@" " withString:@""];
             NSDictionary *dicMM = @{@"contact":smmmStr, @"code":minStr(self.textCodeFF.text)};
             [requestToolClass postNetworkWithUrl:request_login_logout andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                NSString *userId = [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"] ?: @"" ?: @"";
                 [[MHBehaviorReporter shared] trackAction:@"account_change"
                                                     page:NSStringFromClass([self class])
+                                                fromPage:nil
+                                              targetType:@"user"
+                                                targetId:userId
                                                      ext:@{@"action": @"logout"}];
                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
                 [LYUserDefault clearLoginCache];
@@ -435,8 +443,12 @@
 
             NSDictionary *dicMM = @{@"password":minStr(self.textPasswordFF.text), @"code":minStr(self.textCodeFF.text)};
             [requestToolClass postNetworkWithUrl:request_login_modifyPassword andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                NSString *userId = [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"] ?: @"" ?: @"";
                 [[MHBehaviorReporter shared] trackAction:@"account_change"
                                                     page:NSStringFromClass([self class])
+                                                fromPage:nil
+                                              targetType:@"user"
+                                                targetId:userId
                                                      ext:@{@"action": @"password"}];
                 self.isRRRR = NO;
                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];

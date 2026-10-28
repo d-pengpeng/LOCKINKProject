@@ -349,7 +349,10 @@
     }
     [[MHBehaviorReporter shared] trackAction:@"banner_click"
                                         page:NSStringFromClass([self class])
-                                         ext:@{@"pos": @(index), @"adId": bannerId ?: @""}];
+                                    fromPage:nil
+                                  targetType:@"banner"
+                                    targetId:bannerId ?: @""
+                                         ext:@{@"pos": @(index)}];
 
     if (self.cycLisAr.count > index) {
         MHEquipmentModel_linkUrl *model = [MHEquipmentModel_linkUrl mj_objectWithKeyValues:self.cycLisAr[index]];

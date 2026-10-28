@@ -307,8 +307,12 @@
 
     // login_success 行为上报（登录/注册成功拿到 token 后立即上报，必须带 token）
     NSString *token = minStr(dicT[@"token"]);
+    NSString *userId = minStr(dicT[@"userId"]);
     [[MHBehaviorReporter shared] trackAction:@"login_success"
                                         page:nil
+                                    fromPage:nil
+                                  targetType:@"user"
+                                    targetId:userId ?: @""
                                          ext:@{
         @"method": [dicT[@"bindingMethod"] isKindOfClass:[NSString class]] ? dicT[@"bindingMethod"] : @"code",
         @"isNewUser": @([dicT[@"isNewUser"] boolValue]),

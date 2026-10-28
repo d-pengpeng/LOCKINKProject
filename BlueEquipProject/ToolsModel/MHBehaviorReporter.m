@@ -38,6 +38,11 @@ static const int kMaxCache          = 1000;
 static const int kSessionTimeoutSec = 30 * 60;   // 后台 30 分钟切新 session
 static const int kMaxEventExtBytes  = 1024;
 
+#pragma mark - fromPage 上下文（page_view 时更新，供后续事件自动兜底）
+
+static NSString *_g_lastPage = nil;
+static NSString *_g_lastFromPage = nil;
+
 #pragma mark - Reporter
 
 @interface MHBehaviorReporter ()
@@ -288,11 +293,25 @@ static const int kMaxEventExtBytes  = 1024;
 }
 
 - (void)trackAction:(NSString *)key page:(NSString *)page ext:(NSDictionary *)ext {
-    [self trackWithType:MHBTAction key:key page:page fromPage:nil targetType:nil targetId:nil ext:ext result:1 errorCode:nil durationMs:nil costMs:nil];
+    [self trackAction:key page:page fromPage:nil targetType:nil targetId:nil ext:ext];
+}
+
+- (void)trackAction:(NSString *)key
+               page:(NSString *)page
+           fromPage:(NSString *)fromPage
+         targetType:(NSString *)targetType
+           targetId:(NSString *)targetId
+                ext:(NSDictionary *)ext {
+    [self trackWithType:MHBTAction key:key page:page fromPage:fromPage targetType:targetType targetId:targetId ext:ext result:1 errorCode:nil durationMs:nil costMs:nil];
 }
 
 - (void)trackPageView:(NSString *)page fromPage:(NSString *)fromPage {
-    [self trackWithType:MHBTPage key:@"page_view" page:page fromPage:fromPage targetType:nil targetId:nil ext:nil result:1 errorCode:nil durationMs:nil costMs:nil];
+    // 更新上下文：page_view 调用者给的 fromPage 优先，否则用上一个 page_view 的 page
+    NSString *effectiveFromPage = fromPage.length > 0 ? fromPage : _g_lastPage;
+    _g_lastPage = page;
+    _g_lastFromPage = effectiveFromPage;
+    
+    [self trackWithType:MHBTPage key:@"page_view" page:page fromPage:effectiveFromPage targetType:nil targetId:nil ext:nil result:1 errorCode:nil durationMs:nil costMs:nil];
 }
 
 - (void)trackPageLeave:(NSString *)page durationMs:(NSInteger)durationMs {
@@ -381,6 +400,11 @@ static const int kMaxEventExtBytes  = 1024;
     if (page.length == 0) {
         UIViewController *topVC = [MHBehaviorReporter _topViewController];
         if (topVC) page = NSStringFromClass([topVC class]);
+    }
+    
+    // 兜底：fromPage 为空时，用上一个 page_view 记录的上下文
+    if (fromPage.length == 0) {
+        fromPage = _g_lastFromPage;
     }
     
     // 必填

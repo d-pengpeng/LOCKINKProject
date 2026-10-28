@@ -206,9 +206,14 @@
     
 //    + (UIImage *)outgoingBubble 气泡 conversationIDList 会话唯一 ID 列表，C2C 单聊组成方式：[NSString stringWithFormat:@"c2c_%@",userID]；群聊组成方式为 [NSString stringWithFormat:@"group_%@",groupID]
     
+    NSString *convId = [self respondsToSelector:@selector(conversationIDList)] ? [self performSelector:@selector(conversationIDList)] : @"";
+    if (![convId isKindOfClass:[NSString class]]) convId = @"";
     [[MHBehaviorReporter shared] trackAction:@"chat_enter"
                                         page:NSStringFromClass([self class])
-                                         ext:@{@"from": @"conversation", @"targetType": @"user"}];
+                                    fromPage:nil
+                                  targetType:@"conversation"
+                                    targetId:convId
+                                         ext:nil];
 }
 
 #pragma mark - 反诈提示条
