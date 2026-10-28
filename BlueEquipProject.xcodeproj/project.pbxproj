@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6AA0ABE22F324E2BAFAFD2E6 /* MHRealNameManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 917C26FDEFEA4CA6B8BA5399 /* MHRealNameManager.m */; };
 		8AF80625DA39903286378D17 /* UIViewController+MHAgeGate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5410401132F51DE5D51B43D5 /* UIViewController+MHAgeGate.m */; };
+		A1B2C3D4E5F6000000000001 /* MHRealNameVerifyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000003 /* MHRealNameVerifyViewController.m */; };
+		B1E200000000000000000001 /* MHBehaviorReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = B1E200000000000000000003 /* MHBehaviorReporter.m */; };
 		E0C000687CABC3994119C6AD /* MHAgeAssurance.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEFD0E442C9340E3460B99A3 /* MHAgeAssurance.swift */; };
 		E8005C972D0BE06C00F63FE5 /* MHNewDrawingView.m in Sources */ = {isa = PBXBuildFile; fileRef = E8005C962D0BE06C00F63FE5 /* MHNewDrawingView.m */; };
 		E8021A0E2EB2F06B00F64FD9 /* AESCipher.m in Sources */ = {isa = PBXBuildFile; fileRef = E8021A0C2EB2F06B00F64FD9 /* AESCipher.m */; };
@@ -483,9 +486,6 @@
 		E88CCBB02AAB00EE0019E488 /* eSliderNewView.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9052AAB00EC0019E488 /* eSliderNewView.m */; };
 		E88CCBB12AAB00EE0019E488 /* SelVideoSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9062AAB00EC0019E488 /* SelVideoSlider.m */; };
 		E88CCBB22AAB00EE0019E488 /* requestToolClass.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9072AAB00EC0019E488 /* requestToolClass.m */; };
-		6AA0ABE22F324E2BAFAFD2E6 /* MHRealNameManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 917C26FDEFEA4CA6B8BA5399 /* MHRealNameManager.m */; };
-		A1B2C3D4E5F6000000000001 /* MHRealNameVerifyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6000000000003 /* MHRealNameVerifyViewController.m */; };
-		B1E200000000000000000001 /* MHBehaviorReporter.m in Sources */ = {isa = PBXBuildFile; fileRef = B1E200000000000000000003 /* MHBehaviorReporter.m */; };
 		E88CCBB32AAB00EE0019E488 /* ACShowMediaTypeView.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC90B2AAB00EC0019E488 /* ACShowMediaTypeView.m */; };
 		E88CCBB42AAB00EE0019E488 /* ACMediaFrame.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E88CC90E2AAB00EC0019E488 /* ACMediaFrame.bundle */; };
 		E88CCBB52AAB00EE0019E488 /* UIViewController+ACMediaExt.m in Sources */ = {isa = PBXBuildFile; fileRef = E88CC9122AAB00EC0019E488 /* UIViewController+ACMediaExt.m */; };
@@ -787,8 +787,14 @@
 
 /* Begin PBXFileReference section */
 		13D48463FC6D5F93409FE8A5 /* Pods-BlueEquipProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlueEquipProject.debug.xcconfig"; path = "Target Support Files/Pods-BlueEquipProject/Pods-BlueEquipProject.debug.xcconfig"; sourceTree = "<group>"; };
+		26995977CD7E40FCB67EAA5B /* MHRealNameManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MHRealNameManager.h; sourceTree = "<group>"; };
 		5410401132F51DE5D51B43D5 /* UIViewController+MHAgeGate.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "UIViewController+MHAgeGate.m"; sourceTree = "<group>"; };
+		917C26FDEFEA4CA6B8BA5399 /* MHRealNameManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MHRealNameManager.m; sourceTree = "<group>"; };
 		9EA13104BDDD5DBF6BE62EDC /* Pods_BlueEquipProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BlueEquipProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1B2C3D4E5F6000000000002 /* MHRealNameVerifyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MHRealNameVerifyViewController.h; sourceTree = "<group>"; };
+		A1B2C3D4E5F6000000000003 /* MHRealNameVerifyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MHRealNameVerifyViewController.m; sourceTree = "<group>"; };
+		B1E200000000000000000002 /* MHBehaviorReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MHBehaviorReporter.h; sourceTree = "<group>"; };
+		B1E200000000000000000003 /* MHBehaviorReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MHBehaviorReporter.m; sourceTree = "<group>"; };
 		CEFD0E442C9340E3460B99A3 /* MHAgeAssurance.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MHAgeAssurance.swift; sourceTree = "<group>"; };
 		D0F6902D909FDAC74A9BE7FF /* Pods-BlueEquipProject.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BlueEquipProject.release.xcconfig"; path = "Target Support Files/Pods-BlueEquipProject/Pods-BlueEquipProject.release.xcconfig"; sourceTree = "<group>"; };
 		E1885F0B69BC2D8DFB9DF555 /* MHAgeAssurance.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = MHAgeAssurance.h; sourceTree = "<group>"; };
@@ -1739,9 +1745,6 @@
 		E88CC9052AAB00EC0019E488 /* eSliderNewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = eSliderNewView.m; sourceTree = "<group>"; };
 		E88CC9062AAB00EC0019E488 /* SelVideoSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelVideoSlider.m; sourceTree = "<group>"; };
 		E88CC9072AAB00EC0019E488 /* requestToolClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = requestToolClass.m; sourceTree = "<group>"; };
-		917C26FDEFEA4CA6B8BA5399 /* MHRealNameManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MHRealNameManager.m; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000003 /* MHRealNameVerifyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MHRealNameVerifyViewController.m; sourceTree = "<group>"; };
-		B1E200000000000000000003 /* MHBehaviorReporter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MHBehaviorReporter.m; sourceTree = "<group>"; };
 		E88CC9082AAB00EC0019E488 /* DashLineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DashLineView.h; sourceTree = "<group>"; };
 		E88CC90B2AAB00EC0019E488 /* ACShowMediaTypeView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ACShowMediaTypeView.m; sourceTree = "<group>"; };
 		E88CC90C2AAB00EC0019E488 /* ACMediaModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ACMediaModel.h; sourceTree = "<group>"; };
@@ -1973,9 +1976,6 @@
 		E88CCA8B2AAB00ED0019E488 /* AudioSpectrumRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioSpectrumRecorder.h; sourceTree = "<group>"; };
 		E88CCA8C2AAB00ED0019E488 /* DashLineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DashLineView.m; sourceTree = "<group>"; };
 		E88CCA8D2AAB00ED0019E488 /* requestToolClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = requestToolClass.h; sourceTree = "<group>"; };
-		26995977CD7E40FCB67EAA5B /* MHRealNameManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MHRealNameManager.h; sourceTree = "<group>"; };
-		A1B2C3D4E5F6000000000002 /* MHRealNameVerifyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MHRealNameVerifyViewController.h; sourceTree = "<group>"; };
-		B1E200000000000000000002 /* MHBehaviorReporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MHBehaviorReporter.h; sourceTree = "<group>"; };
 		E88CCC712AAB031D0019E488 /* requestUrlRFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = requestUrlRFile.h; sourceTree = "<group>"; };
 		E88CCC722AAB031D0019E488 /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		E88CCC762AAB09A20019E488 /* LFToGIF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LFToGIF.h; sourceTree = "<group>"; };
@@ -6210,7 +6210,7 @@
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6272,7 +6272,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

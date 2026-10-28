@@ -414,7 +414,6 @@ static const int kMaxEventExtBytes  = 1024;
         @"events":   batch ?: @[]
     };
     
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
     NSLog(@"[Behavior] flushing %lu events → %@", (unsigned long)batch.count, payload);
     
     AFHTTPSessionManager *session = [AFHTTPSessionManager manager];
@@ -430,35 +429,50 @@ static const int kMaxEventExtBytes  = 1024;
     
     NSString *url = [NSString stringWithFormat:@"%@%@", INTERFACEADDRESS, @"behavior/report"];
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]];
-    request.HTTPMethod = @"POST";
-    request.HTTPBody = jsonData;
-    
-    [[session dataTaskWithRequest:request uploadProgress:nil downloadProgress:nil completionHandler:^(NSURLResponse *resp, id responseObject, NSError *error) {
+    [session POST:url parameters:payload headers:nil progress:nil success:^(NSURLSessionDataTask *task, id responseObject) {
         self.isFlushing = NO;
         
-        if (error) {
-            NSLog(@"[Behavior] flush failed: %@", error.localizedDescription);
-            // 把失败的事件放回去（保留原 eventId 方便重试）
-            @synchronized (self) {
-                // 插到队头，下次优先上报
-                self.queue = [[batch arrayByAddingObjectsFromArray:self.queue] mutableCopy];
-                if (self.queue.count > kMaxCache) {
-                    [self.queue removeObjectsInRange:NSMakeRange(kMaxCache, self.queue.count - kMaxCache)];
-                }
-            }
-            // 存离线缓存
-            [self _persistCache];
-        } else {
-            NSDictionary *resp = [responseObject isKindOfClass:[NSDictionary class]] ? responseObject : nil;
-            NSInteger accepted = [resp[@"data"][@"accepted"] integerValue];
-            NSInteger rejected = [resp[@"data"][@"rejected"] integerValue];
+        // 防御性解析：responseObject 可能是 NSDictionary 也可能是 NSData/NSString
+        if ([responseObject isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *root = (NSDictionary *)responseObject;
+            NSDictionary *data = [root[@"data"] isKindOfClass:[NSDictionary class]] ? root[@"data"] : nil;
+            NSInteger accepted = data ? [data[@"accepted"] integerValue] : 0;
+            NSInteger rejected = data ? [data[@"rejected"] integerValue] : 0;
             NSLog(@"[Behavior] flushed → accepted=%ld rejected=%ld", (long)accepted, (long)rejected);
-            // rejected > 0 不重试（文档明确要求）
-            // 持久化剩余队列
-            [self _persistCache];
+        } else if ([responseObject isKindOfClass:[NSData class]]) {
+            // AFJSONResponseSerializer 可能失效，手动解析
+            NSError *je;
+            NSDictionary *root = [NSJSONSerialization JSONObjectWithData:(NSData *)responseObject options:0 error:&je];
+            if (!je && [root isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *data = [root[@"data"] isKindOfClass:[NSDictionary class]] ? root[@"data"] : nil;
+                NSInteger accepted = data ? [data[@"accepted"] integerValue] : 0;
+                NSInteger rejected = data ? [data[@"rejected"] integerValue] : 0;
+                NSLog(@"[Behavior] flushed (manual parse) → accepted=%ld rejected=%ld", (long)accepted, (long)rejected);
+            } else {
+                NSLog(@"[Behavior] flushed but response not JSON dict: %@", [[NSString alloc] initWithData:(NSData *)responseObject encoding:NSUTF8StringEncoding]);
+            }
+        } else {
+            NSLog(@"[Behavior] flushed but responseObject type unexpected: %@", [responseObject class]);
         }
-    }] resume];
+        
+        // rejected > 0 不重试（文档明确要求）
+        [self _persistCache];
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        self.isFlushing = NO;
+        
+        NSLog(@"[Behavior] flush failed: %@", error.localizedDescription);
+        // 把失败的事件放回去（保留原 eventId 方便重试）
+        @synchronized (self) {
+            // 插到队头，下次优先上报
+            self.queue = [[batch arrayByAddingObjectsFromArray:self.queue] mutableCopy];
+            if (self.queue.count > kMaxCache) {
+                [self.queue removeObjectsInRange:NSMakeRange(kMaxCache, self.queue.count - kMaxCache)];
+            }
+        }
+        // 存离线缓存
+        [self _persistCache];
+    }];
 }
 
 - (void)_persistCache {
