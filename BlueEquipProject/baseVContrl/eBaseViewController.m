@@ -103,15 +103,24 @@ static NSMutableSet *_leaveReportedSet(void) {
     NSString *page = NSStringFromClass([self class]);
     if (page.length > 0) {
         NSString *key = [NSString stringWithFormat:@"%p", self];
-        _enterTimeMap()[key] = @([[NSDate date] timeIntervalSince1970]);
-        [[MHBehaviorReporter shared] trackPageView:page fromPage:nil];
+        // enterTime 只记首次，后续 viewDidAppear 不覆盖（弹窗 present/dismiss 不应重置停留起点）
+        if (!_enterTimeMap()[key]) {
+            _enterTimeMap()[key] = @([[NSDate date] timeIntervalSince1970]);
+            [[MHBehaviorReporter shared] trackPageView:page fromPage:nil];
+        }
     }
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
-    // 去重：同一 VC 实例的 viewWillDisappear 可能被多次触发（导航栈透传），一次离开只报一条
+    // 只在"真正离开"时报 leave，被半透明弹窗 present 覆盖不算
+    // isMovingFromParentViewController → 导航栈 pop/push 覆盖
+    // isBeingDismissed → dismiss
+    BOOL reallyLeaving = self.isMovingFromParentViewController || self.isBeingDismissed;
+    if (!reallyLeaving) return;
+    
+    // 去重：同一 VC 实例真正离开只报一条
     NSString *selfKey = [NSString stringWithFormat:@"%p", self];
     if ([_leaveReportedSet() containsObject:selfKey]) return;
     [_leaveReportedSet() addObject:selfKey];
