@@ -48,6 +48,11 @@
 @property (nonatomic, assign) BOOL isBlueStartBoo;
 @property (nonatomic, strong) NSArray *cycLisAr;
 @property (nonatomic, strong) UILabel *placLab;
+
+/// exposure 去重：banner 已上报的 index
+@property (nonatomic, strong) NSMutableSet *exposedBannerIndexSet;
+/// exposure 去重：设备 cell 已上报的 index
+@property (nonatomic, strong) NSMutableSet *exposedDeviceIndexSet;
 @property (nonatomic, strong) UIView *placVVV;
 //@property (nonatomic, copy) NSString *ElecStr;
 //@property (nonatomic, assign) BOOL isWWWWBoo;
@@ -130,6 +135,9 @@
     self.backImgV.image = [UIImage imageNamed:@"allBackImgs"];
     self.titleName.text = eLocalizedString(@"tabbar_tit1");
     self.showImgVV = YES;
+    
+    self.exposedBannerIndexSet = [NSMutableSet set];
+    self.exposedDeviceIndexSet = [NSMutableSet set];
     
     [FloatingWindowModel shareInstance].devicNameArr = @[kCharactName3];  //MARK: 二期
     [FloatingWindowModel shareInstance].devicNameArr3 = @[kCharactName4, kCharactName6, kCharactName7, kCharactName8, kCharactName9, kCharactName10, kCharactName11, kCharactName14, kCharactName16,kCharactName17]; //MARK: 三期
@@ -365,6 +373,57 @@
             }
         }
     }
+}
+
+//MARK:  轮播图滚动 → banner 曝光
+- (void)cycleScrollView:(SDCycleScrollView *)cycleScrollView didScrollToIndex:(NSInteger)index
+{
+    NSNumber *idxNum = @(index);
+    if ([self.exposedBannerIndexSet containsObject:idxNum]) return;
+    [self.exposedBannerIndexSet addObject:idxNum];
+    
+    NSObject *banner = self.cycLisAr.count > index ? self.cycLisAr[index] : nil;
+    NSString *bannerId = @"";
+    if ([banner isKindOfClass:[NSDictionary class]]) {
+        bannerId = [(NSDictionary *)banner objectForKey:@"id"] ?: @"";
+    }
+    [[MHBehaviorReporter shared] trackWithType:MHBTPage
+                                            key:@"exposure"
+                                           page:NSStringFromClass([self class])
+                                       fromPage:nil
+                                     targetType:@"banner"
+                                       targetId:bannerId ?: @""
+                                            ext:@{@"pos": @(index)}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
+}
+
+//MARK:  设备 cell 曝光
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section != 0) return;
+    if (indexPath.row >= (NSInteger)[FloatingWindowModel shareInstance].datasMut.count) return;
+    
+    NSNumber *idxNum = @(indexPath.row);
+    if ([self.exposedDeviceIndexSet containsObject:idxNum]) return;
+    [self.exposedDeviceIndexSet addObject:idxNum];
+    
+    MHEquipmentModel *model = [FloatingWindowModel shareInstance].datasMut[indexPath.row];
+    NSString *mac = model.mac ?: @"";
+    NSString *deviceName = model.realName ?: @"";
+    [[MHBehaviorReporter shared] trackWithType:MHBTPage
+                                            key:@"exposure"
+                                           page:NSStringFromClass([self class])
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:mac
+                                            ext:@{@"pos": @(indexPath.row), @"deviceName": deviceName}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
 }
 
 - (void)blueNameStatusNotiffNameUploadDataName

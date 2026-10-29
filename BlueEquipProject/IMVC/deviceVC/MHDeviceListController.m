@@ -8,6 +8,7 @@
 #import "MHDeviceListController.h"
 #import "MHDeviceListCell.h"
 #import "MHDeviceListSubController.h"
+#import "MHBehaviorReporter.h"
 
 @interface MHDeviceListController ()<UITableViewDelegate, UITableViewDataSource>
 
@@ -16,6 +17,9 @@
 @property (nonatomic, strong) noDataImgView *noDataImgV;
 @property (nonatomic, assign) NSInteger pageN;
 @property (nonatomic, assign) BOOL isRRRR;
+
+/// exposure 去重
+@property (nonatomic, strong) NSMutableSet *exposedIndexSet;
 @end
 
 @implementation MHDeviceListController
@@ -45,6 +49,8 @@
     self.redNavView = YES;
     self.titleName.textColor = UIColor.blackColor;
     self.titleName.text = eLocalizedString(@"IMMsg_all2");
+    
+    self.exposedIndexSet = [NSMutableSet set];
     
     UIImageView *placeImV = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, _window_width, _window_height)];
     placeImV.image = [UIImage imageNamed:@"allBackImgsMsg"];
@@ -179,6 +185,30 @@
     MHDeviceListSubController *vc = [[MHDeviceListSubController alloc] init];
     vc.dicMod = self.datasMut[indexPath.row];
     [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row >= (NSInteger)self.datasMut.count) return;
+    
+    NSNumber *idxNum = @(indexPath.row);
+    if ([self.exposedIndexSet containsObject:idxNum]) return;
+    [self.exposedIndexSet addObject:idxNum];
+    
+    NSDictionary *dic = self.datasMut[indexPath.row];
+    NSString *deviceId = minStr(dic[@"deviceId"]);
+    NSString *deviceName = minStr(dic[@"deviceName"]);
+    [[MHBehaviorReporter shared] trackWithType:MHBTPage
+                                            key:@"exposure"
+                                           page:NSStringFromClass([self class])
+                                       fromPage:nil
+                                     targetType:@"device"
+                                       targetId:deviceId
+                                            ext:@{@"pos": @(indexPath.row), @"deviceName": deviceName}
+                                         result:1
+                                       errorCode:nil
+                                      durationMs:nil
+                                         costMs:nil];
 }
 
 @end
