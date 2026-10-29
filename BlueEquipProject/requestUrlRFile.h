@@ -40,6 +40,7 @@
 #define request_login_logout @"oauth/logout"
 #define request_login_changeBinding @"oauth/changeBinding"
 #define request_login_modifyPassword @"oauth/modifyPassword"
+#define request_login_apple @"oauth/loginApple"
 #define request_oauth_checkVerificationCode @"oauth/checkVerificationCode"
 
 

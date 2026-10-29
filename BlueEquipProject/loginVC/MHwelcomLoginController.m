@@ -12,8 +12,10 @@
 #import "MHAboutSubController.h"
 #import "eSelectCountryCodeView.h"
 #import "MHBehaviorReporter.h"
+#import <AuthenticationServices/AuthenticationServices.h>
 
-@interface MHwelcomLoginController ()<UITextViewDelegate>
+API_AVAILABLE(ios(13.0))
+@interface MHwelcomLoginController ()<UITextViewDelegate, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding>
 {
     NSTimer *messsageTimer;
     int messageIssssss;//短信倒计时  60s
@@ -214,11 +216,56 @@
     
     [self qhBtnMethod];//MARK: 改为默认密码登录
     
+    //MARK: 苹果登录按钮区域（iOS 13+）
+    if (@available(iOS 13.0, *)) {
+        UIView *appleLine1 = [[UIView alloc] init];
+        appleLine1.backgroundColor = RGB(90, 90, 90);
+        [self.view addSubview:appleLine1];
+        [appleLine1 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.view.mas_left).offset(10);
+            make.right.equalTo(self.view.mas_centerX).offset(-20);
+            make.top.equalTo(loginBBtn.mas_bottom).offset(24);
+            make.height.offset(0.5);
+        }];
+        
+        UIView *appleLine2 = [[UIView alloc] init];
+        appleLine2.backgroundColor = RGB(90, 90, 90);
+        [self.view addSubview:appleLine2];
+        [appleLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(self.view.mas_centerX).offset(20);
+            make.right.equalTo(self.view.mas_right).offset(-10);
+            make.top.equalTo(loginBBtn.mas_bottom).offset(24);
+            make.height.offset(0.5);
+        }];
+        
+        UILabel *appleLab = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:12 textAlignment:NSTextAlignmentCenter];
+        appleLab.text = @"Apple";
+        [self.view addSubview:appleLab];
+        [appleLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.view.mas_centerX);
+            make.centerY.equalTo(appleLine1.mas_centerY);
+        }];
+        
+        ASAuthorizationAppleIDButton *appleBtn = [ASAuthorizationAppleIDButton buttonWithType:ASAuthorizationAppleIDButtonTypeSignIn style:ASAuthorizationAppleIDButtonStyleBlack];
+        [appleBtn addTarget:self action:@selector(appleLoginClicked) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:appleBtn];
+        [appleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(appleLine1.mas_bottom).offset(12);
+            make.centerX.equalTo(self.view.mas_centerX);
+            make.height.offset(44);
+            make.width.offset(200);
+        }];
+    }
+    
     UIView *botmVV = [HistoryRecordModel createViewUIUI];
     botmVV.backgroundColor = UIColor.clearColor;
     [self.view addSubview:botmVV];
     [botmVV mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(loginBBtn.mas_bottom).offset(6);
+        if (@available(iOS 13.0, *)) {
+            make.top.equalTo(loginBBtn.mas_bottom).offset(88); // 苹果按钮区域占位
+        } else {
+            make.top.equalTo(loginBBtn.mas_bottom).offset(6);
+        }
         make.centerX.equalTo(self.view.mas_centerX);
         make.height.offset(36);
     }];
@@ -702,6 +749,102 @@
 {
     btn.selected = !btn.selected;
     self.textCodeFF.secureTextEntry = !btn.selected;
+}
+
+#pragma mark - Sign in with Apple
+
+- (void)appleLoginClicked API_AVAILABLE(ios(13.0)) {
+    if (@available(iOS 13.0, *)) {
+        [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"method": @"apple"}];
+        
+        ASAuthorizationAppleIDProvider *provider = [[ASAuthorizationAppleIDProvider alloc] init];
+        ASAuthorizationAppleIDRequest *request = [provider createRequest];
+        request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
+        
+        ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
+        controller.delegate = self;
+        controller.presentationContextProvider = self;
+        [controller performRequests];
+    }
+}
+
+#pragma mark - ASAuthorizationControllerDelegate
+
+- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithAuthorization:(ASAuthorization *)authorization API_AVAILABLE(ios(13.0)) {
+    if (![authorization.credential isKindOfClass:[ASAuthorizationAppleIDCredential class]]) return;
+    
+    ASAuthorizationAppleIDCredential *credential = (ASAuthorizationAppleIDCredential *)authorization.credential;
+    NSString *user = credential.user;
+    NSString *email = credential.email ?: @"";
+    NSString *fullName = credential.fullName ? [NSString stringWithFormat:@"%@%@",
+        credential.fullName.familyName ?: @"",
+        credential.fullName.givenName ?: @""] : @"";
+    
+    // 存 user id 到本地（后续判断 credential state）
+    [[NSUserDefaults standardUserDefaults] setObject:user forKey:@"apple_user_id"];
+    
+    // identityToken → 发给后端验证
+    NSData *identityToken = credential.identityToken;
+    if (!identityToken) {
+        [SVProgressHUD showErrorWithStatus:eLocalizedString(@"login_err3") ?: @"登录失败"];
+        return;
+    }
+    NSString *tokenStr = [[NSString alloc] initWithData:identityToken encoding:NSUTF8StringEncoding];
+    
+    [SVProgressHUD show];
+    
+    // 调后端苹果登录接口
+    NSDictionary *dicMM = @{
+        @"appleUserId": user ?: @"",
+        @"identityToken": tokenStr ?: @"",
+        @"email": email,
+        @"fullName": fullName
+    };
+    
+    [requestToolClass postNetworkWithUrl:request_login_apple andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        if ([info isKindOfClass:[NSDictionary class]]) {
+            [LYUserDefault saveUserLoginDefault:info];
+            [LYUserDefault saveIsLoginBoo:YES];
+            
+            [[MHBehaviorReporter shared] trackWithType:MHBTAction
+                                                    key:@"login_success"
+                                                   page:NSStringFromClass([self class])
+                                               fromPage:nil
+                                             targetType:@"user"
+                                               targetId:minStr(info[@"userId"])
+                                                    ext:@{@"method": @"apple", @"isNewUser": @([LYUserDefault userDefault].t_id.length == 0)}
+                                                 result:1
+                                               errorCode:nil
+                                              durationMs:nil
+                                                 costMs:nil];
+            
+            // 登录成功通知 IM
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
+            
+            // 返回上一页或切首页
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
+    } fail:^(NSString * _Nonnull errorStr) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:errorStr.length > 0 ? errorStr : @"Apple 登录失败"];
+    }];
+}
+
+- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error API_AVAILABLE(ios(13.0)) {
+    if (error.code == ASAuthorizationErrorCanceled) {
+        // 用户取消，不提示
+        return;
+    }
+    [SVProgressHUD showErrorWithStatus:error.localizedDescription ?: @"Apple 登录失败"];
+}
+
+#pragma mark - ASAuthorizationControllerPresentationContextProviding
+
+- (ASPresentationAnchor)presentationAnchorForAuthorizationController:(ASAuthorizationController *)controller API_AVAILABLE(ios(13.0)) {
+    return self.view.window;
 }
 
 @end

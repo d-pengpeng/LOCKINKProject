@@ -122,8 +122,8 @@ static requestToolClass* kSingleObject = nil;
                     [SVProgressHUD showErrorWithStatus:strMessage];
                     failBlock(strMessage.length > 0 ? strMessage : @"服务器错误");
                 }else if ([number intValue] == 50008) {
-                    [SVProgressHUD showErrorWithStatus:strMessage];
-                    failBlock(strMessage.length > 0 ? strMessage : @"50008");
+                    //[SVProgressHUD showErrorWithStatus:strMessage];
+                    failBlock(  @"50008");
                 }else if ([number intValue] == 60056) {
                     [SVProgressHUD showErrorWithStatus:strMessage];
                     failBlock([NSString stringWithFormat:@"60056,%@", strMessage.length > 0 ? strMessage : @""]);
