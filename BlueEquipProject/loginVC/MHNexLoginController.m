@@ -252,7 +252,7 @@
                                        fromPage:NSStringFromClass([MHloginController class])
                                      targetType:nil
                                        targetId:nil
-                                            ext:@{@"step": @"final_submit"}
+                                            ext:@{@"step": @(3), @"stepName": @"final_submit"}
                                          result:1
                                        errorCode:nil
                                       durationMs:nil
@@ -273,7 +273,7 @@
                                                fromPage:nil
                                              targetType:nil
                                                targetId:nil
-                                                    ext:@{@"step": @"register_success"}
+                                                    ext:@{@"step": @(4), @"stepName": @"register_success"}
                                                  result:1
                                                errorCode:nil
                                               durationMs:nil
@@ -290,7 +290,7 @@
                                                fromPage:nil
                                              targetType:nil
                                                targetId:nil
-                                                    ext:@{@"step": @"register_fail", @"message": msgStr}
+                                                    ext:@{@"step": @(4), @"stepName": @"register_fail", @"message": msgStr}
                                                  result:2
                                                errorCode:nil
                                               durationMs:nil

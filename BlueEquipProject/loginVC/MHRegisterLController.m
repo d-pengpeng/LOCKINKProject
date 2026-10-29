@@ -410,7 +410,7 @@
                                        fromPage:nil
                                      targetType:nil
                                        targetId:nil
-                                            ext:@{@"step": @"verify_code_submit"}
+                                            ext:@{@"step": @(1), @"stepName": @"verify_code"}
                                          result:1
                                        errorCode:nil
                                       durationMs:nil

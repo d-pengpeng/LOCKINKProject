@@ -9,6 +9,9 @@
 
 @interface eBaseViewController : UIViewController
 
+/// App 切后台时补报当前 topVC 的 page_leave（Reporter 调用）
++ (void)flushPageLeaveForBackground;
+
 @property (nonatomic,strong) UIView *navView;
 @property (nonatomic,strong) UILabel *titleName;
 @property (nonatomic,strong) UIButton *backBnt;

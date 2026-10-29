@@ -100,6 +100,9 @@ FOUNDATION_EXPORT NSString *const MHBTPerf;     // perf 性能
 #pragma mark - 仅供内部：生成 UUID
 + (NSString *)uuidString;
 
+/// 获取当前顶层 VC（公开类方法，供 eBaseViewController 等调用）
++ (UIViewController * _Nullable)topViewController;
+
 @end
 
 NS_ASSUME_NONNULL_END

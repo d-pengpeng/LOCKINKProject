@@ -240,7 +240,7 @@
                                        fromPage:NSStringFromClass([MHRegisterLController class])
                                      targetType:nil
                                        targetId:nil
-                                            ext:@{@"step": @"profile_submit"}
+                                            ext:@{@"step": @(2), @"stepName": @"profile"}
                                          result:1
                                        errorCode:nil
                                       durationMs:nil

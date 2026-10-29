@@ -28,6 +28,7 @@
 @property (nonatomic, assign) int redNum;
 @property (nonatomic, assign) BOOL selecTabbarBoo;
 @property (nonatomic, assign) int selTabbar1;
+@property (nonatomic, assign) NSTimeInterval lastTabSwitchTime; // tab_switch 1秒去重
 @end
 
 @implementation RootViewController
@@ -288,6 +289,11 @@
                 fromClass = oldRoot ? NSStringFromClass([oldRoot class]) : @"";
             }
         }
+        
+        // 1 秒内重复点只报一次
+        NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+        if (now - self.lastTabSwitchTime < 1.0) return;
+        self.lastTabSwitchTime = now;
         
         [[MHBehaviorReporter shared] trackAction:@"tab_switch"
                                             page:nil

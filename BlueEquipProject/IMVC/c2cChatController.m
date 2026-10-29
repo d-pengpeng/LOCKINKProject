@@ -208,10 +208,12 @@
     
     NSString *convId = [self respondsToSelector:@selector(conversationIDList)] ? [self performSelector:@selector(conversationIDList)] : @"";
     if (![convId isKindOfClass:[NSString class]]) convId = @"";
+    // targetType 根据 convId 前缀判断：c2c_ → user，group_ → group
+    NSString *targetType = [convId hasPrefix:@"group_"] ? @"group" : @"user";
     [[MHBehaviorReporter shared] trackAction:@"chat_enter"
                                         page:NSStringFromClass([self class])
                                     fromPage:nil
-                                  targetType:@"conversation"
+                                  targetType:targetType
                                     targetId:convId
                                          ext:nil];
 }

@@ -9,6 +9,7 @@
 #import "requestUrlRFile.h"
 #import "requestToolClass.h"
 #import "LYUserDefault.h"
+#import "eBaseViewController.h"
 #import <AFNetworking.h>
 #import <UIKit/UIKit.h>
 #import <sys/utsname.h>
@@ -55,6 +56,7 @@ static NSString *_g_lastFromPage = nil;
 // session 管理
 @property (nonatomic, copy) NSString *sessionId;
 @property (nonatomic, assign) NSTimeInterval sessionStartMs;                // 本次 session 开始时间
+@property (nonatomic, assign) BOOL hasReportedLoginSuccessInSession;        // login_success session 级去重
 
 @end
 
@@ -119,6 +121,7 @@ static NSString *_g_lastFromPage = nil;
         }
         self.sessionId = [MHBehaviorReporter uuidString];
         self.sessionStartMs = nowMs;
+        self.hasReportedLoginSuccessInSession = NO;
         [ud setObject:self.sessionId forKey:kSessionIdKey];
         [ud setDouble:nowMs forKey:kSessionStartKey];
         [ud synchronize];
@@ -196,6 +199,7 @@ static NSString *_g_lastFromPage = nil;
                              costMs:nil];
         self.sessionId = [MHBehaviorReporter uuidString];
         self.sessionStartMs = nowMs;
+        self.hasReportedLoginSuccessInSession = NO;
         [ud setObject:self.sessionId forKey:kSessionIdKey];
         [ud setDouble:nowMs forKey:kSessionStartKey];
         [ud synchronize];
@@ -234,6 +238,9 @@ static NSString *_g_lastFromPage = nil;
 }
 
 - (void)markAppBackground {
+    // 切后台前先补报当前页面的 page_leave
+    [eBaseViewController flushPageLeaveForBackground];
+    
     // app_background
     [self _enqueueEventWithType:MHBTApp
                             key:@"app_background"
@@ -359,7 +366,7 @@ static NSString *_g_lastFromPage = nil;
 #pragma mark - Internal: Enqueue
 
 /// 兜底：找当前顶层 VC，page 为空时自动填充
-+ (UIViewController *)_topViewController {
++ (UIViewController *)topViewController {
     UIWindow *window = nil;
     if (@available(iOS 13.0, *)) {
         for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
@@ -394,11 +401,21 @@ static NSString *_g_lastFromPage = nil;
                      errorCode:(NSString *)errorCode
                     durationMs:(NSNumber *)durationMs
                        costMs:(NSNumber *)costMs {
+    
+    // login_success session 级去重：每个 session 只报一次
+    if ([key isEqualToString:@"login_success"]) {
+        if (self.hasReportedLoginSuccessInSession) {
+            NSLog(@"[Behavior] skip login_success (already reported this session)");
+            return;
+        }
+        self.hasReportedLoginSuccessInSession = YES;
+    }
+    
     NSMutableDictionary *event = [NSMutableDictionary dictionary];
     
     // 兜底：page 为空时自动取当前 topVC
     if (page.length == 0) {
-        UIViewController *topVC = [MHBehaviorReporter _topViewController];
+        UIViewController *topVC = [MHBehaviorReporter topViewController];
         if (topVC) page = NSStringFromClass([topVC class]);
     }
     

@@ -49,10 +49,10 @@
 @property (nonatomic, strong) NSArray *cycLisAr;
 @property (nonatomic, strong) UILabel *placLab;
 
-/// exposure 去重：banner 已上报的 index
-@property (nonatomic, strong) NSMutableSet *exposedBannerIndexSet;
-/// exposure 去重：设备 cell 已上报的 index
-@property (nonatomic, strong) NSMutableSet *exposedDeviceIndexSet;
+/// exposure 5分钟去重：banner index → 上报时间戳
+@property (nonatomic, strong) NSMutableDictionary *exposedBannerTimeMap;
+/// exposure 5分钟去重：设备 index → 上报时间戳
+@property (nonatomic, strong) NSMutableDictionary *exposedDeviceTimeMap;
 @property (nonatomic, strong) UIView *placVVV;
 //@property (nonatomic, copy) NSString *ElecStr;
 //@property (nonatomic, assign) BOOL isWWWWBoo;
@@ -136,8 +136,8 @@
     self.titleName.text = eLocalizedString(@"tabbar_tit1");
     self.showImgVV = YES;
     
-    self.exposedBannerIndexSet = [NSMutableSet set];
-    self.exposedDeviceIndexSet = [NSMutableSet set];
+    self.exposedBannerTimeMap = [NSMutableDictionary dictionary];
+    self.exposedDeviceTimeMap = [NSMutableDictionary dictionary];
     
     [FloatingWindowModel shareInstance].devicNameArr = @[kCharactName3];  //MARK: 二期
     [FloatingWindowModel shareInstance].devicNameArr3 = @[kCharactName4, kCharactName6, kCharactName7, kCharactName8, kCharactName9, kCharactName10, kCharactName11, kCharactName14, kCharactName16,kCharactName17]; //MARK: 三期
@@ -375,12 +375,14 @@
     }
 }
 
-//MARK:  轮播图滚动 → banner 曝光
+//MARK:  轮播图滚动 → banner 曝光（5 分钟去重）
 - (void)cycleScrollView:(SDCycleScrollView *)cycleScrollView didScrollToIndex:(NSInteger)index
 {
-    NSNumber *idxNum = @(index);
-    if ([self.exposedBannerIndexSet containsObject:idxNum]) return;
-    [self.exposedBannerIndexSet addObject:idxNum];
+    NSString *key = [NSString stringWithFormat:@"%ld", (long)index];
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    NSNumber *last = self.exposedBannerTimeMap[key];
+    if (last && (now - last.doubleValue) < 300) return; // 5 分钟内已上报
+    self.exposedBannerTimeMap[key] = @(now);
     
     NSObject *banner = self.cycLisAr.count > index ? self.cycLisAr[index] : nil;
     NSString *bannerId = @"";
@@ -400,15 +402,17 @@
                                          costMs:nil];
 }
 
-//MARK:  设备 cell 曝光
+//MARK:  设备 cell 曝光（5 分钟去重）
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section != 0) return;
     if (indexPath.row >= (NSInteger)[FloatingWindowModel shareInstance].datasMut.count) return;
     
-    NSNumber *idxNum = @(indexPath.row);
-    if ([self.exposedDeviceIndexSet containsObject:idxNum]) return;
-    [self.exposedDeviceIndexSet addObject:idxNum];
+    NSString *key = [NSString stringWithFormat:@"%ld", (long)indexPath.row];
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    NSNumber *last = self.exposedDeviceTimeMap[key];
+    if (last && (now - last.doubleValue) < 300) return; // 5 分钟内已上报
+    self.exposedDeviceTimeMap[key] = @(now);
     
     MHEquipmentModel *model = [FloatingWindowModel shareInstance].datasMut[indexPath.row];
     NSString *mac = model.mac ?: @"";

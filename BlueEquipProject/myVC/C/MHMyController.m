@@ -13,6 +13,7 @@
 #import "MHsettingsController.h"
 #import "MHmyEditerController.h"
 #import "PopBottomView.h"
+#import "MHBehaviorReporter.h"
 #import "MHupdateQuoteView.h"
 
 @interface MHMyController ()<UITableViewDelegate, UITableViewDataSource, homeLivingOneCellDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
@@ -430,6 +431,13 @@
         NSDictionary *dic = @{@"profile":qiniuStr};
         [requestToolClass postNetworkWithUrl:request_user_updateProfile andParameter:dic success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
 //            [LYUserDefault saveUserAvator:qiniuStr];
+            NSString *userId = minStr([[NSUserDefaults standardUserDefaults] valueForKey:@"user_id"]);
+            [[MHBehaviorReporter shared] trackAction:@"profile_edit"
+                                                page:NSStringFromClass([self class])
+                                            fromPage:nil
+                                          targetType:@"user"
+                                            targetId:userId
+                                                 ext:@{@"field": @"profile"}];
             [SVProgressHUD showInfoWithStatus:eLocalizedString(@"request_success")];
             [self uploadfaceURLUrl:qiniuStr];
             [self requestUIUIMethod];

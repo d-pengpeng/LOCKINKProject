@@ -8,6 +8,7 @@
 
 #import "PAirSandbox.h"
 #import <UIKit/UIKit.h>
+#import "MHBehaviorReporter.h"
 
 #define ASThemeColor [UIColor colorWithWhite:0.2 alpha:1.0]
 #define ASWindowPadding 20
@@ -241,6 +242,13 @@ typedef enum : NSUInteger {
 
 - (void)sharePath:(NSString*)path
 {
+    [[MHBehaviorReporter shared] trackAction:@"share_click"
+                                        page:nil
+                                    fromPage:nil
+                                  targetType:nil
+                                    targetId:nil
+                                         ext:@{@"channel": @"system"}];
+    
     NSURL *url = [NSURL fileURLWithPath:path];
     NSArray *objectsToShare = @[url];
 

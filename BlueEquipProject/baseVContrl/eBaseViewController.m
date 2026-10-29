@@ -135,6 +135,27 @@ static NSMutableSet *_leaveReportedSet(void) {
     }
 }
 
+#pragma mark - App 切后台时补报 page_leave
+
++ (void)flushPageLeaveForBackground {
+    // 取当前 topVC，从 enterTimeMap 里找 enterTime，补报 page_leave
+    UIViewController *topVC = [MHBehaviorReporter topViewController];
+    if (!topVC) return;
+    
+    NSString *key = [NSString stringWithFormat:@"%p", topVC];
+    NSNumber *enter = _enterTimeMap()[key];
+    if (!enter) return;
+    
+    // 检查是否已上报过
+    if ([_leaveReportedSet() containsObject:key]) return;
+    [_leaveReportedSet() addObject:key];
+    
+    NSString *page = NSStringFromClass([topVC class]);
+    NSTimeInterval durationMs = MAX(0, ([[NSDate date] timeIntervalSince1970] - enter.doubleValue) * 1000);
+    [[MHBehaviorReporter shared] trackPageLeave:page durationMs:(NSInteger)durationMs];
+    [_enterTimeMap() removeObjectForKey:key];
+}
+
 -(void)setHideBackBnt:(BOOL)hideBackBnt{
     self.backBnt.hidden = hideBackBnt;
     

@@ -18,8 +18,8 @@
 @property (nonatomic, assign) NSInteger pageN;
 @property (nonatomic, assign) BOOL isRRRR;
 
-/// exposure 去重
-@property (nonatomic, strong) NSMutableSet *exposedIndexSet;
+/// exposure 5分钟去重
+@property (nonatomic, strong) NSMutableDictionary *exposedTimeMap;
 @end
 
 @implementation MHDeviceListController
@@ -50,7 +50,7 @@
     self.titleName.textColor = UIColor.blackColor;
     self.titleName.text = eLocalizedString(@"IMMsg_all2");
     
-    self.exposedIndexSet = [NSMutableSet set];
+    self.exposedTimeMap = [NSMutableDictionary dictionary];
     
     UIImageView *placeImV = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, _window_width, _window_height)];
     placeImV.image = [UIImage imageNamed:@"allBackImgsMsg"];
@@ -191,9 +191,11 @@
 {
     if (indexPath.row >= (NSInteger)self.datasMut.count) return;
     
-    NSNumber *idxNum = @(indexPath.row);
-    if ([self.exposedIndexSet containsObject:idxNum]) return;
-    [self.exposedIndexSet addObject:idxNum];
+    NSString *key = [NSString stringWithFormat:@"%ld", (long)indexPath.row];
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    NSNumber *last = self.exposedTimeMap[key];
+    if (last && (now - last.doubleValue) < 300) return; // 5 分钟内已上报
+    self.exposedTimeMap[key] = @(now);
     
     NSDictionary *dic = self.datasMut[indexPath.row];
     NSString *deviceId = minStr(dic[@"deviceId"]);

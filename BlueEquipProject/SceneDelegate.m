@@ -32,6 +32,7 @@
 @property (nonatomic, assign) BOOL isAddEquip;
 @property (nonatomic, assign) BOOL isListBle;
 @property (nonatomic, assign) BOOL bluetoothBtn;
+@property (nonatomic, assign) NSTimeInterval bleConnectStartTime; // device_connect costMs 起点
 @end
 
 @implementation SceneDelegate
@@ -320,6 +321,7 @@
                         [FloatingWindowModel shareInstance].namStMMM = peripheral.name;
                         self.isAddEquip = YES;
                         self.peripheral = peripheral;
+                        self.bleConnectStartTime = [[NSDate date] timeIntervalSince1970];
                         [self.myCentralManager connectPeripheral:peripheral options:nil];
                     }
                 }
@@ -349,6 +351,7 @@
                         [FloatingWindowModel shareInstance].namStMMM = peripheral.name;
                         self.isAddEquip = YES;
                         self.peripheral = peripheral;
+                        self.bleConnectStartTime = [[NSDate date] timeIntervalSince1970];
                         [self.myCentralManager connectPeripheral:peripheral options:nil];
                     }
                 }
@@ -413,6 +416,7 @@
                     [FloatingWindowModel shareInstance].macStMMM = mac_ss;
                     [FloatingWindowModel shareInstance].namStMMM = pppperal.name;
                     self.peripheral = pppperal;
+                    self.bleConnectStartTime = [[NSDate date] timeIntervalSince1970];
                     [self.myCentralManager connectPeripheral:pppperal options:nil];
                 }
             }else {
@@ -428,6 +432,7 @@
                 [FloatingWindowModel shareInstance].macStMMM = mac_ss;
                 [FloatingWindowModel shareInstance].namStMMM = pppperal.name;
                 self.peripheral = pppperal;
+                self.bleConnectStartTime = [[NSDate date] timeIntervalSince1970];
                 [self.myCentralManager connectPeripheral:pppperal options:nil];
             }
         }
@@ -443,17 +448,21 @@
     NSLog(@"连接成功");
     NSString *devMac = [FloatingWindowModel shareInstance].macStMMM ?: @"";
     NSString *devName = [FloatingWindowModel shareInstance].namStMMM ?: @"";
+    NSTimeInterval costMs = self.bleConnectStartTime > 0
+        ? MAX(0, ([[NSDate date] timeIntervalSince1970] - self.bleConnectStartTime) * 1000)
+        : 0;
+    self.bleConnectStartTime = 0;
     [[MHBehaviorReporter shared] trackWithType:MHBTAction
                                             key:@"device_connect"
                                            page:nil
                                        fromPage:nil
                                      targetType:@"device"
                                        targetId:devMac
-                                            ext:@{@"deviceName": devName}
+                                            ext:@{@"channel": @"ble", @"step": @"ready", @"deviceName": devName}
                                          result:1
                                        errorCode:nil
                                       durationMs:nil
-                                         costMs:nil];
+                                         costMs:@((NSInteger)costMs)];
     
     if(self.peripheral && (self.peripheral != nil)) {
         self.peripheral.delegate = self;
@@ -564,18 +573,7 @@
 //MARK: 断开连接结果
 - (void)centralManager:(CBCentralManager*)central didDisconnectPeripheral:(CBPeripheral*)peripheral error:(nullable NSError*)error
 {
-    NSString *devMac = [FloatingWindowModel shareInstance].macStMMM2 ?: ([FloatingWindowModel shareInstance].macStMMM ?: @"");
-    [[MHBehaviorReporter shared] trackWithType:MHBTAction
-                                            key:@"device_disconnect"
-                                           page:nil
-                                       fromPage:nil
-                                     targetType:@"device"
-                                       targetId:devMac
-                                            ext:nil
-                                         result:1
-                                       errorCode:nil
-                                      durationMs:nil
-                                         costMs:nil];
+// 新文档无 device_disconnect key，不再上报
     
 //    _oneNumLab.text = eLocalizedString(@"home_nam1");
     [[NSNotificationCenter defaultCenter] postNotificationName:@"blueNameStatusNotiffName" object:eLocalizedString(@"home_nam1")];
@@ -783,7 +781,7 @@
                                        fromPage:nil
                                      targetType:@"device"
                                        targetId:([FloatingWindowModel shareInstance].macStMMM2 ?: @"")
-                                            ext:@{@"cmd": @"battery"}
+                                            ext:@{@"channel": @"ble", @"cmd": @"battery"}
                                          result:1
                                        errorCode:nil
                                       durationMs:nil
@@ -873,7 +871,7 @@
                                        fromPage:nil
                                      targetType:@"device"
                                        targetId:devMac
-                                            ext:@{@"cmd": motor.length > 0 ? motor : @"unknown"}
+                                            ext:@{@"channel": @"ble", @"cmd": motor.length > 0 ? motor : @"unknown"}
                                          result:1
                                        errorCode:nil
                                       durationMs:nil
