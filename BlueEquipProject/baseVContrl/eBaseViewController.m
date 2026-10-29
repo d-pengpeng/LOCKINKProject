@@ -18,19 +18,17 @@ static NSMutableDictionary *_enterTimeMap(void) {
     return map;
 }
 
-/// 曝光去重：记录每个页面类名最后一次上报时间（5分钟内不重复）
-static NSMutableDictionary *_exposureLastTimeMap(void) {
-    static NSMutableDictionary *map = nil;
+/// page_leave 去重：记录每个 VC 指针是否已上报过 leave（一次离开只报一条）
+static NSMutableSet *_leaveReportedSet(void) {
+    static NSMutableSet *set = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        map = [NSMutableDictionary dictionary];
+        set = [NSMutableSet set];
     });
-    return map;
+    return set;
 }
 
 @interface eBaseViewController ()
-
-@property (nonatomic, assign) BOOL exposureCancelled;
 
 @end
 
@@ -99,41 +97,25 @@ static NSMutableDictionary *_exposureLastTimeMap(void) {
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    // 重置 leave 去重标记（每次 appear 都允许下次 disappear 上报）
+    [_leaveReportedSet() removeObject:[NSString stringWithFormat:@"%p", self]];
+    
     NSString *page = NSStringFromClass([self class]);
     if (page.length > 0) {
         NSString *key = [NSString stringWithFormat:@"%p", self];
         _enterTimeMap()[key] = @([[NSDate date] timeIntervalSince1970]);
         [[MHBehaviorReporter shared] trackPageView:page fromPage:nil];
-        
-        // exposure: 500ms 可见度检测 + 5分钟去重
-        self.exposureCancelled = NO;
-        __weak typeof(self) weakSelf = self;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            __strong typeof(weakSelf) strongSelf = weakSelf;
-            if (!strongSelf || strongSelf.exposureCancelled) return;
-            if (strongSelf.view.window == nil) return; // 页面已不可见
-            NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
-            NSNumber *last = _exposureLastTimeMap()[page];
-            if (last && (now - last.doubleValue) < 300) return; // 5分钟内已上报过
-            _exposureLastTimeMap()[page] = @(now);
-            [[MHBehaviorReporter shared] trackWithType:MHBTPage
-                                                    key:@"exposure"
-                                                   page:page
-                                               fromPage:nil
-                                             targetType:nil
-                                               targetId:nil
-                                                    ext:nil
-                                                 result:1
-                                               errorCode:nil
-                                              durationMs:nil
-                                                 costMs:nil];
-        });
     }
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    self.exposureCancelled = YES;
+    
+    // 去重：同一 VC 实例的 viewWillDisappear 可能被多次触发（导航栈透传），一次离开只报一条
+    NSString *selfKey = [NSString stringWithFormat:@"%p", self];
+    if ([_leaveReportedSet() containsObject:selfKey]) return;
+    [_leaveReportedSet() addObject:selfKey];
+    
     NSString *page = NSStringFromClass([self class]);
     NSString *key = [NSString stringWithFormat:@"%p", self];
     NSNumber *enter = _enterTimeMap()[key];

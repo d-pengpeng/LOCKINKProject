@@ -202,13 +202,16 @@
         return;
     }
     
-    if (self.selTabbar1 != (int)(btn.tag-9800+1)) {
+    int oldIndex = self.selTabbar1;
+    int newIndex = (int)(btn.tag - 9800 + 1);
+    
+    if (oldIndex != newIndex) {
         self.selecTabbarBoo = YES;
     }
     
     self.tabVVVV.hidden = NO;
     
-    self.selTabbar1 = (int)(btn.tag-9800+1);
+    self.selTabbar1 = newIndex;
     
     UILabel *fivsLab = [self.tabVVVV viewWithTag:9900];
     UILabel *fivsLab2 = [self.tabVVVV viewWithTag:9901];
@@ -275,12 +278,27 @@
             root = ((UINavigationController *)nav).topViewController;
         }
         NSString *toClass = root ? NSStringFromClass([root class]) : @"";
+        
+        // 找旧 tab 的 rootVC class
+        NSString *fromClass = @"";
+        if (oldIndex >= 1 && oldIndex <= (int)self.viewControllers.count) {
+            UIViewController *oldNav = self.viewControllers[oldIndex - 1];
+            if ([oldNav isKindOfClass:[UINavigationController class]]) {
+                UIViewController *oldRoot = ((UINavigationController *)oldNav).topViewController;
+                fromClass = oldRoot ? NSStringFromClass([oldRoot class]) : @"";
+            }
+        }
+        
         [[MHBehaviorReporter shared] trackAction:@"tab_switch"
                                             page:nil
                                         fromPage:nil
                                       targetType:@"tab"
                                         targetId:toClass ?: @""
-                                             ext:nil];
+                                             ext:@{
+            @"from": fromClass ?: @"",
+            @"to": toClass ?: @"",
+            @"index": @(newIndex)
+        }];
     }
 }
 
