@@ -9,6 +9,7 @@
 //#import "SVProgressHUD.h"
 #import "MHBehaviorReporter.h"
 
+/// 页面停留 enterTime 字典，key = VC 指针地址字符串
 static NSMutableDictionary *_enterTimeMap(void) {
     static NSMutableDictionary *map = nil;
     static dispatch_once_t onceToken;
@@ -18,7 +19,7 @@ static NSMutableDictionary *_enterTimeMap(void) {
     return map;
 }
 
-/// page_leave 去重：记录每个 VC 指针是否已上报过 leave（一次离开只报一条）
+/// page_leave 去重：记录每个 VC 指针是否已上报过 leave
 static NSMutableSet *_leaveReportedSet(void) {
     static NSMutableSet *set = nil;
     static dispatch_once_t onceToken;
@@ -26,6 +27,86 @@ static NSMutableSet *_leaveReportedSet(void) {
         set = [NSMutableSet set];
     });
     return set;
+}
+
+/// 系统/第三方控制器黑名单：这些 VC 不做 page_view/page_leave 上报
+/// 原因：系统弹窗、图片选择器、分享面板、IM 内部容器等不是"用户浏览的页面"
+static NSArray<NSString *> *_systemBlockList(void) {
+    static NSArray *list = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        list = @[
+            // UIKit 系统容器
+            @"UIViewController",
+            @"UINavigationController",
+            @"UITabBarController",
+            @"UISplitViewController",
+            @"UIPageViewController",
+            @"UIPanelViewController",
+            @"UIAlertController",
+            @"UIActivityViewController",
+            @"UIInputViewController",
+            @"UISearchController",
+            @"UIReferenceLibraryViewController",
+            @"UIImagePickerController",
+            // Photos
+            @"PHPickerViewController",
+            @"PHAssetPickerViewController",
+            // 文档/预览
+            @"UIDocumentPickerViewController",
+            @"UIDocumentBrowserViewController",
+            @"QLPreviewController",
+            // 消息/邮件
+            @"MFMessageComposeViewController",
+            @"MFMailComposeViewController",
+            // 通讯录
+            @"ABPeoplePickerNavigationController",
+            @"CNContactPickerViewController",
+            // 其它系统
+            @"SKStoreProductViewController",
+            @"SFSafariViewController",
+            @"SFSymbolViewController",
+            @"AVAudioRecorderViewController",
+            @"AVVideoCaptureViewController",
+            @"AVCaptureViewController",
+            @"GKGameCenterViewController",
+            @"MFMediaPickerViewController",
+            @"SKCloudServiceSetupViewController",
+            // IM SDK 容器（TUIContactSelectController 等容器类不记页面）
+            @"TUIBaseChatViewController", // 但子类 c2cChatController 是业务页面，自己会单独上报
+            @"TUIMessageController",
+            // Masonry/SVProgressHUD 等非 VC（以防万一）
+            @"SVProgressHUD",
+        ];
+    });
+    return list;
+}
+
+/// 判断是否应跳过 page_view/page_leave 上报
+static BOOL _shouldTrackPage(UIViewController *vc) {
+    if (!vc) return NO;
+    NSString *clsName = NSStringFromClass([vc class]);
+    if (clsName.length == 0) return NO;
+    // 黑名单精确匹配
+    if ([_systemBlockList() containsObject:clsName]) return NO;
+    // 前缀过滤（避免漏报系统子类如 XXAlertController）
+    NSArray *prefixes = @[
+        @"UIAlert",
+        @"UIActivity",
+        @"UIInput",
+        @"UISearch",
+        @"UIImagePicker",
+        @"PHPicker",
+        @"UIDocument",
+        @"QLPreview",
+        @"SKStore",
+        @"SFSafari",
+        @"WKWebView",
+    ];
+    for (NSString *p in prefixes) {
+        if ([clsName hasPrefix:p]) return NO;
+    }
+    return YES;
 }
 
 @interface eBaseViewController ()
@@ -97,22 +178,27 @@ static NSMutableSet *_leaveReportedSet(void) {
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    // 系统/第三方控制器不做 page_view 上报
+    if (!_shouldTrackPage(self)) return;
+    
     // 重置 leave 去重标记（每次 appear 都允许下次 disappear 上报）
     [_leaveReportedSet() removeObject:[NSString stringWithFormat:@"%p", self]];
     
     NSString *page = NSStringFromClass([self class]);
-    if (page.length > 0) {
-        NSString *key = [NSString stringWithFormat:@"%p", self];
-        // enterTime 只记首次，后续 viewDidAppear 不覆盖（弹窗 present/dismiss 不应重置停留起点）
-        if (!_enterTimeMap()[key]) {
-            _enterTimeMap()[key] = @([[NSDate date] timeIntervalSince1970]);
-            [[MHBehaviorReporter shared] trackPageView:page fromPage:nil];
-        }
+    NSString *key = [NSString stringWithFormat:@"%p", self];
+    // enterTime 只记首次，后续 viewDidAppear 不覆盖（弹窗 present/dismiss 不应重置停留起点）
+    if (!_enterTimeMap()[key]) {
+        _enterTimeMap()[key] = @([[NSDate date] timeIntervalSince1970]);
+        [[MHBehaviorReporter shared] trackPageView:page fromPage:nil];
     }
 }
 
 -(void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    
+    // 系统/第三方控制器不做 page_leave 上报
+    if (!_shouldTrackPage(self)) return;
     
     // 只在"真正离开"时报 leave，被半透明弹窗 present 覆盖不算
     // isMovingFromParentViewController → 导航栈 pop/push 覆盖
@@ -140,7 +226,7 @@ static NSMutableSet *_leaveReportedSet(void) {
 + (void)flushPageLeaveForBackground {
     // 取当前 topVC，从 enterTimeMap 里找 enterTime，补报 page_leave
     UIViewController *topVC = [MHBehaviorReporter topViewController];
-    if (!topVC) return;
+    if (!topVC || !_shouldTrackPage(topVC)) return;
     
     NSString *key = [NSString stringWithFormat:@"%p", topVC];
     NSNumber *enter = _enterTimeMap()[key];
@@ -154,6 +240,44 @@ static NSMutableSet *_leaveReportedSet(void) {
     NSTimeInterval durationMs = MAX(0, ([[NSDate date] timeIntervalSince1970] - enter.doubleValue) * 1000);
     [[MHBehaviorReporter shared] trackPageLeave:page durationMs:(NSInteger)durationMs];
     [_enterTimeMap() removeObjectForKey:key];
+}
+
+#pragma mark - tab 切换 / 外部主动触发
+
+/// 主动对某个 VC 补报 page_leave（tab 切换场景）
++ (void)flushLeaveForVC:(UIViewController *)vc {
+    if (!vc || !_shouldTrackPage(vc)) return;
+    
+    NSString *key = [NSString stringWithFormat:@"%p", vc];
+    
+    // 已上报过就不重复
+    if ([_leaveReportedSet() containsObject:key]) return;
+    // 没有 enterTime 说明没报过 view，leave 也跳过
+    NSNumber *enter = _enterTimeMap()[key];
+    if (!enter) return;
+    
+    [_leaveReportedSet() addObject:key];
+    
+    NSString *page = NSStringFromClass([vc class]);
+    NSTimeInterval durationMs = MAX(0, ([[NSDate date] timeIntervalSince1970] - enter.doubleValue) * 1000);
+    [[MHBehaviorReporter shared] trackPageLeave:page durationMs:(NSInteger)durationMs];
+    [_enterTimeMap() removeObjectForKey:key];
+}
+
+/// 主动对某个 VC 补报 page_view（tab 切换场景）
++ (void)flushViewForVC:(UIViewController *)vc {
+    if (!vc || !_shouldTrackPage(vc)) return;
+    
+    NSString *key = [NSString stringWithFormat:@"%p", vc];
+    // 已有 enterTime 说明之前已报过 view，不重复
+    if (_enterTimeMap()[key]) return;
+    
+    // 清除 leave 去重标记（允许下次 disappear 上报）
+    [_leaveReportedSet() removeObject:key];
+    
+    _enterTimeMap()[key] = @([[NSDate date] timeIntervalSince1970]);
+    NSString *page = NSStringFromClass([vc class]);
+    [[MHBehaviorReporter shared] trackPageView:page fromPage:nil];
 }
 
 -(void)setHideBackBnt:(BOOL)hideBackBnt{

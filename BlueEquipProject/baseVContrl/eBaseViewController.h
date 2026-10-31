@@ -12,6 +12,12 @@
 /// App 切后台时补报当前 topVC 的 page_leave（Reporter 调用）
 + (void)flushPageLeaveForBackground;
 
+/// 主动对某个 VC 补报 page_leave（tab 切换、present 新页面等场景）
++ (void)flushLeaveForVC:(UIViewController *)vc;
+
+/// 主动对某个 VC 补报 page_view（tab 切换回前台时）
++ (void)flushViewForVC:(UIViewController *)vc;
+
 @property (nonatomic,strong) UIView *navView;
 @property (nonatomic,strong) UILabel *titleName;
 @property (nonatomic,strong) UIButton *backBnt;

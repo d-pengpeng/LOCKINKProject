@@ -6023,12 +6023,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = L992GPQMS4;
+				DEVELOPMENT_TEAM = L992GPQMS4;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -6046,7 +6044,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro.BlueEquipProjectNotiServier;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = LOCKINK_BLUE;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -6057,12 +6054,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L992GPQMS4;
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = L992GPQMS4;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -6080,7 +6075,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro.BlueEquipProjectNotiServier;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = com.lockink.qingQuPro.BlueEquipProjectNotiServier;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -6207,71 +6202,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 13;
-				DEVELOPMENT_TEAM = "";
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = L992GPQMS4;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM",
-					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel",
-				);
-				GCC_PREFIX_HEADER = "$(SRCROOT)/BlueEquipProject/PrefixHeader.pch";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BlueEquipProject/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = LOCKINK;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要使用您的蓝牙,  用来搜索连接蓝牙设备";
-				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "需要使用您的蓝牙,  用来搜索连接蓝牙设备";
-				INFOPLIST_KEY_NSCameraUsageDescription = "需要使用您的相机,  用来发布动态时用来添加图片";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要使用您的位置,  在定位锁界面中查看位置";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "需要使用您的位置,  在定位锁界面中查看位置";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要使用您的位置,  在定位锁界面中查看位置";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用您的麦克风, 在发布动态时用来录制语音";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要使用您的相册,  用来发布动态时用来添加图片";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要使用您的相册,  用来发布动态时用来添加图片";
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UIStatusBarStyle = "";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
-				);
-				MARKETING_VERSION = 1.6.3;
-				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "lockink-hoc";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-			};
-			name = Debug;
-		};
-		E88CC6702AAAEB430019E488 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D0F6902D909FDAC74A9BE7FF /* Pods-BlueEquipProject.release.xcconfig */;
-			buildSettings = {
-				APS_ENVIRONMENT = production;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = L992GPQMS4;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -6311,7 +6243,67 @@
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "lockink-appstore";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E88CC6702AAAEB430019E488 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D0F6902D909FDAC74A9BE7FF /* Pods-BlueEquipProject.release.xcconfig */;
+			buildSettings = {
+				APS_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BlueEquipProject/BlueEquipProject.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 13;
+				DEVELOPMENT_TEAM = L992GPQMS4;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM",
+					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel",
+				);
+				GCC_PREFIX_HEADER = "$(SRCROOT)/BlueEquipProject/PrefixHeader.pch";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BlueEquipProject/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LOCKINK;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要使用您的蓝牙,  用来搜索连接蓝牙设备";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "需要使用您的蓝牙,  用来搜索连接蓝牙设备";
+				INFOPLIST_KEY_NSCameraUsageDescription = "需要使用您的相机,  用来发布动态时用来添加图片";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要使用您的位置,  在定位锁界面中查看位置";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "需要使用您的位置,  在定位锁界面中查看位置";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要使用您的位置,  在定位锁界面中查看位置";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "需要使用您的麦克风, 在发布动态时用来录制语音";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要使用您的相册,  用来发布动态时用来添加图片";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要使用您的相册,  用来发布动态时用来添加图片";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen.storyboard;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
+				);
+				MARKETING_VERSION = 1.6.3;
+				OTHER_LDFLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;

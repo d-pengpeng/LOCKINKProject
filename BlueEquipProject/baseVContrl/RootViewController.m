@@ -17,6 +17,7 @@
 #import "MHAgeAssurance.h"
 #import "UIViewController+MHAgeGate.h"
 #import "MHBehaviorReporter.h"
+#import "eBaseViewController.h"
 
 @interface RootViewController ()<V2TIMFriendshipListener, V2TIMConversationListener>
 
@@ -208,6 +209,18 @@
     
     if (oldIndex != newIndex) {
         self.selecTabbarBoo = YES;
+        
+        // ① tab 切换前，对旧 tab 的 topVC 补报 page_leave（UITabBarController 切换不触发 viewWillDisappear）
+        if (oldIndex >= 1 && oldIndex <= (int)self.viewControllers.count) {
+            UIViewController *oldNav = self.viewControllers[oldIndex - 1];
+            UIViewController *oldTop = nil;
+            if ([oldNav isKindOfClass:[UINavigationController class]]) {
+                oldTop = ((UINavigationController *)oldNav).topViewController;
+            } else {
+                oldTop = oldNav;
+            }
+            [eBaseViewController flushLeaveForVC:oldTop];
+        }
     }
     
     self.tabVVVV.hidden = NO;
@@ -305,6 +318,20 @@
             @"to": toClass ?: @"",
             @"index": @(newIndex)
         }];
+        
+        // ② tab 切换后，对新 tab 的 topVC 补报 page_view（某些 iOS 版本下 tab 切换不触发 viewDidAppear）
+        if (oldIndex != newIndex) {
+            if (self.viewControllers.count > newIndex - 1) {
+                UIViewController *newNav = self.viewControllers[newIndex - 1];
+                UIViewController *newTop = nil;
+                if ([newNav isKindOfClass:[UINavigationController class]]) {
+                    newTop = ((UINavigationController *)newNav).topViewController;
+                } else {
+                    newTop = newNav;
+                }
+                [eBaseViewController flushViewForVC:newTop];
+            }
+        }
     }
 }
 
