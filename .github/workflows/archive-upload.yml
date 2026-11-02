@@ -44,8 +44,15 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PP_DIR/53f48a3c-823f-4e48-8911-ddb17f485846.mobileprovision"
-          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$PP_DIR/f46ef368-3b06-463b-8e9f-8d3acdfa3ace.mobileprovision"
+          # Automatic signing matches by profile Name; extract Name from each .mobileprovision
+          MAIN_PROFILE="$PP_DIR/temp_main.mobileprovision"
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$MAIN_PROFILE"
+          MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$MAIN_PROFILE" 2>/dev/null)" 2>/dev/null || echo "lockink-appstore")
+          mv "$MAIN_PROFILE" "$PP_DIR/${MAIN_NAME}.mobileprovision"
+          EXT_PROFILE="$PP_DIR/temp_ext.mobileprovision"
+          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$EXT_PROFILE"
+          EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$EXT_PROFILE" 2>/dev/null)" 2>/dev/null || echo "com.lockink.qingQuPro.BlueEquipProjectNotiServier")
+          mv "$EXT_PROFILE" "$PP_DIR/${EXT_NAME}.mobileprovision"
           ls -la "$PP_DIR"
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -53,18 +60,6 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
           PROVISIONING_PROFILE_EXT_BASE64: ${{ secrets.PROVISIONING_PROFILE_EXT_BASE64 }}
-
-      - name: Create xcconfig
-        run: |
-          cat > build_settings.xcconfig << 'EOF'
-          CODE_SIGN_STYLE = Manual
-          DEVELOPMENT_TEAM = L992GPQMS4
-          PROVISIONING_PROFILE = d7c4f98a-fb72-4d66-8125-18a1b5a4a538
-          PROVISIONING_PROFILE_SPECIFIER = 
-          CODE_SIGN_IDENTITY = iPhone Distribution
-          EOF
-          echo "=== xcconfig ==="
-          cat build_settings.xcconfig
 
       - name: Archive
         run: |
@@ -86,23 +81,6 @@ jobs:
               <true/>
               <key>signingStyle</key>
               <string>manual</string>
-              <key>provisioningProfiles</key>
-              <dict>
-                  <key>com.lockink.qingQuPro</key>
-                  <dict>
-                      <key>signingStyle</key>
-                      <string>manual</string>
-                      <key>profileUUID</key>
-                      <string>53f48a3c-823f-4e48-8911-ddb17f485846</string>
-                  </dict>
-                  <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
-                  <dict>
-                      <key>signingStyle</key>
-                      <string>manual</string>
-                      <key>profileUUID</key>
-                      <string>f46ef368-3b06-463b-8e9f-8d3acdfa3ace</string>
-                  </dict>
-              </dict>
           </dict>
           </plist>
           EOF
