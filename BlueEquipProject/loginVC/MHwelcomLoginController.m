@@ -859,22 +859,32 @@ API_AVAILABLE(ios(13.0))
 #pragma mark - 微信登录
 
 - (void)_wechatLoginClicked {
-    if (![self ensurePrivacyAgreeOrShowPopup]) return;
+    NSLog(@"[WeChat] 点击微信登录按钮");
+    if (![self ensurePrivacyAgreeOrShowPopup]) {
+        NSLog(@"[WeChat] 未同意隐私协议，拦截");
+        return;
+    }
 
     [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
                                         page:NSStringFromClass([self class])
                                          ext:@{@"method": @"wechat"}];
 
     if ([WXApi isWXAppInstalled]) {
+        NSLog(@"[WeChat] 拉起微信授权");
         [[MHWeChatHandler shared] sendAuthReq];
     } else {
+        NSLog(@"[WeChat] 未安装微信，提示用户");
         [SVProgressHUD showInfoWithStatus:@"请先安装微信"];
     }
 }
 
 - (void)_onWeChatAuthReceived:(NSNotification *)note {
     NSString *code = note.userInfo[@"code"];
-    if (code.length == 0) return;
+    NSLog(@"[WeChat] 收到授权回调，code=%@", code ?: @"(null)");
+    if (code.length == 0) {
+        NSLog(@"[WeChat] code 为空，忽略");
+        return;
+    }
     [SVProgressHUD showWithStatus:@"登录中..."];
 
     [[MHBehaviorReporter shared] trackAction:@"login_apple_start"
@@ -882,12 +892,15 @@ API_AVAILABLE(ios(13.0))
                                          ext:@{@"platform": @"wechat"}];
 
     NSDictionary *dicMM = @{@"code": code ?: @""};
+    NSLog(@"[WeChat] → POST %@ body=%@", request_login_wechat, dicMM);
     [requestToolClass postNetworkWithUrl:request_login_wechat andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
+        NSLog(@"[WeChat] loginWechat 响应 — code=%d, msg=%@, info=%@", code, msg, info);
         if (![info isKindOfClass:[NSDictionary class]]) return;
 
         BOOL bound = [info[@"bound"] boolValue];
         if (bound) {
+            NSLog(@"[WeChat] 已绑定账号 → 直接登录");
             NSDictionary *authInfo = info[@"authInfo"];
             if ([authInfo isKindOfClass:[NSDictionary class]]) {
                 [LYUserDefault saveUserLoginDefault:authInfo];
@@ -908,24 +921,28 @@ API_AVAILABLE(ios(13.0))
             // 未绑定 → 二选一
             self.pendingWechatTicket = [info[@"wechatTicket"] copy];
             NSString *nickName = minStr(info[@"nickName"]);
+            NSLog(@"[WeChat] 未绑定 — ticket=%@, nickName=%@", self.pendingWechatTicket ?: @"(null)", nickName ?: @"(null)");
             [self _showWechatUnboundAlertWithNickName:nickName];
         }
     } fail:^(NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
+        NSLog(@"[WeChat] loginWechat 失败 — msg=%@", msg);
         [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"微信登录失败"];
     }];
 }
 
 - (void)_onWeChatAuthFailed:(NSNotification *)note {
     NSString *error = note.userInfo[@"error"];
+    NSLog(@"[WeChat] 授权失败 — %@", error ?: @"(null)");
     [SVProgressHUD showErrorWithStatus:error.length > 0 ? error : @"微信授权失败"];
 }
 
 - (void)_onWeChatAuthCanceled:(NSNotification *)note {
-    // 用户主动取消，静默返回
+    NSLog(@"[WeChat] 用户主动取消授权");
 }
 
 - (void)_showWechatUnboundAlertWithNickName:(NSString *)nickName {
+    NSLog(@"[WeChat] 弹出二选一弹窗 — nickName=%@, hasTicket=%d", nickName ?: @"(null)", self.pendingWechatTicket.length > 0);
     NSString *title = nickName.length > 0 ? [NSString stringWithFormat:@"微信「%@」未绑定账号", nickName] : @"该微信未绑定账号";
     NSString *message = @"请选择注册新账号，或绑定已有账号";
 
@@ -993,12 +1010,12 @@ API_AVAILABLE(ios(13.0))
     NSString *ticket = self.pendingWechatTicket;
     if (ticket.length == 0) return;
     self.pendingWechatTicket = nil;
+    NSLog(@"[WeChat] 场景 C — 登录成功，自动 bindWechat ticket=%@", ticket);
 
     [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-        NSLog(@"[WeChat] bind with ticket success");
+        NSLog(@"[WeChat] bindWechat 成功 — code=%d, msg=%@", code, msg);
     } fail:^(NSString * _Nonnull msg) {
-        // 绑定失败不拦截登录流程，提示用户到账号与安全手动绑定
-        NSLog(@"[WeChat] bind with ticket fail: %@", msg);
+        NSLog(@"[WeChat] bindWechat 失败 — msg=%@ (不拦截登录流程)", msg);
     }];
 }
 
