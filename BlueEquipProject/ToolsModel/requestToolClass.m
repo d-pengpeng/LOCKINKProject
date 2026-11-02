@@ -59,7 +59,9 @@ static requestToolClass* kSingleObject = nil;
         lang_new = @"en";
     }
 
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
@@ -70,7 +72,7 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
@@ -165,7 +167,9 @@ static requestToolClass* kSingleObject = nil;
         lang_new = @"en";
     }
 
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
@@ -176,7 +180,7 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session POST:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull uploadProgress) {
@@ -373,6 +377,15 @@ static requestToolClass* kSingleObject = nil;
     AFHTTPSessionManager *session = [AFHTTPSessionManager manager];
     NSString *requestUrl = [INTERFACEADDRESS stringByAppendingFormat:@"%@",url];
     [session.requestSerializer setValue:TOKEN?TOKEN:@"" forHTTPHeaderField:@"token"];//设置请求体
+    
+    NSString *langStr = [[SwichLanguage shareInstance] userLanguage];
+    NSString *lang_new = @"en";
+    if ([langStr hasPrefix:@"zh"]) {
+        lang_new = @"zh";
+    }
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
+    
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
     [session.requestSerializer didChangeValueForKey:@"timeoutInterval"];
@@ -380,7 +393,7 @@ static requestToolClass* kSingleObject = nil;
     session.responseSerializer = [AFHTTPResponseSerializer serializer];
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-    NSDictionary *headersDic = @{@"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"lang":lang_new, @"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST multipart] %@\n[headers] %@\n[voiceDataSize] %lu\n[params] %@", requestUrl, headersDic, (unsigned long)dataVoice.length, parameter ?: @{});
 
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
@@ -451,7 +464,9 @@ static requestToolClass* kSingleObject = nil;
         lang_new = @"en";
     }
 
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
@@ -462,7 +477,7 @@ static requestToolClass* kSingleObject = nil;
     
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
@@ -539,7 +554,9 @@ static requestToolClass* kSingleObject = nil;
     }else {
         lang_new = @"en";
     }
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
     [session.requestSerializer didChangeValueForKey:@"timeoutInterval"];
@@ -548,7 +565,7 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP POST] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
@@ -622,7 +639,9 @@ static requestToolClass* kSingleObject = nil;
     }else {
         lang_new = @"en";
     }
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
@@ -632,7 +651,7 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
@@ -694,7 +713,9 @@ static requestToolClass* kSingleObject = nil;
     }else {
         lang_new = @"en";
     }
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
@@ -704,7 +725,7 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ? pDic : @{});
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
@@ -784,7 +805,9 @@ static requestToolClass* kSingleObject = nil;
     }else {
         lang_new = @"en";
     }
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
     [session.requestSerializer didChangeValueForKey:@"timeoutInterval"];
@@ -793,7 +816,7 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = @{};
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic);
     
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
@@ -886,7 +909,9 @@ static requestToolClass* kSingleObject = nil;
     }else {
         lang_new = @"en";
     }
-    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    
+[session.requestSerializer setValue:lang_new forHTTPHeaderField:@"Accept-Language"];
+    [session.requestSerializer setValue:lang_new forHTTPHeaderField:@"lang"];
     
     [session.requestSerializer willChangeValueForKey:@"timeoutInterval"];
     session.requestSerializer.timeoutInterval = TIMEOUT;
@@ -896,7 +921,7 @@ static requestToolClass* kSingleObject = nil;
     session.requestSerializer = [AFJSONRequestSerializer serializer];
     requestUrl = [requestUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSDictionary *pDic = parameter;
-    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
+    NSDictionary *headersDic = @{@"Accept-Language":lang_new, @"lang":lang_new, @"token":TOKEN?TOKEN:@"", @"appVersion":[self appVersionString]};
     NSLog(@"\n[HTTP GET] %@\n[headers] %@\n[params] %@", requestUrl, headersDic, pDic ?: @{});
     NSTimeInterval reqStart = [[NSDate date] timeIntervalSince1970];
     [session GET:requestUrl parameters:pDic headers:headersDic progress:^(NSProgress * _Nonnull downloadProgress) {
