@@ -216,56 +216,52 @@ API_AVAILABLE(ios(13.0))
     
     [self qhBtnMethod];//MARK: 改为默认密码登录
     
-    //MARK: 苹果登录按钮区域（iOS 13+）
-    if (@available(iOS 13.0, *)) {
-        UIView *appleLine1 = [[UIView alloc] init];
-        appleLine1.backgroundColor = RGB(90, 90, 90);
-        [self.view addSubview:appleLine1];
-        [appleLine1 mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.equalTo(self.view.mas_left).offset(10);
-            make.right.equalTo(self.view.mas_centerX).offset(-20);
-            make.top.equalTo(loginBBtn.mas_bottom).offset(24);
-            make.height.offset(0.5);
-        }];
-        
-        UIView *appleLine2 = [[UIView alloc] init];
-        appleLine2.backgroundColor = RGB(90, 90, 90);
-        [self.view addSubview:appleLine2];
-        [appleLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.equalTo(self.view.mas_centerX).offset(20);
-            make.right.equalTo(self.view.mas_right).offset(-10);
-            make.top.equalTo(loginBBtn.mas_bottom).offset(24);
-            make.height.offset(0.5);
-        }];
-        
-        UILabel *appleLab = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:12 textAlignment:NSTextAlignmentCenter];
-        appleLab.text = @"Apple";
-        [self.view addSubview:appleLab];
-        [appleLab mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.centerX.equalTo(self.view.mas_centerX);
-            make.centerY.equalTo(appleLine1.mas_centerY);
-        }];
-        
-        ASAuthorizationAppleIDButton *appleBtn = [ASAuthorizationAppleIDButton buttonWithType:ASAuthorizationAppleIDButtonTypeSignIn style:ASAuthorizationAppleIDButtonStyleBlack];
-        [appleBtn addTarget:self action:@selector(appleLoginClicked) forControlEvents:UIControlEventTouchUpInside];
-        [self.view addSubview:appleBtn];
-        [appleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.equalTo(appleLine1.mas_bottom).offset(12);
-            make.centerX.equalTo(self.view.mas_centerX);
-            make.height.offset(44);
-            make.width.offset(200);
-        }];
-    }
+    //MARK: 苹果登录按钮区域（临时隐藏）
+    // if (@available(iOS 13.0, *)) {
+    //     UIView *appleLine1 = [[UIView alloc] init];
+    //     appleLine1.backgroundColor = RGB(90, 90, 90);
+    //     [self.view addSubview:appleLine1];
+    //     [appleLine1 mas_makeConstraints:^(MASConstraintMaker *make) {
+    //         make.left.equalTo(self.view.mas_left).offset(10);
+    //         make.right.equalTo(self.view.mas_centerX).offset(-20);
+    //         make.top.equalTo(loginBBtn.mas_bottom).offset(24);
+    //         make.height.offset(0.5);
+    //     }];
+    //
+    //     UIView *appleLine2 = [[UIView alloc] init];
+    //     appleLine2.backgroundColor = RGB(90, 90, 90);
+    //     [self.view addSubview:appleLine2];
+    //     [appleLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
+    //         make.left.equalTo(self.view.mas_centerX).offset(20);
+    //         make.right.equalTo(self.view.mas_right).offset(-10);
+    //         make.top.equalTo(loginBBtn.mas_bottom).offset(24);
+    //         make.height.offset(0.5);
+    //     }];
+    //
+    //     UILabel *appleLab = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:12 textAlignment:NSTextAlignmentCenter];
+    //     appleLab.text = @"Apple";
+    //     [self.view addSubview:appleLab];
+    //     [appleLab mas_makeConstraints:^(MASConstraintMaker *make) {
+    //         make.centerX.equalTo(self.view.mas_centerX);
+    //         make.centerY.equalTo(appleLine1.mas_centerY);
+    //     }];
+    //
+    //     ASAuthorizationAppleIDButton *appleBtn = [ASAuthorizationAppleIDButton buttonWithType:ASAuthorizationAppleIDButtonTypeSignIn style:ASAuthorizationAppleIDButtonStyleBlack];
+    //     [appleBtn addTarget:self action:@selector(appleLoginClicked) forControlEvents:UIControlEventTouchUpInside];
+    //     [self.view addSubview:appleBtn];
+    //     [appleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+    //         make.top.equalTo(appleLine1.mas_bottom).offset(12);
+    //         make.centerX.equalTo(self.view.mas_centerX);
+    //         make.height.offset(44);
+    //         make.width.offset(200);
+    //     }];
+    // }
     
     UIView *botmVV = [HistoryRecordModel createViewUIUI];
     botmVV.backgroundColor = UIColor.clearColor;
     [self.view addSubview:botmVV];
     [botmVV mas_makeConstraints:^(MASConstraintMaker *make) {
-        if (@available(iOS 13.0, *)) {
-            make.top.equalTo(loginBBtn.mas_bottom).offset(88); // 苹果按钮区域占位
-        } else {
-            make.top.equalTo(loginBBtn.mas_bottom).offset(6);
-        }
+        make.top.equalTo(loginBBtn.mas_bottom).offset(6);
         make.centerX.equalTo(self.view.mas_centerX);
         make.height.offset(36);
     }];
