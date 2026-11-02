@@ -43,7 +43,6 @@ API_AVAILABLE(ios(13.0))
 @property (nonatomic, assign) BOOL isEmilBoo;
 @property (nonatomic, strong) UIButton *deleleMethBtn;
 @property (nonatomic, strong) eSelectCountryCodeView *eSelectCountryCodeV;
-@property (nonatomic, copy, nullable) NSString *pendingWechatTicket;
 @end
 
 @implementation MHwelcomLoginController
@@ -558,9 +557,6 @@ API_AVAILABLE(ios(13.0))
                 }
                 
                 [LYUserDefault saveIsLoginBoo:YES];
-                
-                // 场景 C：如果有待绑定的微信票据，登录成功后自动绑定
-                [self _bindPendingWechatTicketIfNeeded];
                 
                 if([LYUserDefault userDefault].sealing) {
                     
