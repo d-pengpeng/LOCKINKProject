@@ -20,21 +20,27 @@ NSString * const MHWeChatDidCancelNotification = @"MHWeChatDidCancelNotification
     return instance;
 }
 
-- (void)sendAuthReq {
+- (void)sendAuthReqFromVC:(UIViewController *)vc {
     BOOL installed = [WXApi isWXAppInstalled];
-    NSLog(@"[WeChat] sendAuthReq — isWXAppInstalled=%d", installed);
+    NSLog(@"[WeChat] sendAuthReqFromVC — isWXAppInstalled=%d, vc=%@", installed, NSStringFromClass([vc class]));
     if (!installed) {
-        NSLog(@"[WeChat] sendAuthReq 拦截：微信未安装");
+        NSLog(@"[WeChat] sendAuthReqFromVC 拦截：微信未安装");
         return;
     }
     SendAuthReq *req = [[SendAuthReq alloc] init];
     req.scope = @"snsapi_userinfo";
     req.state = @"LOCKINK_LOGIN";
     NSLog(@"[WeChat] sendAuthReq — scope=%@, state=%@", req.scope, req.state);
-    [WXApi sendReq:req completion:^(BOOL success) {
-        NSLog(@"[WeChat] sendReq completion — success=%d", success);
+
+    // 微信 SDK 2.0.9 专用 API：sendAuthReq:viewController:delegate:completion:
+    // 比通用 sendReq: 更适合授权场景，且在 UL 未配好时可能自动回退 URL Scheme
+    [WXApi sendAuthReq:req
+        viewController:vc
+              delegate:[MHWeChatHandler shared]
+            completion:^(BOOL success) {
+        NSLog(@"[WeChat] sendAuthReq:viewController:delegate:completion: → success=%d", success);
         if (!success) {
-            NSLog(@"[WeChat] sendReq 失败，发 MHWeChatDidFailNotification");
+            NSLog(@"[WeChat] sendAuthReq 失败，发 MHWeChatDidFailNotification");
             [[NSNotificationCenter defaultCenter] postNotificationName:MHWeChatDidFailNotification
                                                                 object:nil
                                                               userInfo:@{@"error": @"调起微信失败"}];

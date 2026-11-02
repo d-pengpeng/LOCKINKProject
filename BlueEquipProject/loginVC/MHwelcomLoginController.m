@@ -867,7 +867,7 @@ API_AVAILABLE(ios(13.0))
 
     if ([WXApi isWXAppInstalled]) {
         NSLog(@"[WeChat] 拉起微信授权");
-        [[MHWeChatHandler shared] sendAuthReq];
+        [[MHWeChatHandler shared] sendAuthReqFromVC:self];
     } else {
         NSLog(@"[WeChat] 未安装微信，提示用户");
         [SVProgressHUD showInfoWithStatus:@"请先安装微信"];

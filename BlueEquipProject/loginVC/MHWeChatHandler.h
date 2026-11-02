@@ -18,8 +18,8 @@ extern NSString * const MHWeChatDidCancelNotification;
 
 + (instancetype)shared;
 
-/// 发送微信授权请求（scope = snsapi_userinfo）
-- (void)sendAuthReq;
+/// 发送微信授权请求（SDK 2.0.9 专用 sendAuthReq:viewController:delegate:completion:）
+- (void)sendAuthReqFromVC:(UIViewController *)vc;
 
 @end
 
