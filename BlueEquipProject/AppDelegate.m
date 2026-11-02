@@ -51,12 +51,13 @@ static CFTimeInterval _appLaunchStart = 0;
     [[TUIKit sharedInstance] setupWithAppId:txIMAppId_int];
     
     // 微信开放平台 SDK 注册
-    // universalLink 先传空串（还没配 AASA + Associated Domains），SDK 会回退到 URL Scheme 模式
+    // 注意：WechatOpenSDK-XCFramework 2.x 强制要求 universalLink 为真实域名（不能是 nil 或 @""）
+    // https://api.app.lockink.cn 需在后端放 apple-app-site-association + Xcode 加 Associated Domains entitlement
     [WXApi startLogByLevel:WXLogLevelDetail logBlock:^(NSString * _Nonnull log) {
         NSLog(@"[WeChat SDK] %@", log);
     }];
-    BOOL wxReg = [WXApi registerApp:@"wx35dcf5039999207d" universalLink:@""];
-    NSLog(@"[WeChat] registerApp:universalLink:@\"\" → %d", wxReg);
+    BOOL wxReg = [WXApi registerApp:@"wx35dcf5039999207d" universalLink:@"https://api.app.lockink.cn/"];
+    NSLog(@"[WeChat] registerApp → %d", wxReg);
     if([LYUserDefault userDefault].isLoginBoo) {
         
         [self loginMethodImMethod];
