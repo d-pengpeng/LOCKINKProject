@@ -12,6 +12,7 @@
 #import <QCloudCOSXML/QCloudCOSXMLTransfer.h>
 #import <QuartzCore/QuartzCore.h>
 #import <WechatOpenSDK/WXApi.h>
+#import "MHWeChatHandler.h"
 
 #import <JPUSHService.h>
 #import <UserNotifications/UserNotifications.h>
