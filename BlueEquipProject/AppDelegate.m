@@ -51,9 +51,8 @@ static CFTimeInterval _appLaunchStart = 0;
     [[TUIKit sharedInstance] setupWithAppId:txIMAppId_int];
     
     // 微信开放平台 SDK 注册
-    if ([WXApi registerApp:@"wx35dcf5039999207d" universalLink:@""]) {
-        NSLog(@"[WeChat] registerApp success");
-    }
+    BOOL wxReg = [WXApi registerApp:@"wx35dcf5039999207d" universalLink:@"https://api.app.lockink.cn/"];
+    NSLog(@"[WeChat] registerApp:universalLink: → %d", wxReg);
     if([LYUserDefault userDefault].isLoginBoo) {
         
         [self loginMethodImMethod];
