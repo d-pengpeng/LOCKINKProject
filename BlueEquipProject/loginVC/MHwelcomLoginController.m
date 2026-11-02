@@ -43,6 +43,7 @@ API_AVAILABLE(ios(13.0))
 @property (nonatomic, assign) BOOL isEmilBoo;
 @property (nonatomic, strong) UIButton *deleleMethBtn;
 @property (nonatomic, strong) eSelectCountryCodeView *eSelectCountryCodeV;
+@property (nonatomic, copy, nullable) NSString *pendingWechatTicket; // 绑定已有账号场景：暂存票据
 @end
 
 @implementation MHwelcomLoginController
@@ -558,6 +559,9 @@ API_AVAILABLE(ios(13.0))
                 
                 [LYUserDefault saveIsLoginBoo:YES];
                 
+                // 场景 C：如果有 pendingWechatTicket（用户选了"绑定已有账号"），登录成功后自动调 bindWechat
+                [self _bindPendingWechatTicketIfNeeded];
+                
                 if([LYUserDefault userDefault].sealing) {
                     
                     [LYUserDefault saveIsSealing:NO];
@@ -929,12 +933,12 @@ API_AVAILABLE(ios(13.0))
                 [SVProgressHUD showErrorWithStatus:@"微信登录返回异常"];
             }
         } else {
-            // 未绑定 → 直接跳注册页，注册失败 50002 时会自动走 bindWechat
+            // 未绑定 → 弹窗二选一：注册新账号 / 绑定已有账号
             NSString *nickName = minStr(info[@"nickName"]);
             NSString *ticket = [info[@"wechatTicket"] copy];
-            NSLog(@"[WeChat] 未绑定 → 直接跳注册 ticket=%@, nickName=%@", ticket ?: @"(null)", nickName ?: @"(null)");
+            NSLog(@"[WeChat] 未绑定 → 二选一弹窗 ticket=%@, nickName=%@", ticket ?: @"(null)", nickName ?: @"(null)");
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self _pushRegisterWithWechatTicket:ticket nickName:nickName];
+                [self _showWechatUnboundAlertWithTicket:ticket nickName:nickName];
             });
         }
     } fail:^(NSString * _Nonnull msg) {
@@ -952,6 +956,53 @@ API_AVAILABLE(ios(13.0))
 
 - (void)_onWeChatAuthCanceled:(NSNotification *)note {
     NSLog(@"[WeChat] 用户主动取消授权");
+}
+
+// MARK: 二选一弹窗：注册新账号 / 绑定已有账号
+- (void)_showWechatUnboundAlertWithTicket:(NSString *)ticket nickName:(NSString *)nickName {
+    NSString *title = nickName.length > 0 ? [NSString stringWithFormat:@"微信「%@」未绑定账号", nickName] : @"该微信未绑定账号";
+    NSString *message = @"请选择注册新账号，或绑定已有账号";
+    NSLog(@"[WeChat] 弹窗 — title=%@, hasTicket=%d", title, ticket.length > 0);
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleActionSheet];
+
+    __weak typeof(self) weakSelf = self;
+
+    // 注册新账号 → 跳注册页（注册时带 ticket 自动绑定）
+    [alert addAction:[UIAlertAction actionWithTitle:@"注册新账号" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        NSLog(@"[WeChat] 用户选择 → 注册新账号");
+        [strongSelf _pushRegisterWithWechatTicket:ticket nickName:nickName];
+    }]];
+
+    // 绑定已有账号 → 留在当前登录页，保存 ticket，登录成功后自动 bindWechat
+    [alert addAction:[UIAlertAction actionWithTitle:@"绑定已有账号" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        NSLog(@"[WeChat] 用户选择 → 绑定已有账号（保存 pendingWechatTicket，引导用户登录）");
+        strongSelf.pendingWechatTicket = ticket;
+        [SVProgressHUD showInfoWithStatus:@"请用已有账号登录，登录后将自动绑定微信"];
+    }]];
+
+    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+/// 登录成功后，如有 pendingWechatTicket 自动调 bindWechat（场景 C）
+- (void)_bindPendingWechatTicketIfNeeded {
+    NSString *ticket = self.pendingWechatTicket;
+    if (ticket.length == 0) return;
+    self.pendingWechatTicket = nil;
+    NSLog(@"[WeChat] 场景 C — 登录成功，自动 bindWechat ticket=%@", ticket);
+    [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        NSLog(@"[WeChat] bindWechat 成功 — code=%d, msg=%@", code, msg);
+    } fail:^(NSString * _Nonnull msg) {
+        NSLog(@"[WeChat] bindWechat 失败 — msg=%@ (不拦截登录)", msg);
+    }];
 }
 
 - (void)_pushRegisterWithWechatTicket:(NSString *)ticket nickName:(NSString *)nickName {
