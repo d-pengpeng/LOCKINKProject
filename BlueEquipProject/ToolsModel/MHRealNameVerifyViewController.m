@@ -104,11 +104,24 @@
         make.width.equalTo(sv);
     }];
 
+    // ===== 顶部监管说明 =====
+    UILabel *noticeLabel = [[UILabel alloc] init];
+    noticeLabel.text = @"根据监管要求，使用聊天功能前需完成实名认证\nReal-name verification is required before chatting.";
+    noticeLabel.numberOfLines = 0;
+    noticeLabel.font = [UIFont boldSystemFontOfSize:16];
+    noticeLabel.textColor = [UIColor darkGrayColor];
+    [content addSubview:noticeLabel];
+    [noticeLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(content).offset(16);
+        make.left.equalTo(content).offset(16);
+        make.right.equalTo(content).offset(-16);
+    }];
+
     // ===== 状态卡片 =====
     self.statusCardView = [self _buildStatusCard];
     [content addSubview:self.statusCardView];
     [self.statusCardView mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(content).offset(12);
+        make.top.equalTo(noticeLabel.mas_bottom).offset(12);
         make.left.equalTo(content).offset(16);
         make.right.equalTo(content).offset(-16);
     }];
@@ -225,9 +238,6 @@
         make.height.mas_equalTo(44);
         make.bottom.equalTo(self.formContainer).offset(-18);
     }];
-
-    // 默认隐藏状态卡片（只改 hidden 不动约束）
-    self.statusCardView.hidden = YES;
 }
 
 #pragma mark - 辅助构建
@@ -385,7 +395,11 @@
 }
 
 - (void)_renderNoneUI {
-    self.statusCardView.hidden = YES;
+    self.statusTitleLabel.text = @"未提交实名认证";
+    self.statusTitleLabel.textColor = [UIColor grayColor];
+    self.statusDetailLabel.text = @"Not verified";
+    self.statusCardView.backgroundColor = [UIColor whiteColor];
+    self.statusCardView.hidden = NO;
 
     self.nameField.enabled = YES;
     self.idCardField.enabled = YES;
