@@ -8,6 +8,7 @@
 #import "MHNexLoginController.h"
 #import "MHBehaviorReporter.h"
 #import "MHloginController.h"
+#import "requestUrlRFile.h"
 
 @interface MHNexLoginController ()
 
@@ -298,6 +299,26 @@
         } fail:^(NSString * _Nonnull msg) {
             self.isRequBoo = NO;
             NSString *msgStr = msg ?: @"";
+            NSLog(@"[WeChat] register fail — msg=%@, hasWechatTicket=%d", msgStr, self.wechatTicket.length > 0);
+
+            // 微信登录注册场景：如果账号已存在（50002）且带了 wechatTicket
+            // → 用户用该账号密码正常登录后自动绑定微信
+            if (self.wechatTicket.length > 0
+                && ([msgStr containsString:@"占用"] || [msgStr containsString:@"已存在"] || [msgStr containsString:@"exists"])) {
+                NSLog(@"[WeChat] 50002 登录名已占用 → 调 loginMethodUIUIU（登录成功后自动 bindWechat）");
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"账号已存在"
+                                                                               message:@"该账号已注册，将使用您刚才填写的密码登录并自动绑定微信"
+                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                __weak typeof(self) weakSelf = self;
+                [alert addAction:[UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    __strong typeof(weakSelf) strongSelf = weakSelf;
+                    if (!strongSelf) return;
+                    [strongSelf loginMethodUIUIU];
+                }]];
+                [self presentViewController:alert animated:YES completion:nil];
+                return;
+            }
+
             [[MHBehaviorReporter shared] trackWithType:MHBTFlow
                                                     key:@"register_step"
                                                    page:NSStringFromClass([self class])
@@ -309,6 +330,7 @@
                                                errorCode:nil
                                               durationMs:nil
                                                  costMs:nil];
+            [SVProgressHUD showErrorWithStatus:msgStr];
         }];
     }else {
         [SVProgressHUD showInfoWithStatus:eLocalizedString(@"login_err3")];
@@ -326,6 +348,18 @@
         }
         [LYUserDefault saveIsEmailBoo:self.isEmilBoo];
         [LYUserDefault saveIsLoginBoo:YES];
+
+        // 微信绑定场景：登录成功后带 wechatTicket 自动绑定
+        if (self.wechatTicket.length > 0) {
+            NSString *ticket = self.wechatTicket;
+            self.wechatTicket = nil;
+            NSLog(@"[WeChat] register→login 成功，自动 bindWechat ticket=%@", ticket);
+            [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                NSLog(@"[WeChat] bindWechat 成功 — code=%d, msg=%@", code, msg);
+            } fail:^(NSString * _Nonnull msg) {
+                NSLog(@"[WeChat] bindWechat 失败 — msg=%@ (不拦截)", msg);
+            }];
+        }
         
         if([LYUserDefault userDefault].sealing) {
             
