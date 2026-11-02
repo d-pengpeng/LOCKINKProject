@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSString *passworStr;
 @property (nonatomic, copy) NSString *codeStr;
 @property (nonatomic, assign) BOOL isEmilBoo;
+@property (nonatomic, copy, nullable) NSString *wechatTicket;
 @end
 
 NS_ASSUME_NONNULL_END

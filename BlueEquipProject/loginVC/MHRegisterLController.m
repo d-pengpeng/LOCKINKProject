@@ -443,6 +443,7 @@
                     vc.passworStr = minStr(self.textPasswordFF.text);
                     vc.codeStr = minStr(self.textCodeFF.text);
                     vc.isEmilBoo = self.isEmilBoo;
+                    vc.wechatTicket = self.wechatTicket;
                     [self.navigationController pushViewController:vc animated:YES];
                 } fail:^(NSString * _Nonnull msg) {
                     self.isRequBoo = NO;
@@ -461,6 +462,7 @@
                     vc.passworStr = minStr(self.textPasswordFF.text);
                     vc.codeStr = minStr(self.textCodeFF.text);
                     vc.isEmilBoo = self.isEmilBoo;
+                    vc.wechatTicket = self.wechatTicket;
                     [self.navigationController pushViewController:vc animated:YES];
                 } fail:^(NSString * _Nonnull msg) {
                     self.isRequBoo = NO;

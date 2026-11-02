@@ -42,6 +42,9 @@
 #define request_login_modifyPassword @"oauth/modifyPassword"
 #define request_login_apple @"oauth/loginApple"
 #define request_oauth_checkVerificationCode @"oauth/checkVerificationCode"
+#define request_login_wechat @"oauth/loginWechat"
+#define request_bind_wechat @"oauth/bindWechat"
+#define request_unbind_wechat @"oauth/unbindWechat"
 
 
 #define request_other_getAllServiceUid @"other/getServiceUid"

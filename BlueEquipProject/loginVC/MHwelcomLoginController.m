@@ -12,6 +12,7 @@
 #import "MHAboutSubController.h"
 #import "eSelectCountryCodeView.h"
 #import "MHBehaviorReporter.h"
+#import "MHWeChatHandler.h"
 #import <AuthenticationServices/AuthenticationServices.h>
 
 API_AVAILABLE(ios(13.0))
@@ -42,6 +43,7 @@ API_AVAILABLE(ios(13.0))
 @property (nonatomic, assign) BOOL isEmilBoo;
 @property (nonatomic, strong) UIButton *deleleMethBtn;
 @property (nonatomic, strong) eSelectCountryCodeView *eSelectCountryCodeV;
+@property (nonatomic, copy, nullable) NSString *pendingWechatTicket;
 @end
 
 @implementation MHwelcomLoginController
@@ -216,52 +218,56 @@ API_AVAILABLE(ios(13.0))
     
     [self qhBtnMethod];//MARK: 改为默认密码登录
     
-    //MARK: 苹果登录按钮区域（临时隐藏）
-    // if (@available(iOS 13.0, *)) {
-    //     UIView *appleLine1 = [[UIView alloc] init];
-    //     appleLine1.backgroundColor = RGB(90, 90, 90);
-    //     [self.view addSubview:appleLine1];
-    //     [appleLine1 mas_makeConstraints:^(MASConstraintMaker *make) {
-    //         make.left.equalTo(self.view.mas_left).offset(10);
-    //         make.right.equalTo(self.view.mas_centerX).offset(-20);
-    //         make.top.equalTo(loginBBtn.mas_bottom).offset(24);
-    //         make.height.offset(0.5);
-    //     }];
-    //
-    //     UIView *appleLine2 = [[UIView alloc] init];
-    //     appleLine2.backgroundColor = RGB(90, 90, 90);
-    //     [self.view addSubview:appleLine2];
-    //     [appleLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
-    //         make.left.equalTo(self.view.mas_centerX).offset(20);
-    //         make.right.equalTo(self.view.mas_right).offset(-10);
-    //         make.top.equalTo(loginBBtn.mas_bottom).offset(24);
-    //         make.height.offset(0.5);
-    //     }];
-    //
-    //     UILabel *appleLab = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:12 textAlignment:NSTextAlignmentCenter];
-    //     appleLab.text = @"Apple";
-    //     [self.view addSubview:appleLab];
-    //     [appleLab mas_makeConstraints:^(MASConstraintMaker *make) {
-    //         make.centerX.equalTo(self.view.mas_centerX);
-    //         make.centerY.equalTo(appleLine1.mas_centerY);
-    //     }];
-    //
-    //     ASAuthorizationAppleIDButton *appleBtn = [ASAuthorizationAppleIDButton buttonWithType:ASAuthorizationAppleIDButtonTypeSignIn style:ASAuthorizationAppleIDButtonStyleBlack];
-    //     [appleBtn addTarget:self action:@selector(appleLoginClicked) forControlEvents:UIControlEventTouchUpInside];
-    //     [self.view addSubview:appleBtn];
-    //     [appleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-    //         make.top.equalTo(appleLine1.mas_bottom).offset(12);
-    //         make.centerX.equalTo(self.view.mas_centerX);
-    //         make.height.offset(44);
-    //         make.width.offset(200);
-    //     }];
-    // }
+    //MARK: 微信登录按钮区域
+    UIView *wxLine1 = [[UIView alloc] init];
+    wxLine1.backgroundColor = RGB(90, 90, 90);
+    [self.view addSubview:wxLine1];
+    [wxLine1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).offset(10);
+        make.right.equalTo(self.view.mas_centerX).offset(-20);
+        make.top.equalTo(loginBBtn.mas_bottom).offset(24);
+        make.height.offset(0.5);
+    }];
+    
+    UIView *wxLine2 = [[UIView alloc] init];
+    wxLine2.backgroundColor = RGB(90, 90, 90);
+    [self.view addSubview:wxLine2];
+    [wxLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_centerX).offset(20);
+        make.right.equalTo(self.view.mas_right).offset(-10);
+        make.top.equalTo(loginBBtn.mas_bottom).offset(24);
+        make.height.offset(0.5);
+    }];
+    
+    UILabel *wxLab = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:12 textAlignment:NSTextAlignmentCenter];
+    wxLab.text = @"微信";
+    [self.view addSubview:wxLab];
+    [wxLab mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.view.mas_centerX);
+        make.centerY.equalTo(wxLine1.mas_centerY);
+    }];
+    
+    UIButton *wxBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [wxBtn setTitle:@"微信登录" forState:UIControlStateNormal];
+    [wxBtn setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
+    wxBtn.titleLabel.font = SYS_Font(15);
+    wxBtn.backgroundColor = [UIColor colorWithRed:7.0/255 green:193.0/255 blue:96.0/255 alpha:1.0];
+    wxBtn.layer.cornerRadius = 22;
+    wxBtn.layer.masksToBounds = YES;
+    [wxBtn addTarget:self action:@selector(_wechatLoginClicked) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:wxBtn];
+    [wxBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(wxLine1.mas_bottom).offset(12);
+        make.centerX.equalTo(self.view.mas_centerX);
+        make.height.offset(44);
+        make.width.offset(200);
+    }];
     
     UIView *botmVV = [HistoryRecordModel createViewUIUI];
     botmVV.backgroundColor = UIColor.clearColor;
     [self.view addSubview:botmVV];
     [botmVV mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(loginBBtn.mas_bottom).offset(6);
+        make.top.equalTo(wxBtn.mas_bottom).offset(12);
         make.centerX.equalTo(self.view.mas_centerX);
         make.height.offset(36);
     }];
@@ -405,6 +411,10 @@ API_AVAILABLE(ios(13.0))
         [self onebtnMethodTwo];
     }
     
+    // MARK: 微信授权回调通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWeChatAuthReceived:) name:MHWeChatDidReceiveCodeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWeChatAuthFailed:) name:MHWeChatDidFailNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWeChatAuthCanceled:) name:MHWeChatDidCancelNotification object:nil];
 }
 
 - (void)handleTapUIMethod:(UITapGestureRecognizer *)tagMM
@@ -548,6 +558,9 @@ API_AVAILABLE(ios(13.0))
                 }
                 
                 [LYUserDefault saveIsLoginBoo:YES];
+                
+                // 场景 C：如果有待绑定的微信票据，登录成功后自动绑定
+                [self _bindPendingWechatTicketIfNeeded];
                 
                 if([LYUserDefault userDefault].sealing) {
                     
@@ -841,6 +854,156 @@ API_AVAILABLE(ios(13.0))
 
 - (ASPresentationAnchor)presentationAnchorForAuthorizationController:(ASAuthorizationController *)controller API_AVAILABLE(ios(13.0)) {
     return self.view.window;
+}
+
+#pragma mark - 微信登录
+
+- (void)_wechatLoginClicked {
+    if (![self ensurePrivacyAgreeOrShowPopup]) return;
+
+    [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"method": @"wechat"}];
+
+    if ([WXApi isWXAppInstalled]) {
+        [[MHWeChatHandler shared] sendAuthReq];
+    } else {
+        [SVProgressHUD showInfoWithStatus:@"请先安装微信"];
+    }
+}
+
+- (void)_onWeChatAuthReceived:(NSNotification *)note {
+    NSString *code = note.userInfo[@"code"];
+    if (code.length == 0) return;
+    [SVProgressHUD showWithStatus:@"登录中..."];
+
+    [[MHBehaviorReporter shared] trackAction:@"login_apple_start"
+                                        page:NSStringFromClass([self class])
+                                         ext:@{@"platform": @"wechat"}];
+
+    NSDictionary *dicMM = @{@"code": code ?: @""};
+    [requestToolClass postNetworkWithUrl:request_login_wechat andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        if (![info isKindOfClass:[NSDictionary class]]) return;
+
+        BOOL bound = [info[@"bound"] boolValue];
+        if (bound) {
+            NSDictionary *authInfo = info[@"authInfo"];
+            if ([authInfo isKindOfClass:[NSDictionary class]]) {
+                [LYUserDefault saveUserLoginDefault:authInfo];
+                [LYUserDefault saveIsLoginBoo:YES];
+
+                [[MHBehaviorReporter shared] trackAction:@"login_apple_success"
+                                                    page:NSStringFromClass([self class])
+                                                     ext:@{@"platform": @"wechat"}];
+
+                // 登录成功通知 IM
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"loginNotifMethod" object:nil];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
+                });
+                [self.navigationController popToRootViewControllerAnimated:YES];
+            }
+        } else {
+            // 未绑定 → 二选一
+            self.pendingWechatTicket = [info[@"wechatTicket"] copy];
+            NSString *nickName = minStr(info[@"nickName"]);
+            [self _showWechatUnboundAlertWithNickName:nickName];
+        }
+    } fail:^(NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"微信登录失败"];
+    }];
+}
+
+- (void)_onWeChatAuthFailed:(NSNotification *)note {
+    NSString *error = note.userInfo[@"error"];
+    [SVProgressHUD showErrorWithStatus:error.length > 0 ? error : @"微信授权失败"];
+}
+
+- (void)_onWeChatAuthCanceled:(NSNotification *)note {
+    // 用户主动取消，静默返回
+}
+
+- (void)_showWechatUnboundAlertWithNickName:(NSString *)nickName {
+    NSString *title = nickName.length > 0 ? [NSString stringWithFormat:@"微信「%@」未绑定账号", nickName] : @"该微信未绑定账号";
+    NSString *message = @"请选择注册新账号，或绑定已有账号";
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title
+                                                                   message:message
+                                                            preferredStyle:UIAlertControllerStyleActionSheet];
+
+    __weak typeof(self) weakSelf = self;
+
+    [alert addAction:[UIAlertAction actionWithTitle:@"注册新账号" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [strongSelf _pushRegisterWithWechatTicket:strongSelf.pendingWechatTicket nickName:nickName];
+    }]];
+
+    [alert addAction:[UIAlertAction actionWithTitle:@"绑定已有账号" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        [strongSelf _showBindExistingAccountAlert];
+    }]];
+
+    [alert addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil]];
+
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+- (void)_pushRegisterWithWechatTicket:(NSString *)ticket nickName:(NSString *)nickName {
+    MHRegisterLController *vc = [[MHRegisterLController alloc] init];
+    if (ticket.length > 0) {
+        vc.wechatTicket = ticket;
+    }
+    if (nickName.length > 0) {
+        vc.prefillName = nickName;
+    }
+    vc.isTYBoo = self.isTYBoo;
+    [self.navigationController pushViewController:vc animated:YES];
+    __weak typeof(self) weakSelf = self;
+    vc.block_ = ^(BOOL isboo) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (!strongSelf) return;
+        strongSelf.isTYBoo = isboo;
+        if (strongSelf.isTYBoo) {
+            strongSelf.selImgV.image = [UIImage imageNamed:@"selSelect_img"];
+        } else {
+            strongSelf.selImgV.image = [UIImage imageNamed:@"selNor_img"];
+        }
+    };
+}
+
+- (void)_showBindExistingAccountAlert {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"绑定已有账号"
+                                                                   message:@"请先登录您已有的账号，然后带微信票据自动完成绑定"
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+
+    __weak typeof(self) weakSelf = self;
+    [alert addAction:[UIAlertAction actionWithTitle:@"好的，去登录" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        // 保持当前登录页的 pendingWechatTicket，用户用手机号/邮箱正常登录
+        // 登录成功后在 loginBtnMethod 里检测 pendingWechatTicket 并调 bindWechat
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+/// 登录成功后，如果有 pendingWechatTicket，调 bindWechat 把微信绑到当前账号
+- (void)_bindPendingWechatTicketIfNeeded {
+    NSString *ticket = self.pendingWechatTicket;
+    if (ticket.length == 0) return;
+    self.pendingWechatTicket = nil;
+
+    [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        NSLog(@"[WeChat] bind with ticket success");
+    } fail:^(NSString * _Nonnull msg) {
+        // 绑定失败不拦截登录流程，提示用户到账号与安全手动绑定
+        NSLog(@"[WeChat] bind with ticket fail: %@", msg);
+    }];
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 @end

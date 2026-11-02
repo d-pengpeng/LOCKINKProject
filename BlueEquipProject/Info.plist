@@ -14,10 +14,22 @@
 				<string>spotify-ios-quick-start</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>WeChat</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>wx35dcf5039999207d</string>
+			</array>
+		</dict>
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>spotify</string>
+		<string>weixin</string>
+		<string>weixinULAPI</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>

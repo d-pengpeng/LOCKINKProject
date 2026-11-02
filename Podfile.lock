@@ -73,6 +73,7 @@ PODS:
   - SVProgressHUD (2.3.1):
     - SVProgressHUD/Core (= 2.3.1)
   - SVProgressHUD/Core (2.3.1)
+  - WechatOpenSDK-XCFramework (2.0.9)
 
 DEPENDENCIES:
   - AFNetworking
@@ -90,6 +91,7 @@ DEPENDENCIES:
   - SocketRocket
   - SVGAPlayer
   - SVProgressHUD
+  - WechatOpenSDK-XCFramework
 
 SPEC REPOS:
   trunk:
@@ -113,6 +115,7 @@ SPEC REPOS:
     - SSZipArchive
     - SVGAPlayer
     - SVProgressHUD
+    - WechatOpenSDK-XCFramework
 
 SPEC CHECKSUMS:
   AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
@@ -135,7 +138,8 @@ SPEC CHECKSUMS:
   SSZipArchive: fe6a26b2a54d5a0890f2567b5cc6de5caa600aef
   SVGAPlayer: 318b85a78b61292d6ae9dfcd651f3f0d1cdadd86
   SVProgressHUD: 4837c74bdfe2e51e8821c397825996a8d7de6e22
+  WechatOpenSDK-XCFramework: 996f8fe4f5ca9d75529546f7246da459ef31aa0d
 
-PODFILE CHECKSUM: 8afd7a099e38b69c5f6ac701b7d5e0fc6f0a1da3
+PODFILE CHECKSUM: 5757745af707195006729b3ba5079b7d0d005725
 
 COCOAPODS: 1.16.2

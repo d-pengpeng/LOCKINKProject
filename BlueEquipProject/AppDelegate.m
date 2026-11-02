@@ -11,6 +11,7 @@
 #import <Bugly/Bugly.h>
 #import <QCloudCOSXML/QCloudCOSXMLTransfer.h>
 #import <QuartzCore/QuartzCore.h>
+#import <WechatOpenSDK/WXApi.h>
 
 #import <JPUSHService.h>
 #import <UserNotifications/UserNotifications.h>
@@ -47,6 +48,11 @@ static CFTimeInterval _appLaunchStart = 0;
     [[UIApplication sharedApplication] beginReceivingRemoteControlEvents]; //锁屏情况控制播放
     [Bugly startWithAppId:buglyAppIDId];
     [[TUIKit sharedInstance] setupWithAppId:txIMAppId_int];
+    
+    // 微信开放平台 SDK 注册
+    if ([WXApi registerApp:@"wx35dcf5039999207d"]) {
+        NSLog(@"[WeChat] registerApp success");
+    }
     if([LYUserDefault userDefault].isLoginBoo) {
         
         [self loginMethodImMethod];
@@ -288,7 +294,10 @@ static CFTimeInterval _appLaunchStart = 0;
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-    
+    // 微信回调
+    if ([url.scheme hasPrefix:@"wx"]) {
+        return [WXApi handleOpenURL:url delegate:[MHWeChatHandler shared]];
+    }
     return YES;
 }
 

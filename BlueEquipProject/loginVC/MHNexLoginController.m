@@ -264,7 +264,21 @@
         }
         self.isRequBoo = YES;
         [SVProgressHUD show];
-        NSDictionary *dicMM = @{@"contact":self.phoneStr, @"password":self.passworStr, @"code":self.codeStr, @"birthday":self.ymdStr, @"height":self.ymdStr2, @"weight":self.ymdStr3, @"locationId":self.ymdStr4, @"gender":self.oneSt, @"genderPreference":self.oneSt2, @"rolePreference":self.oneSt3, @"channel":@"IOS"};
+        NSMutableDictionary *dicMM = [NSMutableDictionary dictionary];
+        [dicMM setObject:self.phoneStr ?: @"" forKey:@"contact"];
+        [dicMM setObject:self.passworStr ?: @"" forKey:@"password"];
+        [dicMM setObject:self.codeStr ?: @"" forKey:@"code"];
+        [dicMM setObject:self.ymdStr ?: @"" forKey:@"birthday"];
+        [dicMM setObject:self.ymdStr2 ?: @"" forKey:@"height"];
+        [dicMM setObject:self.ymdStr3 ?: @"" forKey:@"weight"];
+        [dicMM setObject:self.ymdStr4 ?: @"" forKey:@"locationId"];
+        [dicMM setObject:self.oneSt ?: @"" forKey:@"gender"];
+        [dicMM setObject:self.oneSt2 ?: @"" forKey:@"genderPreference"];
+        [dicMM setObject:self.oneSt3 ?: @"" forKey:@"rolePreference"];
+        [dicMM setObject:@"IOS" forKey:@"channel"];
+        if (self.wechatTicket.length > 0) {
+            [dicMM setObject:self.wechatTicket forKey:@"wechatTicket"];
+        }
         [requestToolClass postRegisterLogNetworkWithUrl:request_login_register andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
 
             [[MHBehaviorReporter shared] trackWithType:MHBTFlow

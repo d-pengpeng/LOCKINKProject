@@ -12,6 +12,8 @@ typedef void(^registerLLLBlock)(BOOL isboo);
 @interface MHRegisterLController : eBaseViewController
 
 @property (nonatomic, assign) BOOL isTYBoo;
+@property (nonatomic, copy, nullable) NSString *wechatTicket;
+@property (nonatomic, copy, nullable) NSString *prefillName;
 @property (nonatomic, copy) registerLLLBlock block_;
 @end
 

@@ -24,6 +24,7 @@ target 'BlueEquipProject' do
   pod 'SocketRocket'
   pod 'Bugly'
   pod 'QCloudCOSXML/Transfer'
+  pod 'WechatOpenSDK-XCFramework'
   
   # Pods for BlueEquipProject
 
