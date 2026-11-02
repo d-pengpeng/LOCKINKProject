@@ -51,8 +51,10 @@ static CFTimeInterval _appLaunchStart = 0;
     [[TUIKit sharedInstance] setupWithAppId:txIMAppId_int];
     
     // 微信开放平台 SDK 注册
-    BOOL wxReg = [WXApi registerApp:@"wx35dcf5039999207d" universalLink:@"https://api.app.lockink.cn/"];
-    NSLog(@"[WeChat] registerApp:universalLink: → %d", wxReg);
+    // universalLink 暂时传 nil（还没在微信开放平台+AASA+AssociatedDomains 配好）
+    // 等域名 https://api.app.lockink.cn/ 配置好 apple-app-site-association 后再改回来
+    BOOL wxReg = [WXApi registerApp:@"wx35dcf5039999207d" universalLink:nil];
+    NSLog(@"[WeChat] registerApp:universalLink:nil → %d", wxReg);
     if([LYUserDefault userDefault].isLoginBoo) {
         
         [self loginMethodImMethod];
@@ -294,11 +296,25 @@ static CFTimeInterval _appLaunchStart = 0;
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-    // 微信回调
+    // 微信回调（URL Scheme 方式，iOS 12 及以下 / 没配置 Universal Links 的回退路径）
     if ([url.scheme hasPrefix:@"wx"]) {
+        NSLog(@"[WeChat] handleOpenURL → %@", url);
         return [WXApi handleOpenURL:url delegate:[MHWeChatHandler shared]];
     }
     return YES;
+}
+
+// MARK: Universal Links 回跳（微信 SDK 2.x + iOS 13+ 优先走这个）
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler
+{
+    NSLog(@"[WeChat] continueUserActivity — type=%@, url=%@", userActivity.activityType, userActivity.webpageURL);
+    if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+        NSURL *url = userActivity.webpageURL;
+        if (url) {
+            return [WXApi handleUniversalLink:url delegate:[MHWeChatHandler shared]];
+        }
+    }
+    return NO;
 }
 
 

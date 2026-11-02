@@ -10,6 +10,7 @@
 #import "CJNavigationController.h"
 #import "MHwelcomLoginController.h"
 #import "MHGuideViewController.h"
+#import "MHWeChatHandler.h"
 
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreLocation/CoreLocation.h>
@@ -195,10 +196,26 @@
 
 - (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
 {
-//    UIOpenURLContext *urlCC = URLContexts.allObjects.firstObject;
-//    if(urlCC.URL != nil) {
-//        [[spotifyRemoteConfigModel shareInstance] spotifyAuthorizationParametUrl:urlCC.URL];
-//    }
+    // 微信回调（URL Scheme 方式，iOS 12 及以下 / 没配置 Universal Links 的回退路径）
+    UIOpenURLContext *urlCC = URLContexts.allObjects.firstObject;
+    if (urlCC.URL != nil) {
+        NSLog(@"[WeChat] scene:openURLContexts → %@", urlCC.URL);
+        if ([urlCC.URL.scheme hasPrefix:@"wx"]) {
+            [WXApi handleOpenURL:urlCC.URL delegate:[MHWeChatHandler shared]];
+        }
+    }
+}
+
+// MARK: Universal Links 回跳（微信 SDK 2.x + iOS 13+ 优先走这个）
+- (void)scene:(UIScene *)scene continueUserActivity:(NSUserActivity *)userActivity
+{
+    NSLog(@"[WeChat] scene:continueUserActivity — type=%@, url=%@", userActivity.activityType, userActivity.webpageURL);
+    if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+        NSURL *url = userActivity.webpageURL;
+        if (url) {
+            [WXApi handleUniversalLink:url delegate:[MHWeChatHandler shared]];
+        }
+    }
 }
 
 - (void)notifStartScanBlueServiceNameMethodNotif
