@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>App 第三方登录通用流程图</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", sans-serif; background:#f5f5f7; margin:0; padding:40px 20px; }
+  h1 { text-align:center; color:#333; margin-bottom:8px; }
+  .subtitle { text-align:center; color:#888; margin-bottom:40px; font-size:14px; }
+  .wrap { max-width:1100px; margin:0 auto; background:#fff; border-radius:16px; box-shadow:0 4px 30px rgba(0,0,0,.08); padding:40px; overflow-x:auto; }
+  .legend { max-width:1100px; margin:30px auto 0; background:#fff; border-radius:12px; padding:20px 28px; font-size:13px; color:#555; line-height:1.8; box-shadow:0 2px 12px rgba(0,0,0,.05); }
+  .legend b { color:#333; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad:true, theme:'base', themeVariables:{ primaryColor:'#4A90E2', primaryTextColor:'#fff', primaryBorderColor:'#357ABD', lineColor:'#666', secondaryColor:'#F5A623', tertiaryColor:'#7ED321', fontFamily:'-apple-system, PingFang SC, sans-serif' }, flowchart:{ useMaxWidth:true, htmlLabels:true, curve:'basis' } });</script>
+</head>
+<body>
+
+<h1>🔐 App 第三方登录通用流程图</h1>
+<p class="subtitle">适用于：微信 / QQ / Apple Sign in / Google / Facebook / Twitter 等 OAuth2 / OpenID Connect 渠道</p>
+
+<div class="wrap">
+<pre class="mermaid">
+flowchart TD
+    A([用户打开 App 登录页]) --> B{选择登录方式}
+    B -->|手机号+验证码| PHONE[[手机号登录<br>不在本流程范围]]
+    B -->|第三方账号| C[点击第三方登录按钮<br>微信 / Apple / Google ...]
+
+    C --> D{是否安装第三方 App?}
+    D -->|已安装| E[调起第三方 SDK<br>OpenURL / Universal Link]
+    D -->|未安装| F[跳转第三方 Web 授权页<br>H5 Safari / SFSafariViewController]
+
+    E --> G{第三方授权}
+    F --> G
+    G -->|用户取消| X([登录失败 / 返回])
+    G -->|用户同意授权| H[第三方返回 auth code / identityToken]
+
+    H --> I[App 将 auth code 发给后端]
+    I --> J((后端))
+    J --> K[后端用 code 向第三方<br>换 access_token + userinfo]
+    K --> L{请求第三方 API}
+    L --> M[拿到第三方 openid / unionid / email / 头像]
+
+    M --> N{本地用户表是否<br>存在该 third-party id?}
+    N -->|✅ 已绑定| O[查到已有用户记录]
+    N -->|❌ 未绑定| P{是否首次使用?}
+    P -->|🆕 新用户| Q[自动创建账号<br>绑定 third-party id]
+    P -->|🔁 老用户换了设备| R[进入绑定流程<br>要求输入手机号/验证码]
+
+    O --> S[后端生成 JWT / Session]
+    Q --> S
+    R --> S
+
+    S --> T[返回 JWT + 用户信息<br>给 App]
+    T --> U[App 存储登录态<br>UserDefaults / Keychain]
+    U --> V([进入首页 / 登录成功])
+
+    subgraph 渠道差异说明
+      direction LR
+      APPLE["🍎 Apple Sign in<br>返回 identityToken (JWT)<br>需后端验签"]
+      WECHAT["💬 微信<br>返回 code → 换 access_token<br>拉 userinfo"]
+      GOOGLE["🔍 Google<br>返回 id_token (JWT)<br>需后端验签"]
+    end
+
+    style A fill:#4A90E2,stroke:#357ABD,color:#fff
+    style V fill:#7ED321,stroke:#5DA019,color:#fff
+    style X fill:#D0021B,stroke:#A60016,color:#fff
+    style J fill:#F5A623,stroke:#C78517,color:#fff
+    style PHONE fill:#BDBDBD,stroke:#8E8E8E,color:#fff
+    style APPLE fill:#000,stroke:#333,color:#fff
+    style WECHAT fill:#07C160,stroke:#05954A,color:#fff
+    style GOOGLE fill:#4285F4,stroke:#2E6EDB,color:#fff
+</pre>
+</div>
+
+<div class="legend">
+  <b>核心思路：</b>App → 第三方 → App → 自己后端 → 第三方(取 userinfo) → 自己后端(查/建用户) → 发 JWT<br>
+  <b>App 端职责：</b>调起 SDK、处理回调、暂存 code、把 code 发给后端、保存登录态<br>
+  <b>后端职责：</b>code 换 token、拉 userinfo、用户表匹配/创建、发 JWT、管理过期与刷新<br>
+  <b>安全要点：</b>App <b>永远不要</b>直接把第三方 access_token 存到本地信任它；必须经过自己后端二次换取和校验。Apple / Google 的 identityToken 是 JWT，后端要验签名和 exp。<br>
+  <b>新用户策略：</b>可以直接一键创建（减少摩擦），也可以要求绑定手机号（合规要求）。取决于产品和监管需求。
+</div>
+
+</body>
+</html>
