@@ -39,6 +39,7 @@
 		E810889C2B57C4BD0044DFC1 /* MHRoleSetSubController.m in Sources */ = {isa = PBXBuildFile; fileRef = E810889B2B57C4BD0044DFC1 /* MHRoleSetSubController.m */; };
 		E8158DA02B9AABF50091302A /* MHRoleConnectView.m in Sources */ = {isa = PBXBuildFile; fileRef = E8158D9F2B9AABF50091302A /* MHRoleConnectView.m */; };
 		E816A8052ADF7E6E009512F9 /* MHwelcomLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A8042ADF7E6E009512F9 /* MHwelcomLoginController.m */; };
+		FFFFFFFF0000000000000003 /* MHWeChatHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = FFFFFFFF0000000000000002 /* MHWeChatHandler.m */; };
 		E816A8082ADF8630009512F9 /* MHloginController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A8072ADF8630009512F9 /* MHloginController.m */; };
 		E816A80B2ADF865C009512F9 /* MHRegisterLController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A80A2ADF865C009512F9 /* MHRegisterLController.m */; };
 		E816A80E2ADF867C009512F9 /* MHforgetLController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A80D2ADF867C009512F9 /* MHforgetLController.m */; };
@@ -852,6 +853,8 @@
 		E8158D9F2B9AABF50091302A /* MHRoleConnectView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHRoleConnectView.m; sourceTree = "<group>"; };
 		E816A8032ADF7E6E009512F9 /* MHwelcomLoginController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHwelcomLoginController.h; sourceTree = "<group>"; };
 		E816A8042ADF7E6E009512F9 /* MHwelcomLoginController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHwelcomLoginController.m; sourceTree = "<group>"; };
+		FFFFFFFF0000000000000001 /* MHWeChatHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHWeChatHandler.h; sourceTree = "<group>"; };
+		FFFFFFFF0000000000000002 /* MHWeChatHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHWeChatHandler.m; sourceTree = "<group>"; };
 		E816A8062ADF8630009512F9 /* MHloginController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHloginController.h; sourceTree = "<group>"; };
 		E816A8072ADF8630009512F9 /* MHloginController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHloginController.m; sourceTree = "<group>"; };
 		E816A8092ADF865C009512F9 /* MHRegisterLController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHRegisterLController.h; sourceTree = "<group>"; };
@@ -2289,6 +2292,8 @@
 				E8B4D07C2B49012F006D8F25 /* eSelectCountryCodeView.m */,
 				E816A8032ADF7E6E009512F9 /* MHwelcomLoginController.h */,
 				E816A8042ADF7E6E009512F9 /* MHwelcomLoginController.m */,
+				FFFFFFFF0000000000000001 /* MHWeChatHandler.h */,
+				FFFFFFFF0000000000000002 /* MHWeChatHandler.m */,
 				E816A8062ADF8630009512F9 /* MHloginController.h */,
 				E816A8072ADF8630009512F9 /* MHloginController.m */,
 				E8AD24F72B4808AC0029A5C0 /* MHNexLoginController.h */,
@@ -5679,6 +5684,7 @@
 				E88CC65A2AAAEB420019E488 /* AppDelegate.m in Sources */,
 				E88CCAA12AAB00EE0019E488 /* UIImage+RoundedCorner.m in Sources */,
 				E816A8052ADF7E6E009512F9 /* MHwelcomLoginController.m in Sources */,
+				FFFFFFFF0000000000000003 /* MHWeChatHandler.m in Sources */,
 				E83790062AECF1AC008D67F0 /* mySearchAddViewController.m in Sources */,
 				E808050B2B86E98300EEC12B /* MHRoleMoreListCell.m in Sources */,
 				E8378EE32AECB342008D67F0 /* TUIChatDataProvider.m in Sources */,
