@@ -891,10 +891,22 @@ API_AVAILABLE(ios(13.0))
     NSLog(@"[WeChat] → POST %@ body=%@", request_login_wechat, dicMM);
     [requestToolClass postNetworkWithUrl:request_login_wechat andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
-        NSLog(@"[WeChat] loginWechat 响应 — code=%d, msg=%@, info=%@", code, msg, info);
-        if (![info isKindOfClass:[NSDictionary class]]) return;
+        NSLog(@"[WeChat] loginWechat 响应 — code=%d, msg=%@, info=%@, infoClass=%@", code, msg, info, NSStringFromClass([info class]));
+        if (![info isKindOfClass:[NSDictionary class]]) {
+            NSLog(@"[WeChat] info 不是 NSDictionary，类型=%@，停止处理", NSStringFromClass([info class]));
+            [SVProgressHUD showErrorWithStatus:@"微信登录响应异常"];
+            return;
+        }
 
-        BOOL bound = [info[@"bound"] boolValue];
+        // bound 字段兼容处理：nil/NSNull/NO → 未绑定；YES → 已绑定
+        id boundObj = info[@"bound"];
+        BOOL bound = [boundObj respondsToSelector:@selector(boolValue)] ? [boundObj boolValue] : NO;
+        NSLog(@"[WeChat] boundObj=%@, bound=%d, authInfo=%@, wechatTicket=%@, nickName=%@",
+              boundObj ?: @"(null)", bound,
+              info[@"authInfo"] ?: @"(null)",
+              info[@"wechatTicket"] ?: @"(null)",
+              info[@"nickName"] ?: @"(null)");
+
         if (bound) {
             NSLog(@"[WeChat] 已绑定账号 → 直接登录");
             NSDictionary *authInfo = info[@"authInfo"];
@@ -912,13 +924,18 @@ API_AVAILABLE(ios(13.0))
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
                 });
                 [self.navigationController popToRootViewControllerAnimated:YES];
+            } else {
+                NSLog(@"[WeChat] bound=true 但 authInfo 缺失！");
+                [SVProgressHUD showErrorWithStatus:@"微信登录返回异常"];
             }
         } else {
             // 未绑定 → 直接跳注册页，注册失败 50002 时会自动走 bindWechat
             NSString *nickName = minStr(info[@"nickName"]);
             NSString *ticket = [info[@"wechatTicket"] copy];
             NSLog(@"[WeChat] 未绑定 → 直接跳注册 ticket=%@, nickName=%@", ticket ?: @"(null)", nickName ?: @"(null)");
-            [self _pushRegisterWithWechatTicket:ticket nickName:nickName];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self _pushRegisterWithWechatTicket:ticket nickName:nickName];
+            });
         }
     } fail:^(NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
