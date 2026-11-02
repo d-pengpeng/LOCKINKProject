@@ -209,12 +209,9 @@
 // MARK: Universal Links 回跳（微信 SDK 2.x + iOS 13+ 优先走这个）
 - (void)scene:(UIScene *)scene continueUserActivity:(NSUserActivity *)userActivity
 {
-    NSLog(@"[WeChat] scene:continueUserActivity — type=%@, url=%@", userActivity.activityType, userActivity.webpageURL);
+    NSLog(@"[WeChat] scene:continueUserActivity — type=%@", userActivity.activityType);
     if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
-        NSURL *url = userActivity.webpageURL;
-        if (url) {
-            [WXApi handleUniversalLink:url delegate:[MHWeChatHandler shared]];
-        }
+        [WXApi handleOpenUniversalLink:userActivity delegate:[MHWeChatHandler shared]];
     }
 }
 

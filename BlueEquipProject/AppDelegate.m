@@ -307,12 +307,9 @@ static CFTimeInterval _appLaunchStart = 0;
 // MARK: Universal Links 回跳（微信 SDK 2.x + iOS 13+ 优先走这个）
 - (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray * _Nullable))restorationHandler
 {
-    NSLog(@"[WeChat] continueUserActivity — type=%@, url=%@", userActivity.activityType, userActivity.webpageURL);
+    NSLog(@"[WeChat] continueUserActivity — type=%@", userActivity.activityType);
     if ([userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
-        NSURL *url = userActivity.webpageURL;
-        if (url) {
-            return [WXApi handleUniversalLink:url delegate:[MHWeChatHandler shared]];
-        }
+        return [WXApi handleOpenUniversalLink:userActivity delegate:[MHWeChatHandler shared]];
     }
     return NO;
 }
