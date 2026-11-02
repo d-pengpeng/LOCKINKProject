@@ -6239,7 +6239,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
-				MARKETING_VERSION = 1.6.3;
+				MARKETING_VERSION = 1.6.4;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -6299,7 +6299,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
-				MARKETING_VERSION = 1.6.3;
+				MARKETING_VERSION = 1.6.4;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
