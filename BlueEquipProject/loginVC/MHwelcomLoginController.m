@@ -833,7 +833,7 @@ API_AVAILABLE(ios(13.0))
     }];
 }
 
-- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error API_AVAILABLE(ios(13.0)) {
+- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error API_AVAILABLE(ios(13.0)) { 
     if (error.code == ASAuthorizationErrorCanceled) {
         // 用户取消，不提示
         return;

@@ -16,6 +16,7 @@ typedef NS_ENUM(NSInteger, MHRealNameStatus) {
     MHRealNameStatusApproved = 1,  // 通过
     MHRealNameStatusRejected = 2,  // 驳回
     MHRealNameStatusNone     = 3,  // 未提交
+    MHRealNameStatusExempt   = 4,  // 豁免，无需验证（视为已通过）
 };
 
 @interface MHRealNameInfo : NSObject

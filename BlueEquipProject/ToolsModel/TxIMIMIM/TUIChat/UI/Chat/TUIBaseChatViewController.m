@@ -1221,7 +1221,7 @@ constructingBodyWithBlock:^(id<AFMultipartFormData> _Nonnull formData) {
 
 - (void)mh_checkRealnameOnEnterChat {
     MHRealNameStatus cached = [[MHRealNameManager shared] cachedStatus];
-    if (cached == MHRealNameStatusApproved) return;
+    if (cached == MHRealNameStatusApproved || cached == MHRealNameStatusExempt) return;
 
     @weakify(self);
     [[MHRealNameManager shared] fetchStatus:^(BOOL required, MHRealNameStatus status, MHRealNameInfo * _Nullable info, NSError * _Nullable error) {
@@ -1229,7 +1229,7 @@ constructingBodyWithBlock:^(id<AFMultipartFormData> _Nonnull formData) {
         if (!self) return;
         if (error) return; // 网络问题，不阻止进入
         if (!required) return; // 后台开关关闭，或非中国大陆用户
-        if (status == MHRealNameStatusApproved) return; // 已实名，不弹任何东西
+        if (status == MHRealNameStatusApproved || status == MHRealNameStatusExempt) return; // 已实名 / 豁免，不弹任何东西
 
         // 未通过实名，弹覆盖层
         dispatch_async(dispatch_get_main_queue(), ^{

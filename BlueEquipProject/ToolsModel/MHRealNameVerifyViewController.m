@@ -314,6 +314,7 @@
 - (void)_applyStatusUI {
     switch (self.currentStatus) {
         case MHRealNameStatusApproved:
+        case MHRealNameStatusExempt:    // 豁免也视为已通过
             [self _renderApprovedUI];
             break;
         case MHRealNameStatusPending:
