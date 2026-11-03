@@ -258,6 +258,7 @@
         vc.codeStr = self.codeStr;
         vc.isEmilBoo = self.isEmilBoo;
         vc.wechatTicket = self.wechatTicket;
+        vc.appleTicket = self.appleTicket;
         vc.prefillNickName = self.prefillNickName;
         [self.navigationController pushViewController:vc animated:YES];
     }else {

@@ -10,6 +10,10 @@
 #import "LYUserDefault.h"
 #import "requestUrlRFile.h"
 #import "MHWeChatHandler.h"
+#import <AuthenticationServices/AuthenticationServices.h>
+
+@interface MHsettingsSubController () <ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding>
+@end
 
 @interface MHsettingsSubController ()
 
@@ -221,20 +225,56 @@
                     rightButtonTitle:@"解绑"
                        selectedHandle:^(NSInteger index) {
             if (index == 1) {
-                [self _callUnbindAPI:key platformName:platformName];
+                [self _callUnbindAccountAPI:key platformName:platformName];
             }
         }];
     } else {
         if ([key isEqualToString:@"wechat"]) {
             [self _startWechatBindFlow];
-        } else {
-            [SVProgressHUD showInfoWithStatus:@"暂不支持"];
+        } else if ([key isEqualToString:@"apple"]) {
+            [self _startAppleBindFlow];
         }
     }
 }
 
-#pragma mark - 微信绑定流程（未绑定 → 授权 → loginWechat 拿 ticket → bindWechat）
+#pragma mark - 统一绑定/解绑接口
 
+/// 绑定：POST /oauth/bindAccount {type, ...凭证}
+- (void)_callBindAccountAPI:(NSString *)type params:(NSDictionary *)params {
+    [SVProgressHUD showWithStatus:@"绑定中..."];
+    [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        if (code == 200) {
+            [SVProgressHUD showSuccessWithStatus:@"绑定成功"];
+            [self _refreshBindingsFromServer];
+        } else {
+            [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"绑定失败"];
+        }
+    } fail:^(NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"绑定失败"];
+    }];
+}
+
+/// 解绑：POST /oauth/unbindAccount {type}
+- (void)_callUnbindAccountAPI:(NSString *)type platformName:(NSString *)platformName {
+    [SVProgressHUD showWithStatus:@"解绑中..."];
+    NSDictionary *params = @{@"type": type};
+    [requestToolClass postNetworkWithUrl:request_oauth_unbindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        if (code == 200) {
+            [SVProgressHUD showSuccessWithStatus:@"解绑成功"];
+            [self _markPlatformUnbound:type];
+        } else {
+            [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"解绑失败"];
+        }
+    } fail:^(NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"解绑失败"];
+    }];
+}
+
+/// 微信绑定：授权 → loginWechat 拿 ticket → bindAccount
 - (void)_startWechatBindFlow {
     [[MHWeChatHandler shared] sendAuthReqFromVC:self];
 }
@@ -244,27 +284,23 @@
     if (code.length == 0) return;
     
     [SVProgressHUD showWithStatus:@"绑定中..."];
-    
-    // 用 code 调 /oauth/loginWechat 拿 wechatTicket
-    NSDictionary *params = @{@"code": code};
-    [requestToolClass postNetworkWithUrl:request_login_wechat andParameter:params success:^(int code2, id  _Nonnull info, NSString * _Nonnull msg) {
+    [requestToolClass postNetworkWithUrl:request_login_wechat andParameter:@{@"code": code} success:^(int code2, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
         if (code2 != 200 || ![info isKindOfClass:[NSDictionary class]]) {
             [SVProgressHUD showErrorWithStatus:msg ?: @"授权失败"];
             return;
         }
         
-        BOOL bound = [info[@"bound"] boolValue];
-        NSString *ticket = info[@"wechatTicket"];
+        BOOL bound = NO;
+        id boundObj = info[@"bound"];
+        if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) bound = [boundObj boolValue];
+        NSString *ticket = [info[@"wechatTicket"] copy];
         
-        if (bound) {
-            // 已经绑了（可能微信授权了同一个微信号），直接更新缓存
+        if (bound && ticket.length == 0) {
             [SVProgressHUD showSuccessWithStatus:@"已绑定"];
-            [self _markPlatformUnbound:@"dummy"]; // 触发刷新
             [self _refreshBindingsFromServer];
         } else if (ticket.length > 0) {
-            // 有 ticket，调 bindWechat
-            [self _callBindWechatAPI:ticket];
+            [self _callBindAccountAPI:@"wechat" params:@{@"type": @"wechat", @"wechatTicket": ticket}];
         } else {
             [SVProgressHUD showErrorWithStatus:@"未返回票据"];
         }
@@ -277,54 +313,78 @@
 - (void)_onWechatAuthFailed {
     [SVProgressHUD showErrorWithStatus:@"微信授权失败"];
 }
-
 - (void)_onWechatAuthCanceled {
     [SVProgressHUD showInfoWithStatus:@"已取消"];
 }
 
-- (void)_callBindWechatAPI:(NSString *)ticket {
+/// 苹果绑定：ASAuthorizationController → bindAccount
+- (void)_startAppleBindFlow API_AVAILABLE(ios(13.0)) {
+    if (@available(iOS 13.0, *)) {
+        ASAuthorizationAppleIDProvider *provider = [[ASAuthorizationAppleIDProvider alloc] init];
+        ASAuthorizationAppleIDRequest *request = [provider createRequest];
+        request.requestedScopes = @[ASAuthorizationScopeFullName, ASAuthorizationScopeEmail];
+        ASAuthorizationController *controller = [[ASAuthorizationController alloc] initWithAuthorizationRequests:@[request]];
+        controller.delegate = self;
+        controller.presentationContextProvider = self;
+        [controller performRequests];
+    }
+}
+
+- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithAuthorization:(ASAuthorization *)authorization API_AVAILABLE(ios(13.0)) {
+    if (![authorization.credential isKindOfClass:[ASAuthorizationAppleIDCredential class]]) return;
+    
+    ASAuthorizationAppleIDCredential *credential = (ASAuthorizationAppleIDCredential *)authorization.credential;
+    NSString *user = credential.user;
+    NSString *email = credential.email ?: @"";
+    NSString *fullName = credential.fullName ? [NSString stringWithFormat:@"%@%@",
+        credential.fullName.familyName ?: @"", credential.fullName.givenName ?: @""] : @"";
+    
+    NSData *identityToken = credential.identityToken;
+    if (!identityToken) {
+        [SVProgressHUD showErrorWithStatus:@"Apple 授权失败"];
+        return;
+    }
+    NSString *tokenStr = [[NSString alloc] initWithData:identityToken encoding:NSUTF8StringEncoding];
+    
     [SVProgressHUD showWithStatus:@"绑定中..."];
-    [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+    // Apple 只在第一次授权返回 fullName → 必须带上
+    NSMutableDictionary *params = [@{
+        @"type": @"apple",
+        @"identityToken": tokenStr ?: @"",
+        @"email": email,
+        @"fullName": fullName
+    } mutableCopy];
+    if (user.length > 0) params[@"appleUserId"] = user;
+    
+    [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:[params copy] success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
         if (code == 200) {
             [SVProgressHUD showSuccessWithStatus:@"绑定成功"];
             [self _refreshBindingsFromServer];
         } else {
-            [SVProgressHUD showErrorWithStatus:msg ?: @"绑定失败"];
+            [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"绑定失败"];
         }
     } fail:^(NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
-        [SVProgressHUD showErrorWithStatus:msg ?: @"绑定失败"];
+        [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"绑定失败"];
     }];
 }
 
+- (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error API_AVAILABLE(ios(13.0)) {
+    if (error.code != ASAuthorizationErrorCanceled) {
+        [SVProgressHUD showErrorWithStatus:@"Apple 授权失败"];
+    }
+}
+
+/// 刷新绑定状态（GET /oauth/bindings 或 /user/me）
 - (void)_refreshBindingsFromServer {
     [requestToolClass getNetworkWithUrl:request_user_me andParameter:@{} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         if ([info isKindOfClass:[NSDictionary class]]) {
-            [LYUserDefault saveUserDefault:info];  // 会自动缓存 bindings
+            [LYUserDefault saveUserDefault:info];
             [self setupSocialBindingsRows];
         }
     } fail:^(NSString * _Nonnull msg) {
-        // 拉不到也刷新 UI（可能本地缓存已经是旧的 bound=1 了）
         [self setupSocialBindingsRows];
-    }];
-}
-
-- (void)_callUnbindAPI:(NSString *)key platformName:(NSString *)platformName {
-    [SVProgressHUD showWithStatus:@"解绑中..."];
-    
-    // 目前只支持解绑微信
-    [requestToolClass postNetworkWithUrl:request_unbind_wechat andParameter:@{} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-        [SVProgressHUD dismiss];
-        if (code == 200) {
-            [SVProgressHUD showSuccessWithStatus:@"解绑成功"];
-            [self _markPlatformUnbound:key];
-        } else {
-            [SVProgressHUD showErrorWithStatus:msg ?: @"解绑失败"];
-        }
-    } fail:^(NSString * _Nonnull msg) {
-        [SVProgressHUD dismiss];
-        [SVProgressHUD showErrorWithStatus:msg ?: @"解绑失败"];
     }];
 }
 

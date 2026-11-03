@@ -46,6 +46,11 @@
 #define request_bind_wechat @"oauth/bindWechat"
 #define request_unbind_wechat @"oauth/unbindWechat"
 
+// 统一账号绑定接口（微信/苹果/谷歌共用）
+#define request_oauth_bindings @"oauth/bindings"
+#define request_oauth_bindAccount @"oauth/bindAccount"
+#define request_oauth_unbindAccount @"oauth/unbindAccount"
+
 
 #define request_other_getAllServiceUid @"other/getServiceUid"
 

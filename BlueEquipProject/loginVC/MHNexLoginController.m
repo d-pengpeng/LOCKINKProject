@@ -292,6 +292,9 @@
         if (self.wechatTicket.length > 0) {
             [dicMM setObject:self.wechatTicket forKey:@"wechatTicket"];
         }
+        if (self.appleTicket.length > 0) {
+            [dicMM setObject:self.appleTicket forKey:@"appleTicket"];
+        }
         [requestToolClass postRegisterLogNetworkWithUrl:request_login_register andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
 
             [[MHBehaviorReporter shared] trackWithType:MHBTFlow

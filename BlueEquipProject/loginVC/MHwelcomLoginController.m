@@ -45,7 +45,11 @@ API_AVAILABLE(ios(13.0))
 @property (nonatomic, strong) eSelectCountryCodeView *eSelectCountryCodeV;
 @property (nonatomic, copy, nullable) NSString *pendingWechatTicket; // 绑定已有账号场景：暂存票据
 @property (nonatomic, copy, nullable) NSString *pendingWechatNickName; // 微信返回的昵称
+@property (nonatomic, copy, nullable) NSString *pendingAppleTicket;    // 苹果未绑定场景票据
+@property (nonatomic, copy, nullable) NSString *pendingAppleNickName;  // 苹果返回的姓名
+@property (nonatomic, copy, nullable) NSString *pendingAppleEmail;     // 苹果返回的邮箱
 @property (nonatomic, strong) UIView *wechatBindView;   // 未绑定时显示的图片提示
+@property (nonatomic, strong) UIView *appleBindView;     // 苹果未绑定时显示的图片提示
 @end
 
 @implementation MHwelcomLoginController
@@ -130,6 +134,18 @@ API_AVAILABLE(ios(13.0))
     self.wechatBindView.hidden = YES;
     [self.view addSubview:self.wechatBindView];
     [self.wechatBindView mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).offset(30);
+        make.right.equalTo(self.view.mas_right).offset(-30);
+        make.top.equalTo(self.oneLab.mas_bottom).offset(24);
+        make.height.offset(48);
+    }];
+    
+    //MARK: 苹果未绑定提示（同 wechatBindView 位置，互斥显示）
+    self.appleBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]]; // 暂复用，等 apple_info 图标
+    self.appleBindView.contentMode = UIViewContentModeScaleAspectFit;
+    self.appleBindView.hidden = YES;
+    [self.view addSubview:self.appleBindView];
+    [self.appleBindView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(30);
         make.right.equalTo(self.view.mas_right).offset(-30);
         make.top.equalTo(self.oneLab.mas_bottom).offset(24);
@@ -620,10 +636,15 @@ API_AVAILABLE(ios(13.0))
     }
     MHRegisterLController *vc = [[MHRegisterLController alloc] init];
     vc.isTYBoo = self.isTYBoo;
-    // 如果有 pendingWechatTicket（微信未绑定场景），自动传给注册页
+    // 微信未绑定场景
     if (self.pendingWechatTicket.length > 0) {
         vc.wechatTicket = self.pendingWechatTicket;
         vc.prefillName = self.pendingWechatNickName;
+    }
+    // 苹果未绑定场景
+    if (self.pendingAppleTicket.length > 0) {
+        vc.appleTicket = self.pendingAppleTicket;
+        vc.prefillName = self.pendingAppleNickName.length > 0 ? self.pendingAppleNickName : vc.prefillName;
     }
     [self.navigationController pushViewController:vc animated:YES];
     vc.block_ = ^(BOOL isboo) {
@@ -816,30 +837,61 @@ API_AVAILABLE(ios(13.0))
     
     [requestToolClass postNetworkWithUrl:request_login_apple andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
-        if ([info isKindOfClass:[NSDictionary class]]) {
-            [LYUserDefault saveUserLoginDefault:info];
-            [LYUserDefault saveIsLoginBoo:YES];
-
-            // 如果有 pendingWechatTicket（之前点了微信登录但未绑定），登录成功后自动调 bindWechat
-            [self _bindPendingWechatTicketIfNeeded];
-            
-            [[MHBehaviorReporter shared] trackWithType:MHBTAction
-                                                    key:@"login_success"
-                                                   page:NSStringFromClass([self class])
-                                               fromPage:nil
-                                             targetType:@"user"
-                                               targetId:minStr(info[@"userId"])
-                                                    ext:@{@"method": @"apple", @"isNewUser": @([LYUserDefault userDefault].t_id.length == 0)}
-                                                 result:1
-                                               errorCode:nil
-                                              durationMs:nil
-                                                 costMs:nil];
-            
-            // 登录成功通知 IM
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
-            
-            // 返回上一页或切首页
-            [self.navigationController popToRootViewControllerAnimated:YES];
+        if (![info isKindOfClass:[NSDictionary class]]) {
+            [SVProgressHUD showErrorWithStatus:@"Apple 登录返回异常"];
+            return;
+        }
+        
+        // 先缓存 bindings（无论 bound true/false）
+        NSDictionary *bindings = info[@"bindings"];
+        if ([bindings isKindOfClass:[NSDictionary class]]) {
+            [[LYUserDefault userDefault] setSocialBindings:bindings];
+        }
+        
+        // 判断绑定状态 — 类似微信 loginWechat 的返回
+        NSNumber *boundObj = info[@"bound"];
+        BOOL bound = YES;  // 默认已绑定（兼容旧版后端）
+        if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) {
+            bound = [boundObj boolValue];
+        }
+        
+        if (bound) {
+            // 已绑定 → 直接登录
+            NSDictionary *authInfo = info[@"authInfo"];
+            if ([authInfo isKindOfClass:[NSDictionary class]]) {
+                [LYUserDefault saveUserLoginDefault:authInfo];
+                [LYUserDefault saveIsLoginBoo:YES];
+                [self _bindPendingWechatTicketIfNeeded];
+                
+                [[MHBehaviorReporter shared] trackWithType:MHBTAction
+                                                        key:@"login_success"
+                                                       page:NSStringFromClass([self class])
+                                                   fromPage:nil
+                                                 targetType:@"user"
+                                                   targetId:minStr(authInfo[@"userId"])
+                                                        ext:@{@"method": @"apple", @"isNewUser": @([LYUserDefault userDefault].t_id.length == 0)}
+                                                     result:1
+                                                   errorCode:nil
+                                                  durationMs:nil
+                                                     costMs:nil];
+                
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
+                [self.navigationController popToRootViewControllerAnimated:YES];
+            } else {
+                NSLog(@"[Apple] bound=true 但 authInfo 缺失！");
+                [SVProgressHUD showErrorWithStatus:@"Apple 登录返回异常"];
+            }
+        } else {
+            // 未绑定 → 显示状态图标 + 暂存票据（用户后续注册或登录时自动 bindAccount）
+            NSString *ticket = [info[@"appleTicket"] copy];
+            NSLog(@"[Apple] 未绑定 → 显示图片 ticket=%@", ticket ?: @"(null)");
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.pendingAppleTicket = ticket;
+                self.pendingAppleNickName = fullName;
+                self.pendingAppleEmail = email;
+                self.appleBindView.hidden = NO;
+                self.wechatBindView.hidden = YES;  // 互斥
+            });
         }
     } fail:^(NSString * _Nonnull errorStr) {
         [SVProgressHUD dismiss];
