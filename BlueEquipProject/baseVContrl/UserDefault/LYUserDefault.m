@@ -320,13 +320,6 @@
     [[NSUserDefaults standardUserDefaults] setBool:[dicT[@"isDomestic"] boolValue] forKey:@"isDomestic"];
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"userId"]) forKey:@"user_id"];
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"token"]) forKey:@"AppToken"];
-
-    // 第三方账号绑定信息缓存
-    NSDictionary *bindings = dicT[@"bindings"];
-    if ([bindings isKindOfClass:[NSDictionary class]]) {
-        [[NSUserDefaults standardUserDefaults] setObject:bindings forKey:@"socialBindings"];
-    }
-
     [[NSUserDefaults standardUserDefaults] synchronize];
 
     // login_success 行为上报（登录/注册成功拿到 token 后立即上报，必须带 token）
@@ -373,6 +366,13 @@
     NSString *pass_id = minStr(dicT[@"bindingMethod"]);
     [[NSUserDefaults standardUserDefaults] setInteger:[pass_id integerValue] forKey:@"isPassWordB"];
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"boundContact"]) forKey:@"EmailAuccount"];
+
+    // 第三方账号绑定信息（/user/me 返回）
+    NSDictionary *bindings = dicT[@"bindings"];
+    if ([bindings isKindOfClass:[NSDictionary class]]) {
+        [[NSUserDefaults standardUserDefaults] setObject:bindings forKey:@"socialBindings"];
+    }
+
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
