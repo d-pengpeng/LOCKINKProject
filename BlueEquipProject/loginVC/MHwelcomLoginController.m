@@ -260,8 +260,8 @@ API_AVAILABLE(ios(13.0))
     [wxBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(loginBBtn.mas_bottom).offset(24);
         make.centerX.equalTo(self.view.mas_centerX).offset(36);
-        make.height.offset(42);
-        make.width.offset(42);
+        make.height.offset(50);
+        make.width.offset(50);
     }];
     
     UIButton *appleBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -272,8 +272,8 @@ API_AVAILABLE(ios(13.0))
     [appleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
         make.top.equalTo(wxBtn.mas_top);
         make.centerX.equalTo(self.view.mas_centerX).offset(-36);
-        make.height.offset(42);
-        make.width.offset(42);
+        make.height.offset(50);
+        make.width.offset(50);
     }];
     
     UIView *botmVV = [HistoryRecordModel createViewUIUI];
