@@ -91,8 +91,7 @@
     
     NSArray *platforms = @[
         @{@"key": @"wechat", @"name": @"微信", @"iconBound": @"wechat_bound", @"iconUnbound": @"wechat_login"},
-        @{@"key": @"apple",  @"name": @"Apple", @"iconBound": @"apple_bound",  @"iconUnbound": @"apple_login"},
-        @{@"key": @"google", @"name": @"Google", @"iconBound": @"",              @"iconUnbound": @""}
+        @{@"key": @"apple",  @"name": @"Apple", @"iconBound": @"apple_bound",  @"iconUnbound": @"apple_login"}
     ];
     
     CGFloat startY = NAVHEIGHT + 2 * 54 + 12;  // 基础设置 2 行 + 12pt 间距
@@ -131,11 +130,12 @@
         nameLab.tag = 9101;
         [row addSubview:nameLab];
         
-        // 绑定状态
+        // 绑定状态（右对齐，离右箭头 8pt）
+        // 箭头在 right=-12 宽16 → 箭头左边界 = _window_width-28 → 状态文字右边界 = _window_width-36
         NSString *statusText = bound ? @"已绑定" : @"未绑定";
         UIColor *statusColor = bound ? RGB(7, 193, 96) : RGB(153, 153, 153);
         UILabel *statusLab = [HistoryRecordModel createLabLabTextColor:statusColor fontFloat:13 textAlignment:NSTextAlignmentRight];
-        statusLab.frame = CGRectMake(_window_width - 120, 0, 100, row.height);
+        statusLab.frame = CGRectMake(_window_width - 36 - 120, 0, 120, row.height);
         statusLab.text = statusText;
         statusLab.tag = 9102;
         [row addSubview:statusLab];
