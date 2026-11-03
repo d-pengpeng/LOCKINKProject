@@ -16,6 +16,7 @@
 @property (nonatomic, copy) NSString *oneSt2;
 @property (nonatomic, copy) NSString *oneSt3;
 @property (nonatomic, assign) BOOL isRequBoo;
+@property (nonatomic, strong) UIImageView *wechatBindView;
 @end
 
 @implementation MHNexLoginController
@@ -54,8 +55,19 @@
     onelab2.text = eLocalizedString(@"login_all27");
     [oneVV addSubview:onelab2];
     
+    // 微信未绑定场景：显示 wechat_info 图片提示 + 昵称预填
+    CGFloat subOneVStartY = CGRectGetMaxY(onelab2.frame) + 10;
+    if (self.wechatTicket.length > 0) {
+        self.wechatBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]];
+        self.wechatBindView.contentMode = UIViewContentModeScaleAspectFit;
+        self.wechatBindView.frame = CGRectMake(30, subOneVStartY, _window_width - 60, 48);
+        [oneVV addSubview:self.wechatBindView];
+        subOneVStartY = CGRectGetMaxY(self.wechatBindView.frame) + 10;
+        NSLog(@"[WeChat] 注册页显示 wechat_info, ticket=%@, nickName=%@", self.wechatTicket ?: @"(null)", self.prefillNickName ?: @"(null)");
+    }
+    
     CGFloat ww_one = (_window_width-64*3-60)/2;
-    UIView *subOneV = [[UIView alloc] initWithFrame:CGRectMake(ww_one, 46, 64*3+60, 134)];
+    UIView *subOneV = [[UIView alloc] initWithFrame:CGRectMake(ww_one, subOneVStartY, 64*3+60, 134)];
     subOneV.backgroundColor = UIColor.clearColor;
     [oneVV addSubview:subOneV];
     

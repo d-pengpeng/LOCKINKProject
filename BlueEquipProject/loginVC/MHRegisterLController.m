@@ -444,6 +444,7 @@
                     vc.codeStr = minStr(self.textCodeFF.text);
                     vc.isEmilBoo = self.isEmilBoo;
                     vc.wechatTicket = self.wechatTicket;
+                    vc.prefillNickName = self.prefillName;
                     [self.navigationController pushViewController:vc animated:YES];
                 } fail:^(NSString * _Nonnull msg) {
                     self.isRequBoo = NO;
@@ -463,6 +464,7 @@
                     vc.codeStr = minStr(self.textCodeFF.text);
                     vc.isEmilBoo = self.isEmilBoo;
                     vc.wechatTicket = self.wechatTicket;
+                    vc.prefillNickName = self.prefillName;
                     [self.navigationController pushViewController:vc animated:YES];
                 } fail:^(NSString * _Nonnull msg) {
                     self.isRequBoo = NO;

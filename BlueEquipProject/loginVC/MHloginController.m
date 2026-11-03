@@ -258,6 +258,7 @@
         vc.codeStr = self.codeStr;
         vc.isEmilBoo = self.isEmilBoo;
         vc.wechatTicket = self.wechatTicket;
+        vc.prefillNickName = self.prefillNickName;
         [self.navigationController pushViewController:vc animated:YES];
     }else {
 //        [SVProgressHUD showInfoWithStatus:eLocalizedString(@"login_all30")];

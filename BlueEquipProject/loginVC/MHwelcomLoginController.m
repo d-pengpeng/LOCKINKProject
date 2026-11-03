@@ -44,6 +44,7 @@ API_AVAILABLE(ios(13.0))
 @property (nonatomic, strong) UIButton *deleleMethBtn;
 @property (nonatomic, strong) eSelectCountryCodeView *eSelectCountryCodeV;
 @property (nonatomic, copy, nullable) NSString *pendingWechatTicket; // 绑定已有账号场景：暂存票据
+@property (nonatomic, copy, nullable) NSString *pendingWechatNickName; // 微信返回的昵称
 @property (nonatomic, strong) UIView *wechatBindView;   // 未绑定时显示的图片提示
 @end
 
@@ -622,6 +623,7 @@ API_AVAILABLE(ios(13.0))
     // 如果有 pendingWechatTicket（微信未绑定场景），自动传给注册页
     if (self.pendingWechatTicket.length > 0) {
         vc.wechatTicket = self.pendingWechatTicket;
+        vc.prefillName = self.pendingWechatNickName;
     }
     [self.navigationController pushViewController:vc animated:YES];
     vc.block_ = ^(BOOL isboo) {
@@ -936,11 +938,13 @@ API_AVAILABLE(ios(13.0))
                 [SVProgressHUD showErrorWithStatus:@"微信登录返回异常"];
             }
         } else {
-            // 未绑定 → 显示图片提示 + 暂存 ticket（用户正常登录后自动 bindWechat）
+            // 未绑定 → 显示图片提示 + 暂存 ticket + nickName（用户正常登录后自动 bindWechat）
             NSString *ticket = [info[@"wechatTicket"] copy];
-            NSLog(@"[WeChat] 未绑定 → 显示图片 ticket=%@", ticket ?: @"(null)");
+            NSString *nickName = [info[@"nickName"] copy];
+            NSLog(@"[WeChat] 未绑定 → 显示图片 ticket=%@, nickName=%@", ticket ?: @"(null)", nickName ?: @"(null)");
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.pendingWechatTicket = ticket;
+                self.pendingWechatNickName = nickName;
                 self.wechatBindView.hidden = NO;
             });
         }
