@@ -857,8 +857,22 @@ API_AVAILABLE(ios(13.0))
         
         if (bound) {
             // 已绑定 → 直接登录
+            // 兼容两种后端返回结构：
+            //   结构A: {bound:true, authInfo:{token, userId, ...}, bindings:{...}}
+            //   结构B: {bound:true, token, userId, ..., bindings:{...}}  ← 用户信息在顶层
             NSDictionary *authInfo = info[@"authInfo"];
-            if ([authInfo isKindOfClass:[NSDictionary class]]) {
+            if (![authInfo isKindOfClass:[NSDictionary class]] || authInfo.count == 0) {
+                // 顶层兼容：把 info 去掉 bound/bindings 后当作用户信息
+                NSMutableDictionary *topLevel = [info mutableCopy];
+                [topLevel removeObjectForKey:@"bound"];
+                [topLevel removeObjectForKey:@"bindings"];
+                authInfo = [topLevel copy];
+                NSLog(@"[Apple] authInfo 缺失，使用顶层信息: %@", authInfo);
+            } else {
+                NSLog(@"[Apple] authInfo 正常: %@", authInfo);
+            }
+            
+            if ([authInfo isKindOfClass:[NSDictionary class]] && authInfo.count > 0) {
                 [LYUserDefault saveUserLoginDefault:authInfo];
                 [LYUserDefault saveIsLoginBoo:YES];
                 [self _bindPendingWechatTicketIfNeeded];
@@ -971,7 +985,15 @@ API_AVAILABLE(ios(13.0))
         if (bound) {
             NSLog(@"[WeChat] 已绑定账号 → 直接登录");
             NSDictionary *authInfo = info[@"authInfo"];
-            if ([authInfo isKindOfClass:[NSDictionary class]]) {
+            if (![authInfo isKindOfClass:[NSDictionary class]] || authInfo.count == 0) {
+                NSMutableDictionary *topLevel = [info mutableCopy];
+                [topLevel removeObjectForKey:@"bound"];
+                [topLevel removeObjectForKey:@"bindings"];
+                authInfo = [topLevel copy];
+                NSLog(@"[WeChat] authInfo 缺失，使用顶层信息: %@", authInfo);
+            }
+            
+            if ([authInfo isKindOfClass:[NSDictionary class]] && authInfo.count > 0) {
                 [LYUserDefault saveUserLoginDefault:authInfo];
                 [LYUserDefault saveIsLoginBoo:YES];
 
