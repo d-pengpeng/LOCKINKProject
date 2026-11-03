@@ -310,7 +310,7 @@
     }];
 }
 
-/// 微信绑定：授权 → loginWechat 拿 ticket → bindAccount
+/// 微信绑定：授权 → 直接调 bindAccount（用户已登录，不需要走 loginWechat）
 - (void)_startWechatBindFlow {
     [[MHWeChatHandler shared] sendAuthReqFromVC:self];
 }
@@ -319,35 +319,9 @@
     NSString *code = note.userInfo[@"code"];
     if (code.length == 0) return;
     
-    [SVProgressHUD showWithStatus:@"绑定中..."];
-    [requestToolClass postNetworkWithUrl:request_login_wechat andParameter:@{@"code": code} success:^(int code2, id  _Nonnull info, NSString * _Nonnull msg) {
-        [SVProgressHUD dismiss];
-        if (code2 != 200 || ![info isKindOfClass:[NSDictionary class]]) {
-            [SVProgressHUD showErrorWithStatus:msg ?: @"授权失败"];
-            return;
-        }
-        
-        BOOL bound = NO;
-        id boundObj = info[@"bound"];
-        if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) bound = [boundObj boolValue];
-        // 优先读统一字段 ticket，兜底 wechatTicket（微信兼容）
-        NSString *ticket = [info[@"ticket"] copy];
-        if (ticket.length == 0) {
-            ticket = [info[@"wechatTicket"] copy];
-        }
-        
-        if (bound && ticket.length == 0) {
-            [SVProgressHUD showSuccessWithStatus:@"已绑定"];
-            [self _refreshBindingsFromServer];
-        } else if (ticket.length > 0) {
-            [self _callBindAccountAPI:@"wechat" params:@{@"type": @"wechat", @"ticket": ticket}];
-        } else {
-            [SVProgressHUD showErrorWithStatus:@"未返回票据"];
-        }
-    } fail:^(NSString * _Nonnull msg) {
-        [SVProgressHUD dismiss];
-        [SVProgressHUD showErrorWithStatus:msg ?: @"网络异常"];
-    }];
+    // 直接用 code 调 bindAccount（后端统一接口接受 code / ticket）
+    NSDictionary *params = @{@"type": @"wechat", @"code": code};
+    [self _callBindAccountAPI:@"wechat" params:params];
 }
 
 - (void)_onWechatAuthFailed {
