@@ -123,6 +123,7 @@ API_AVAILABLE(ios(13.0))
     [self.view addSubview:oneBtn2];
 
     //MARK: 微信未绑定提示（仅显示图片，默认 hidden）
+    // 高度 24pt：刚好塞在 oneLab 和 accImgV (oneLab.bottom+34) 之间，不挡输入框
     self.wechatBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]];
     self.wechatBindView.contentMode = UIViewContentModeScaleAspectFit;
     self.wechatBindView.hidden = YES;
@@ -130,8 +131,8 @@ API_AVAILABLE(ios(13.0))
     [self.wechatBindView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(30);
         make.right.equalTo(self.view.mas_right).offset(-30);
-        make.top.equalTo(self.oneLab.mas_bottom).offset(30);
-        make.height.offset(60);
+        make.top.equalTo(self.oneLab.mas_bottom).offset(4);
+        make.height.offset(24);
     }];
     
     
