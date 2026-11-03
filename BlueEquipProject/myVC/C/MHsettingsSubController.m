@@ -11,9 +11,7 @@
 #import "requestUrlRFile.h"
 #import "MHWeChatHandler.h"
 
-@interface MHsettingsSubController () <WXApiDelegate>
-
-@property (nonatomic, copy) void (^pendingWechatBindBlock)(NSString *ticket);
+@interface MHsettingsSubController ()
 
 @end
 
@@ -40,7 +38,7 @@
     self.navView.backgroundColor = RGB(247, 247, 247);
 
     // 注册微信授权结果通知
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWechatAuthReceived:) name:@"MHWeChatDidAuthNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWechatAuthReceived:) name:@"MHWeChatDidReceiveCodeNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWechatAuthFailed) name:@"MHWeChatDidFailNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWechatAuthCanceled) name:@"MHWeChatDidCancelNotification" object:nil];
 
@@ -225,22 +223,7 @@
 #pragma mark - 微信绑定流程（未绑定 → 授权 → loginWechat 拿 ticket → bindWechat）
 
 - (void)_startWechatBindFlow {
-    if (![WXApi isWXAppInstalled]) {
-        [SVProgressHUD showErrorWithStatus:@"请先安装微信"];
-        return;
-    }
-    
-    SendAuthReq *req = [[SendAuthReq alloc] init];
-    req.scope = @"snsapi_userinfo";
-    req.state = @"LOCKINK_BIND";
-    
-    __weak typeof(self) weakSelf = self;
-    [[MHWeChatHandler sharedInstance] sendAuthReq:req viewController:self delegate:self completion:^(BOOL success) {
-        __strong typeof(weakSelf) self = weakSelf;
-        if (!success) {
-            [SVProgressHUD showErrorWithStatus:@"调起微信失败"];
-        }
-    }];
+    [[MHWeChatHandler shared] sendAuthReqFromVC:self];
 }
 
 - (void)_onWechatAuthReceived:(NSNotification *)note {
