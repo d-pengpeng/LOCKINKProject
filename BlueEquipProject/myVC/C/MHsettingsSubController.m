@@ -128,10 +128,17 @@
         // 绑定状态（已绑定显示 nickName，未绑定显示"未绑定"）
         NSString *statusText;
         if (bound) {
-            NSString *nick = [info isKindOfClass:[NSDictionary class]] ? info[@"nickName"] : nil;
+            // 兼容多种 key：nickName / nickname / nick_name
+            NSString *nick = nil;
+            if ([info isKindOfClass:[NSDictionary class]]) {
+                nick = info[@"nickName"];
+                if (!nick) nick = info[@"nickname"];
+                if (!nick) nick = info[@"nick_name"];
+            }
             if ([nick isKindOfClass:[NSString class]] && nick.length > 0) {
                 statusText = nick;
             } else {
+                NSLog(@"[Bindings] ⚠️ %@ bound=1 但 nickName 为空，info=%@", key, info);
                 statusText = @"已绑定";
             }
         } else {
