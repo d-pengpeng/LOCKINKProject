@@ -836,6 +836,9 @@ API_AVAILABLE(ios(13.0))
         if ([info isKindOfClass:[NSDictionary class]]) {
             [LYUserDefault saveUserLoginDefault:info];
             [LYUserDefault saveIsLoginBoo:YES];
+
+            // 如果有 pendingWechatTicket（之前点了微信登录但未绑定），登录成功后自动调 bindWechat
+            [self _bindPendingWechatTicketIfNeeded];
             
             [[MHBehaviorReporter shared] trackWithType:MHBTAction
                                                     key:@"login_success"
