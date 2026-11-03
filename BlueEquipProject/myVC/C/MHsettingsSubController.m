@@ -125,8 +125,18 @@
         nameLab.text = plat[@"name"];
         [row addSubview:nameLab];
         
-        // 绑定状态
-        NSString *statusText = bound ? @"已绑定" : @"未绑定";
+        // 绑定状态（已绑定显示 nickName，未绑定显示"未绑定"）
+        NSString *statusText;
+        if (bound) {
+            NSString *nick = [info isKindOfClass:[NSDictionary class]] ? info[@"nickName"] : nil;
+            if ([nick isKindOfClass:[NSString class]] && nick.length > 0) {
+                statusText = nick;
+            } else {
+                statusText = @"已绑定";
+            }
+        } else {
+            statusText = @"未绑定";
+        }
         UIColor *statusColor = bound ? RGB(7, 193, 96) : RGB(153, 153, 153);
         UILabel *statusLab = [HistoryRecordModel createLabLabTextColor:statusColor fontFloat:13 textAlignment:NSTextAlignmentRight];
         statusLab.frame = CGRectMake(_window_width - 36 - 120, 0, 120, row.height);
