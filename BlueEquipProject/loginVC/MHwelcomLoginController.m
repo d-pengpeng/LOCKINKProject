@@ -141,7 +141,7 @@ API_AVAILABLE(ios(13.0))
     }];
     
     //MARK: 苹果未绑定提示（同 wechatBindView 位置，互斥显示）
-    self.appleBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]]; // 暂复用，等 apple_info 图标
+    self.appleBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"apple_info"]];
     self.appleBindView.contentMode = UIViewContentModeScaleAspectFit;
     self.appleBindView.hidden = YES;
     [self.view addSubview:self.appleBindView];
