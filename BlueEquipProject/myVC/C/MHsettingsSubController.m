@@ -90,8 +90,8 @@
     }
     
     // section header 标签（tag=9000，每次刷新不删，只更新文案）
-    // 字体 14pt（+2号），与上方基础设置区间距 22pt（原 12 +10）
-    CGFloat startY = NAVHEIGHT + 2 * 54 + 22;
+    // 字体 14pt，与上方基础设置区间距 32pt（原 22 +10）
+    CGFloat startY = NAVHEIGHT + 2 * 54 + 32;
     UIView *oldHeader = [self.view viewWithTag:9000];
     if (!oldHeader) {
         UILabel *sectionLab = [HistoryRecordModel createLabLabTextColor:RGB(153, 153, 153) fontFloat:14 textAlignment:NSTextAlignmentLeft];
@@ -111,8 +111,8 @@
         @{@"key": @"apple",  @"name": @"Apple", @"icon": @"apple_bound"}
     ];
     
-    // row 起始 y = header.bottom(=NAVHEIGHT+2*54+22) + 4pt gap
-    startY = NAVHEIGHT + 2 * 54 + 26;
+    // row 起始 y = header.bottom(=NAVHEIGHT+2*54+32) + 4pt gap
+    startY = NAVHEIGHT + 2 * 54 + 36;
     
     for (int i = 0; i < platforms.count; i++) {
         NSDictionary *plat = platforms[i];
