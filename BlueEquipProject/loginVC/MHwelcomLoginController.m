@@ -263,12 +263,8 @@ API_AVAILABLE(ios(13.0))
     }];
     
     UIButton *wxBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [wxBtn setTitle:@"微信登录" forState:UIControlStateNormal];
-    [wxBtn setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
-    wxBtn.titleLabel.font = SYS_Font(15);
-    wxBtn.backgroundColor = [UIColor colorWithRed:7.0/255 green:193.0/255 blue:96.0/255 alpha:1.0];
-    wxBtn.layer.cornerRadius = 22;
-    wxBtn.layer.masksToBounds = YES;
+    [wxBtn setBackgroundImage:[UIImage imageNamed:@"wechat_login"] forState:UIControlStateNormal];
+    wxBtn.backgroundColor = UIColor.clearColor;
     [wxBtn addTarget:self action:@selector(_wechatLoginClicked) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:wxBtn];
     [wxBtn mas_makeConstraints:^(MASConstraintMaker *make) {
