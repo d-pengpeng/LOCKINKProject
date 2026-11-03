@@ -39,7 +39,6 @@
 		E810889C2B57C4BD0044DFC1 /* MHRoleSetSubController.m in Sources */ = {isa = PBXBuildFile; fileRef = E810889B2B57C4BD0044DFC1 /* MHRoleSetSubController.m */; };
 		E8158DA02B9AABF50091302A /* MHRoleConnectView.m in Sources */ = {isa = PBXBuildFile; fileRef = E8158D9F2B9AABF50091302A /* MHRoleConnectView.m */; };
 		E816A8052ADF7E6E009512F9 /* MHwelcomLoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A8042ADF7E6E009512F9 /* MHwelcomLoginController.m */; };
-		FFFFFFFF0000000000000003 /* MHWeChatHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = FFFFFFFF0000000000000002 /* MHWeChatHandler.m */; };
 		E816A8082ADF8630009512F9 /* MHloginController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A8072ADF8630009512F9 /* MHloginController.m */; };
 		E816A80B2ADF865C009512F9 /* MHRegisterLController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A80A2ADF865C009512F9 /* MHRegisterLController.m */; };
 		E816A80E2ADF867C009512F9 /* MHforgetLController.m in Sources */ = {isa = PBXBuildFile; fileRef = E816A80D2ADF867C009512F9 /* MHforgetLController.m */; };
@@ -749,6 +748,7 @@
 		E8FDA2EE2AEF4F2900B28B0C /* MHAddTOYSController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8FDA2ED2AEF4F2900B28B0C /* MHAddTOYSController.m */; };
 		E8FDA2F52AEFB09D00B28B0C /* myBlackListController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8FDA2F42AEFB09D00B28B0C /* myBlackListController.m */; };
 		F3FDCEBE8066A879214B0384 /* Pods_BlueEquipProject.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9EA13104BDDD5DBF6BE62EDC /* Pods_BlueEquipProject.framework */; };
+		FFFFFFFF0000000000000003 /* MHWeChatHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = FFFFFFFF0000000000000002 /* MHWeChatHandler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -853,8 +853,6 @@
 		E8158D9F2B9AABF50091302A /* MHRoleConnectView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHRoleConnectView.m; sourceTree = "<group>"; };
 		E816A8032ADF7E6E009512F9 /* MHwelcomLoginController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHwelcomLoginController.h; sourceTree = "<group>"; };
 		E816A8042ADF7E6E009512F9 /* MHwelcomLoginController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHwelcomLoginController.m; sourceTree = "<group>"; };
-		FFFFFFFF0000000000000001 /* MHWeChatHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHWeChatHandler.h; sourceTree = "<group>"; };
-		FFFFFFFF0000000000000002 /* MHWeChatHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHWeChatHandler.m; sourceTree = "<group>"; };
 		E816A8062ADF8630009512F9 /* MHloginController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHloginController.h; sourceTree = "<group>"; };
 		E816A8072ADF8630009512F9 /* MHloginController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHloginController.m; sourceTree = "<group>"; };
 		E816A8092ADF865C009512F9 /* MHRegisterLController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHRegisterLController.h; sourceTree = "<group>"; };
@@ -2235,6 +2233,8 @@
 		E8FDA2F32AEFB09D00B28B0C /* myBlackListController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = myBlackListController.h; sourceTree = "<group>"; };
 		E8FDA2F42AEFB09D00B28B0C /* myBlackListController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = myBlackListController.m; sourceTree = "<group>"; };
 		ECCBCC728F47E4231ADBDF28 /* UIViewController+MHAgeGate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "UIViewController+MHAgeGate.h"; sourceTree = "<group>"; };
+		FFFFFFFF0000000000000001 /* MHWeChatHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHWeChatHandler.h; sourceTree = "<group>"; };
+		FFFFFFFF0000000000000002 /* MHWeChatHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHWeChatHandler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -6246,7 +6246,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
-				MARKETING_VERSION = 1.6.4;
+				MARKETING_VERSION = 1.6.5;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -6308,7 +6308,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/BlueEquipProject/ToolsModel/TxIMIMIM/TUIChat/VoiceConvert",
 				);
-				MARKETING_VERSION = 1.6.4;
+				MARKETING_VERSION = 1.6.5;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;
 				PRODUCT_NAME = "$(TARGET_NAME)";

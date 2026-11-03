@@ -55,7 +55,7 @@
     onelab2.text = eLocalizedString(@"login_all27");
     [oneVV addSubview:onelab2];
     
-    // 微信未绑定场景：显示 wechat_info 图片提示 + 昵称预填
+    // 未绑定场景：显示 wechat_info / apple_info 图片提示
     CGFloat subOneVStartY = CGRectGetMaxY(onelab2.frame) + 10;
     if (self.wechatTicket.length > 0) {
         self.wechatBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]];
@@ -64,6 +64,13 @@
         [oneVV addSubview:self.wechatBindView];
         subOneVStartY = CGRectGetMaxY(self.wechatBindView.frame) + 10;
         NSLog(@"[WeChat] 注册页显示 wechat_info, ticket=%@, nickName=%@", self.wechatTicket ?: @"(null)", self.prefillNickName ?: @"(null)");
+    } else if (self.appleTicket.length > 0) {
+        UIImageView *appleBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"apple_info"]];
+        appleBindView.contentMode = UIViewContentModeScaleAspectFit;
+        appleBindView.frame = CGRectMake(30, subOneVStartY, _window_width - 60, 48);
+        [oneVV addSubview:appleBindView];
+        subOneVStartY = CGRectGetMaxY(appleBindView.frame) + 10;
+        NSLog(@"[Apple] 注册页显示 apple_info, ticket=%@", self.appleTicket ?: @"(null)");
     }
     
     CGFloat ww_one = (_window_width-64*3-60)/2;
