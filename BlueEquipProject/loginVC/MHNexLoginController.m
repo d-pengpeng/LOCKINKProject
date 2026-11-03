@@ -379,6 +379,11 @@
             NSDictionary *params = @{@"type": @"wechat", @"ticket": ticket};
             [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
                 NSLog(@"[WeChat] bindAccount 成功 — code=%d, msg=%@", code, msg);
+                if (code == 200) {
+                    [[MHBehaviorReporter shared] trackAction:@"account_bind"
+                                                        page:NSStringFromClass([self class])
+                                                         ext:@{@"platform": @"wechat", @"from": @"register_retry"}];
+                }
             } fail:^(NSString * _Nonnull msg) {
                 NSLog(@"[WeChat] bindAccount 失败 — msg=%@ (不拦截)", msg);
             }];
@@ -390,6 +395,11 @@
             NSDictionary *params = @{@"type": @"apple", @"ticket": ticket};
             [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
                 NSLog(@"[Apple] bindAccount 成功 — code=%d, msg=%@", code, msg);
+                if (code == 200) {
+                    [[MHBehaviorReporter shared] trackAction:@"account_bind"
+                                                        page:NSStringFromClass([self class])
+                                                         ext:@{@"platform": @"apple", @"from": @"register_retry"}];
+                }
             } fail:^(NSString * _Nonnull msg) {
                 NSLog(@"[Apple] bindAccount 失败 — msg=%@ (不拦截)", msg);
             }];

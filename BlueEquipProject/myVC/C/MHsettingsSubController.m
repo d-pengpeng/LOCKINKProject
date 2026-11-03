@@ -245,6 +245,9 @@
     [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
         if (code == 200) {
+            [[MHBehaviorReporter shared] trackAction:@"account_bind"
+                                                page:NSStringFromClass([self class])
+                                                 ext:@{@"platform": type ?: @""}];
             [SVProgressHUD showSuccessWithStatus:@"绑定成功"];
             [self _refreshBindingsFromServer];
         } else {
@@ -263,6 +266,9 @@
     [requestToolClass postNetworkWithUrl:request_oauth_unbindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
         if (code == 200) {
+            [[MHBehaviorReporter shared] trackAction:@"account_unbind"
+                                                page:NSStringFromClass([self class])
+                                                 ext:@{@"platform": type ?: @""}];
             [SVProgressHUD showSuccessWithStatus:@"解绑成功"];
             [self _markPlatformUnbound:type];
         } else {
@@ -361,18 +367,7 @@
         @"fullName": fullName
     };
     
-    [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:[params copy] success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-        [SVProgressHUD dismiss];
-        if (code == 200) {
-            [SVProgressHUD showSuccessWithStatus:@"绑定成功"];
-            [self _refreshBindingsFromServer];
-        } else {
-            [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"绑定失败"];
-        }
-    } fail:^(NSString * _Nonnull msg) {
-        [SVProgressHUD dismiss];
-        [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"绑定失败"];
-    }];
+    [self _callBindAccountAPI:@"apple" params:params];
 }
 
 - (void)authorizationController:(ASAuthorizationController *)controller didCompleteWithError:(NSError *)error API_AVAILABLE(ios(13.0)) {

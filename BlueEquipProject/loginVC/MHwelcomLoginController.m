@@ -799,6 +799,9 @@ API_AVAILABLE(ios(13.0))
         return;
     }
     if (@available(iOS 13.0, *)) {
+        [[MHBehaviorReporter shared] trackAction:@"login_apple_start"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"platform": @"apple"}];
         [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
                                             page:NSStringFromClass([self class])
                                              ext:@{@"method": @"apple"}];
@@ -913,6 +916,10 @@ API_AVAILABLE(ios(13.0))
                 [self _bindPendingWechatTicketIfNeeded];
                 [self _bindPendingAppleTicketIfNeeded];
                 
+                [[MHBehaviorReporter shared] trackAction:@"login_apple_success"
+                                                    page:NSStringFromClass([self class])
+                                                     ext:@{@"platform": @"apple"}];
+                
                 [[MHBehaviorReporter shared] trackWithType:MHBTAction
                                                         key:@"login_success"
                                                        page:NSStringFromClass([self class])
@@ -951,6 +958,9 @@ API_AVAILABLE(ios(13.0))
         }
     } fail:^(NSString * _Nonnull errorStr) {
         [SVProgressHUD dismiss];
+        [[MHBehaviorReporter shared] trackAction:@"login_apple_fail"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"platform": @"apple", @"error": errorStr ?: @""}];
         [SVProgressHUD showErrorWithStatus:errorStr.length > 0 ? errorStr : @"Apple 登录失败"];
     }];
 }
@@ -1087,6 +1097,9 @@ API_AVAILABLE(ios(13.0))
     } fail:^(NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];
         NSLog(@"[WeChat] loginWechat 失败 — msg=%@", msg);
+        [[MHBehaviorReporter shared] trackAction:@"login_wechat_fail"
+                                            page:NSStringFromClass([self class])
+                                             ext:@{@"platform": @"wechat", @"error": msg ?: @""}];
         [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"微信登录失败"];
     }];
 }
@@ -1113,6 +1126,11 @@ API_AVAILABLE(ios(13.0))
     NSDictionary *params = @{@"type": @"wechat", @"ticket": ticket};
     [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         NSLog(@"[WeChat] bindAccount 成功 — code=%d, msg=%@", code, msg);
+        if (code == 200) {
+            [[MHBehaviorReporter shared] trackAction:@"account_bind"
+                                                page:NSStringFromClass([self class])
+                                                 ext:@{@"platform": @"wechat", @"from": @"pending"}];
+        }
     } fail:^(NSString * _Nonnull msg) {
         NSLog(@"[WeChat] bindAccount 失败 — msg=%@ (不拦截登录)", msg);
     }];
@@ -1127,6 +1145,11 @@ API_AVAILABLE(ios(13.0))
     NSDictionary *params = @{@"type": @"apple", @"ticket": ticket};
     [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         NSLog(@"[Apple] bindAccount 成功 — code=%d, msg=%@", code, msg);
+        if (code == 200) {
+            [[MHBehaviorReporter shared] trackAction:@"account_bind"
+                                                page:NSStringFromClass([self class])
+                                                 ext:@{@"platform": @"apple", @"from": @"pending"}];
+        }
     } fail:^(NSString * _Nonnull msg) {
         NSLog(@"[Apple] bindAccount 失败 — msg=%@ (不拦截登录)", msg);
     }];
