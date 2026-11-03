@@ -91,8 +91,8 @@
     NSLog(@"[Bindings] 缓存 bindings=%@", bindings);
     
     NSArray *platforms = @[
-        @{@"key": @"wechat", @"name": @"微信", @"iconBound": @"wechat_bound", @"iconUnbound": @"wechat_login"},
-        @{@"key": @"apple",  @"name": @"Apple", @"iconBound": @"apple_bound",  @"iconUnbound": @"apple_login"}
+        @{@"key": @"wechat", @"name": @"微信", @"iconBound": @"wechat_bound", @"iconUnbound": @"wechat_bound"},
+        @{@"key": @"apple",  @"name": @"Apple", @"iconBound": @"apple_bound",  @"iconUnbound": @"apple_bound"}
     ];
     
     CGFloat startY = NAVHEIGHT + 2 * 54 + 12;  // 基础设置 2 行 + 12pt 间距
