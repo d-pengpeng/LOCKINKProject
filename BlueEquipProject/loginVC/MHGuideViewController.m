@@ -43,6 +43,7 @@
     self.hideNavView = YES;
     
     self.cycleScrollV = [SDCycleScrollView cycleScrollViewWithFrame:CGRectMake(0, 0, _window_width, _window_height) delegate:self placeholderImage:[UIImage imageNamed:@""]];
+    self.cycleScrollV.bannerImageViewContentMode = UIViewContentModeScaleAspectFill;
     self.cycleScrollV.clipsToBounds = YES;
     self.cycleScrollV.layer.cornerRadius = 8;
     self.cycleScrollV.currentPageDotColor = UIColor.whiteColor;
