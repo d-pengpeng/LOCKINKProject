@@ -889,8 +889,11 @@ API_AVAILABLE(ios(13.0))
                                                   durationMs:nil
                                                      costMs:nil];
                 
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
-                [self.navigationController popToRootViewControllerAnimated:YES];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"loginNotifMethod" object:nil];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
+                    [self.navigationController popToRootViewControllerAnimated:YES];
+                });
             } else {
                 NSLog(@"[Apple] bound=true 但 authInfo 缺失！");
                 [SVProgressHUD showErrorWithStatus:@"Apple 登录返回异常"];
@@ -1001,12 +1004,11 @@ API_AVAILABLE(ios(13.0))
                                                     page:NSStringFromClass([self class])
                                                      ext:@{@"platform": @"wechat"}];
 
-                // 登录成功通知 IM
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                dispatch_async(dispatch_get_main_queue(), ^{
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"loginNotifMethod" object:nil];
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"LoginImNotifFF" object:nil];
+                    [self.navigationController popToRootViewControllerAnimated:YES];
                 });
-                [self.navigationController popToRootViewControllerAnimated:YES];
             } else {
                 NSLog(@"[WeChat] bound=true 但 authInfo 缺失！");
                 [SVProgressHUD showErrorWithStatus:@"微信登录返回异常"];
