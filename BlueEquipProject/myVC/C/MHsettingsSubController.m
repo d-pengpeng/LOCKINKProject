@@ -84,9 +84,20 @@
 
 - (void)setupSocialBindingsRows {
     for (UIView *v in self.view.subviews) {
-        if (v.tag >= 9000 && v.tag < 9100) {
+        if (v.tag >= 9001 && v.tag < 9100) {
             [v removeFromSuperview];
         }
+    }
+    
+    // section header 标签（tag=9000，每次刷新不删，只更新文案）
+    CGFloat startY = NAVHEIGHT + 2 * 54 + 12;
+    UIView *oldHeader = [self.view viewWithTag:9000];
+    if (!oldHeader) {
+        UILabel *sectionLab = [HistoryRecordModel createLabLabTextColor:RGB(153, 153, 153) fontFloat:12 textAlignment:NSTextAlignmentLeft];
+        sectionLab.text = @"第三方登录方式";
+        sectionLab.frame = CGRectMake(12, startY - 18, _window_width - 24, 18);
+        sectionLab.tag = 9000;
+        [self.view addSubview:sectionLab];
     }
     
     NSDictionary *bindings = [LYUserDefault userDefault].socialBindings;
