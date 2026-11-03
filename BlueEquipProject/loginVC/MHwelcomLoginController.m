@@ -790,6 +790,10 @@ API_AVAILABLE(ios(13.0))
     if (![self ensurePrivacyAgreeOrShowPopup]) {
         return;
     }
+    if (!self.isTYBoo) {
+        [SVProgressHUD showInfoWithStatus:eLocalizedString(@"login_all15")];
+        return;
+    }
     if (@available(iOS 13.0, *)) {
         [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
                                             page:NSStringFromClass([self class])
@@ -967,6 +971,10 @@ API_AVAILABLE(ios(13.0))
     NSLog(@"[WeChat] 点击微信登录按钮");
     if (![self ensurePrivacyAgreeOrShowPopup]) {
         NSLog(@"[WeChat] 未同意隐私协议，拦截");
+        return;
+    }
+    if (!self.isTYBoo) {
+        [SVProgressHUD showInfoWithStatus:eLocalizedString(@"login_all15")];
         return;
     }
 
