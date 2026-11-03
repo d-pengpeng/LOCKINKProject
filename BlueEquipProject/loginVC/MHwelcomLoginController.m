@@ -233,34 +233,7 @@ API_AVAILABLE(ios(13.0))
     
     [self qhBtnMethod];//MARK: 改为默认密码登录
     
-    //MARK: 微信登录按钮区域
-    UIView *wxLine1 = [[UIView alloc] init];
-    wxLine1.backgroundColor = RGB(90, 90, 90);
-    [self.view addSubview:wxLine1];
-    [wxLine1 mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.view.mas_left).offset(10);
-        make.right.equalTo(self.view.mas_centerX).offset(-20);
-        make.top.equalTo(loginBBtn.mas_bottom).offset(24);
-        make.height.offset(0.5);
-    }];
-    
-    UIView *wxLine2 = [[UIView alloc] init];
-    wxLine2.backgroundColor = RGB(90, 90, 90);
-    [self.view addSubview:wxLine2];
-    [wxLine2 mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.view.mas_centerX).offset(20);
-        make.right.equalTo(self.view.mas_right).offset(-10);
-        make.top.equalTo(loginBBtn.mas_bottom).offset(24);
-        make.height.offset(0.5);
-    }];
-    
-    UILabel *wxLab = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:12 textAlignment:NSTextAlignmentCenter];
-    wxLab.text = @"微信";
-    [self.view addSubview:wxLab];
-    [wxLab mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.centerX.equalTo(self.view.mas_centerX);
-        make.centerY.equalTo(wxLine1.mas_centerY);
-    }];
+    //MARK: 第三方登录按钮区域（Apple + WeChat 并排，各 48×48）
     
     UIButton *wxBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [wxBtn setBackgroundImage:[UIImage imageNamed:@"wechat_login"] forState:UIControlStateNormal];
@@ -268,10 +241,22 @@ API_AVAILABLE(ios(13.0))
     [wxBtn addTarget:self action:@selector(_wechatLoginClicked) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:wxBtn];
     [wxBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.top.equalTo(wxLine1.mas_bottom).offset(12);
-        make.centerX.equalTo(self.view.mas_centerX);
-        make.height.offset(44);
-        make.width.offset(200);
+        make.top.equalTo(loginBBtn.mas_bottom).offset(24);
+        make.centerX.equalTo(self.view.mas_centerX).offset(30);
+        make.height.offset(48);
+        make.width.offset(48);
+    }];
+    
+    UIButton *appleBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    [appleBtn setBackgroundImage:[UIImage imageNamed:@"apple_login"] forState:UIControlStateNormal];
+    appleBtn.backgroundColor = UIColor.clearColor;
+    [appleBtn addTarget:self action:@selector(appleLoginClicked) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:appleBtn];
+    [appleBtn mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.top.equalTo(wxBtn.mas_top);
+        make.centerX.equalTo(self.view.mas_centerX).offset(-30);
+        make.height.offset(48);
+        make.width.offset(48);
     }];
     
     UIView *botmVV = [HistoryRecordModel createViewUIUI];
