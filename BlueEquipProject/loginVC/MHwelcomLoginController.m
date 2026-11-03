@@ -572,8 +572,9 @@ API_AVAILABLE(ios(13.0))
                 
                 [LYUserDefault saveIsLoginBoo:YES];
                 
-                // 场景 C：如果有 pendingWechatTicket（用户选了"绑定已有账号"），登录成功后自动调 bindWechat
+                // 场景 C：如果有 pending 第三方 ticket，登录成功后自动 bind
                 [self _bindPendingWechatTicketIfNeeded];
+                [self _bindPendingAppleTicketIfNeeded];
                 
                 if([LYUserDefault userDefault].sealing) {
                     
@@ -848,12 +849,38 @@ API_AVAILABLE(ios(13.0))
             [[LYUserDefault userDefault] setSocialBindings:bindings];
         }
         
-        // 判断绑定状态 — 类似微信 loginWechat 的返回
-        NSNumber *boundObj = info[@"bound"];
-        BOOL bound = YES;  // 默认已绑定（兼容旧版后端）
+        // ====== 三层判断绑定状态（默认 NO，兜底防误判）======
+        BOOL bound = NO;
+        
+        // 方式1: 直接读 info[@"bound"]（后端如果返回了就用）
+        id boundObj = info[@"bound"];
         if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) {
-            bound = [boundObj boolValue];
+            bound = [boundObj respondsToSelector:@selector(boolValue)] ? [boundObj boolValue] : NO;
         }
+        
+        // 方式2: 如果方式1没拿到，从 bindings.apple.bound 读
+        if (!bound && [bindings isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *appleBind = bindings[@"apple"];
+            if ([appleBind isKindOfClass:[NSDictionary class]]) {
+                id b2 = appleBind[@"bound"];
+                if (b2 && ![b2 isKindOfClass:[NSNull class]]) {
+                    bound = [b2 respondsToSelector:@selector(boolValue)] ? [b2 boolValue] : NO;
+                }
+            }
+        }
+        
+        // 方式3: 有 appleTicket → 强制 bound=NO（后端未绑定时通常返回 ticket）
+        NSString *appleTicket = [info[@"appleTicket"] copy];
+        if (appleTicket.length > 0) {
+            bound = NO;
+        }
+        
+        NSLog(@"[Apple] bound判断 — boundObj=%@, bindings.apple=%@, appleTicket=%@ → 最终 bound=%d, info.keys=%@",
+              boundObj ?: @"(null)",
+              bindings[@"apple"] ?: @"(null)",
+              appleTicket ?: @"(null)",
+              bound,
+              [info allKeys]);
         
         if (bound) {
             // 已绑定 → 直接登录
@@ -876,6 +903,7 @@ API_AVAILABLE(ios(13.0))
                 [LYUserDefault saveUserLoginDefault:authInfo];
                 [LYUserDefault saveIsLoginBoo:YES];
                 [self _bindPendingWechatTicketIfNeeded];
+                [self _bindPendingAppleTicketIfNeeded];
                 
                 [[MHBehaviorReporter shared] trackWithType:MHBTAction
                                                         key:@"login_success"
@@ -900,10 +928,9 @@ API_AVAILABLE(ios(13.0))
             }
         } else {
             // 未绑定 → 显示状态图标 + 暂存票据（用户后续注册或登录时自动 bindAccount）
-            NSString *ticket = [info[@"appleTicket"] copy];
-            NSLog(@"[Apple] 未绑定 → 显示图片 ticket=%@", ticket ?: @"(null)");
+            NSLog(@"[Apple] 未绑定 → 显示图片 ticket=%@", appleTicket ?: @"(null)");
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.pendingAppleTicket = ticket;
+                self.pendingAppleTicket = appleTicket;
                 self.pendingAppleNickName = fullName;
                 self.pendingAppleEmail = email;
                 self.appleBindView.hidden = NO;
@@ -999,6 +1026,8 @@ API_AVAILABLE(ios(13.0))
             if ([authInfo isKindOfClass:[NSDictionary class]] && authInfo.count > 0) {
                 [LYUserDefault saveUserLoginDefault:authInfo];
                 [LYUserDefault saveIsLoginBoo:YES];
+                [self _bindPendingWechatTicketIfNeeded];
+                [self _bindPendingAppleTicketIfNeeded];
 
                 [[MHBehaviorReporter shared] trackAction:@"login_apple_success"
                                                     page:NSStringFromClass([self class])
@@ -1053,6 +1082,20 @@ API_AVAILABLE(ios(13.0))
         NSLog(@"[WeChat] bindWechat 成功 — code=%d, msg=%@", code, msg);
     } fail:^(NSString * _Nonnull msg) {
         NSLog(@"[WeChat] bindWechat 失败 — msg=%@ (不拦截登录)", msg);
+    }];
+}
+
+/// 登录成功后，如有 pendingAppleTicket 自动调 bindAccount（场景 C — 苹果未绑定后用已有账号绑定）
+- (void)_bindPendingAppleTicketIfNeeded {
+    NSString *ticket = self.pendingAppleTicket;
+    if (ticket.length == 0) return;
+    self.pendingAppleTicket = nil;
+    NSLog(@"[Apple] 场景 C — 登录成功，自动 bindAccount appleTicket=%@", ticket);
+    NSDictionary *params = @{@"type": @"apple", @"appleTicket": ticket};
+    [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        NSLog(@"[Apple] bindAccount 成功 — code=%d, msg=%@", code, msg);
+    } fail:^(NSString * _Nonnull msg) {
+        NSLog(@"[Apple] bindAccount 失败 — msg=%@ (不拦截登录)", msg);
     }];
 }
 
