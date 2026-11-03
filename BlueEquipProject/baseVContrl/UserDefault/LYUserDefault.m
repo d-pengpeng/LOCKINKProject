@@ -25,7 +25,7 @@
     [[NSUserDefaults standardUserDefaults] setValue:@"" forKey:@"AppToken"];
     [[NSUserDefaults standardUserDefaults] setValue:@"" forKey:@"imUserSig"];
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"isLoginBoo"];
-    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"user_isPrivacyAgreeBoo"];
+    // 注意：isPrivacyAgreeBoo 是设备级同意，退出登录不清
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"socialBindings"];
 }
 
