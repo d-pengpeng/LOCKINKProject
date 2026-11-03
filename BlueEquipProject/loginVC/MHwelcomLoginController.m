@@ -787,6 +787,9 @@ API_AVAILABLE(ios(13.0))
 #pragma mark - Sign in with Apple
 
 - (void)appleLoginClicked API_AVAILABLE(ios(13.0)) {
+    if (![self ensurePrivacyAgreeOrShowPopup]) {
+        return;
+    }
     if (@available(iOS 13.0, *)) {
         [[MHBehaviorReporter shared] trackAction:@"login_method_switch"
                                             page:NSStringFromClass([self class])
