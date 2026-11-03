@@ -265,6 +265,21 @@
                                                  ext:@{@"platform": type ?: @""}];
             [SVProgressHUD showSuccessWithStatus:@"绑定成功"];
             [self _refreshBindingsFromServer];
+        } else if (code == 50021 || code == 50024 || code == 50029) {
+            // 50021=微信 50024=Apple 50029=Google — 该第三方账号已绑定其他账号
+            NSString *channelName = [type isEqualToString:@"wechat"] ? @"微信" : ([type isEqualToString:@"apple"] ? @"Apple" : @"Google");
+            [SGActionView showAlertWithTitle:@"无法绑定"
+                                    message:[NSString stringWithFormat:@"该%@账号已绑定其他 LOCKINK 账号，请先在原账号解绑后再试", channelName]
+                         leftButtonTitle:@"取消"
+                        rightButtonTitle:@"知道了"
+                           selectedHandle:nil];
+        } else if (code == 50022 || code == 50025 || code == 50030) {
+            // 50022/50025/50030 — 当前账号已绑了同渠道另一个
+            [SGActionView showAlertWithTitle:@"无法绑定"
+                                    message:@"当前账号已绑定该第三方账号，请先解绑原来的"
+                         leftButtonTitle:@"取消"
+                        rightButtonTitle:@"知道了"
+                           selectedHandle:nil];
         } else {
             [SVProgressHUD showErrorWithStatus:msg.length > 0 ? msg : @"绑定失败"];
         }
