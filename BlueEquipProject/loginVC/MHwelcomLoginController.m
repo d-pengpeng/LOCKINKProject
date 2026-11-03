@@ -85,47 +85,69 @@ API_AVAILABLE(ios(13.0))
     messageIssssss = 60;
     
     UIImageView *logoImgV = [HistoryRecordModel createImgImgView];
-    logoImgV.frame = CGRectMake(_window_width/2-62, NAVHEIGHT+12, 124, 110);
     logoImgV.image = [UIImage imageNamed:@"logoImg"];
+    logoImgV.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:logoImgV];
+    [logoImgV mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.centerX.equalTo(self.view.mas_centerX);
+        make.top.equalTo(self.view.mas_top).offset(NAVHEIGHT+12);
+        make.width.offset(124);
+        make.height.offset(110);
+    }];
 
     
     self.oneLab = [HistoryRecordModel createLabLabTextColor:normalColors fontFloat:16 textAlignment:NSTextAlignmentCenter];
-    self.oneLab.frame = CGRectMake(10, logoImgV.y+110+22, 104, 36);
     self.oneLab.text = eLocalizedString(@"login_all1");
     self.oneLab.numberOfLines = 0;
     [self.view addSubview:self.oneLab];
     [self.oneLab mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(10);
-        make.bottom.equalTo(self.view.mas_top).offset(logoImgV.y+110+22+30);
+        make.top.equalTo(logoImgV.mas_bottom).offset(22);
         make.width.offset(104);
         make.height.mas_greaterThanOrEqualTo(30);
     }];
     
     self.oneLab2 = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:16 textAlignment:NSTextAlignmentCenter];
-    self.oneLab2.frame = CGRectMake(10+104, self.oneLab.y, 104, 36);
     self.oneLab2.text = eLocalizedString(@"login_all2");
     self.oneLab2.numberOfLines = 0;
     [self.view addSubview:self.oneLab2];
     [self.oneLab2 mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.oneLab.mas_right).offset(8);
-        make.bottom.equalTo(self.view.mas_top).offset(logoImgV.y+110+22+30);
+        make.top.equalTo(self.oneLab.mas_top);
         make.width.offset(104);
         make.height.mas_greaterThanOrEqualTo(30);
     }];
     
-    self.linImgV = [[UIImageView alloc] initWithFrame:CGRectMake(37, logoImgV.y+110+22+30, 50, 3)];
+    self.linImgV = [[UIImageView alloc] init];
     self.linImgV.clipsToBounds = YES;
     self.linImgV.image = [UIImage imageNamed:@"login_allimg5"];
     [self.view addSubview:self.linImgV];
+    [self.linImgV mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).offset(37);
+        make.top.equalTo(self.oneLab.mas_bottom).offset(8);
+        make.width.offset(50);
+        make.height.offset(3);
+    }];
     
-    UIButton *oneBtn1 = [[UIButton alloc] initWithFrame:CGRectMake(10, self.oneLab.y, 104, 36)];
+    UIButton *oneBtn1 = [[UIButton alloc] init];
     [oneBtn1 addTarget:self action:@selector(onebtnMethodOne) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:oneBtn1];
+    [oneBtn1 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.view.mas_left).offset(10);
+        make.centerY.equalTo(self.oneLab.mas_centerY);
+        make.width.offset(104);
+        make.height.offset(36);
+    }];
     
-    UIButton *oneBtn2 = [[UIButton alloc] initWithFrame:CGRectMake(114, self.oneLab.y, 104, 36)];
+    UIButton *oneBtn2 = [[UIButton alloc] init];
     [oneBtn2 addTarget:self action:@selector(onebtnMethodTwo) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:oneBtn2];
+    [oneBtn2 mas_makeConstraints:^(MASConstraintMaker *make) {
+        make.left.equalTo(self.oneLab2.mas_left);
+        make.centerY.equalTo(self.oneLab.mas_centerY);
+        make.width.offset(104);
+        make.height.offset(36);
+    }];
 
     //MARK: 微信未绑定提示（仅显示图片，默认 hidden）
     // 放大到 48pt，下面的 accImgV 会在它下面（+4pt gap）
