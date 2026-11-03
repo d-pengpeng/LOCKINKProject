@@ -130,8 +130,8 @@ API_AVAILABLE(ios(13.0))
     [self.wechatBindView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(30);
         make.right.equalTo(self.view.mas_right).offset(-30);
-        make.top.equalTo(self.oneLab.mas_bottom).offset(6);
-        make.height.offset(40);
+        make.top.equalTo(self.oneLab.mas_bottom).offset(30);
+        make.height.offset(60);
     }];
     
     
