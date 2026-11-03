@@ -131,13 +131,13 @@ API_AVAILABLE(ios(13.0))
     [self.wechatBindView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(30);
         make.right.equalTo(self.view.mas_right).offset(-30);
-        make.top.equalTo(self.oneLab.mas_bottom).offset(4);
+        make.top.equalTo(self.oneLab.mas_bottom).offset(24);
         make.height.offset(48);
     }];
     
     
-    // accImgV 下移：原 oneLab.bottom+34 → 现在 oneLab.bottom+56（wechatBindView 底部 +4pt gap）
-    self.accImgV = [[UIImageView alloc] initWithFrame:CGRectMake(34, CGRectGetMaxY(self.oneLab.frame)+56, 26, 26)];
+    // accImgV 下移：原 oneLab.bottom+56 → 现在 oneLab.bottom+76（下间距再 +20）
+    self.accImgV = [[UIImageView alloc] initWithFrame:CGRectMake(34, CGRectGetMaxY(self.oneLab.frame)+76, 26, 26)];
     self.accImgV.image = [UIImage imageNamed:@"login_allimg1"];
     [self.view addSubview:self.accImgV];
     
