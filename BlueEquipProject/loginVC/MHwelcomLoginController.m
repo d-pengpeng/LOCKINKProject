@@ -635,6 +635,10 @@ API_AVAILABLE(ios(13.0))
     if (![self ensurePrivacyAgreeOrShowPopup]) {
         return;
     }
+    if (!self.isTYBoo) {
+        [SVProgressHUD showInfoWithStatus:eLocalizedString(@"login_all15")];
+        return;
+    }
     MHRegisterLController *vc = [[MHRegisterLController alloc] init];
     vc.isTYBoo = self.isTYBoo;
     // 微信未绑定场景
