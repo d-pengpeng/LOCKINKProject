@@ -111,6 +111,17 @@
     self.linImgV.image = [UIImage imageNamed:@"login_allimg5"];
     [self.view addSubview:self.linImgV];
     
+    // 微信未绑定场景：显示 wechat_info 图片提示
+    CGFloat accImgVTopOffset = 34;  // 默认 accImgV 距离 oneLab.bottom 的偏移
+    if (self.wechatTicket.length > 0) {
+        UIImageView *wechatInfo = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]];
+        wechatInfo.contentMode = UIViewContentModeScaleAspectFit;
+        wechatInfo.frame = CGRectMake(30, CGRectGetMaxY(self.oneLab.frame) + 4, _window_width - 60, 48);
+        [self.view addSubview:wechatInfo];
+        accImgVTopOffset = 4 + 48 + 4;  // 图片高 + 上下 gap
+        NSLog(@"[WeChat] MHRegisterLController 显示 wechat_info, ticket=%@", self.wechatTicket ?: @"(null)");
+    }
+    
     UIButton *oneBtn1 = [[UIButton alloc] initWithFrame:CGRectMake(10, self.oneLab.y, 104, 36)];
     [oneBtn1 addTarget:self action:@selector(onebtnMethodOne) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:oneBtn1];
@@ -119,8 +130,7 @@
     [oneBtn2 addTarget:self action:@selector(onebtnMethodTwo) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:oneBtn2];
     
-    
-    self.accImgV = [[UIImageView alloc] initWithFrame:CGRectMake(34, CGRectGetMaxY(self.oneLab.frame)+34, 26, 26)];
+    self.accImgV = [[UIImageView alloc] initWithFrame:CGRectMake(34, CGRectGetMaxY(self.oneLab.frame)+accImgVTopOffset, 26, 26)];
     self.accImgV.image = [UIImage imageNamed:@"login_allimg1"];
     [self.view addSubview:self.accImgV];
     
