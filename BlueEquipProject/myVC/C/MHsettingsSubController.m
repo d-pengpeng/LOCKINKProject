@@ -8,6 +8,7 @@
 #import "MHsettingsSubController.h"
 #import "MHRedoPasswordController.h"
 #import "LYUserDefault.h"
+#import "requestUrlRFile.h"
 
 @interface MHsettingsSubController ()
 
@@ -20,11 +21,8 @@
     
     if (@available(iOS 13.0, *)) {
         [FloatingWindowModel shareInstance].getWindowSceneBarMehotd.windows.firstObject.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
-    } else {
-        // Fallback on earlier versions
     }
     
-    // 刷新绑定状态显示
     [self setupSocialBindingsRows];
 }
 
@@ -38,7 +36,6 @@
     placeImV.image = [UIImage imageNamed:@"allBackImgsMsg"];
     [self.view addSubview:placeImV];
      
-    // 顶部两行（修改密码 + 绑定手机号）
     NSArray *namsAr = @[@"my_settings11", @"my_settings12"];
     
     for (int i=0; i<namsAr.count; i++) {
@@ -72,12 +69,10 @@
         }
     }
     
-    // 第三方账号绑定区域容器（放在 2 行基础设置下面，起始 y = NAVHEIGHT + 2*54）
     [self setupSocialBindingsRows];
 }
 
 - (void)setupSocialBindingsRows {
-    // 先移除旧的（如果有）
     for (UIView *v in self.view.subviews) {
         if (v.tag >= 9000 && v.tag < 9100) {
             [v removeFromSuperview];
@@ -88,21 +83,18 @@
     if (![bindings isKindOfClass:[NSDictionary class]]) {
         bindings = @{};
     }
-    NSLog(@"[Bindings] 缓存 bindings=%@", bindings);
     
     NSArray *platforms = @[
-        @{@"key": @"wechat", @"name": @"微信", @"iconBound": @"wechat_bound", @"iconUnbound": @"wechat_bound"},
-        @{@"key": @"apple",  @"name": @"Apple", @"iconBound": @"apple_bound",  @"iconUnbound": @"apple_bound"}
+        @{@"key": @"wechat", @"name": @"微信", @"icon": @"wechat_bound"},
+        @{@"key": @"apple",  @"name": @"Apple", @"icon": @"apple_bound"}
     ];
     
-    CGFloat startY = NAVHEIGHT + 2 * 54 + 12;  // 基础设置 2 行 + 12pt 间距
-    NSArray *subviews = self.view.subviews;
+    CGFloat startY = NAVHEIGHT + 2 * 54 + 12;
     
     for (int i = 0; i < platforms.count; i++) {
         NSDictionary *plat = platforms[i];
         NSString *key = plat[@"key"];
         NSDictionary *info = bindings[key];
-        // bound 可能是 NSNumber(1)、NSString(@"1")、NSNull 或 缺失
         BOOL bound = NO;
         if ([info isKindOfClass:[NSDictionary class]]) {
             id boundObj = info[@"bound"];
@@ -110,7 +102,6 @@
                 bound = [boundObj boolValue];
             }
         }
-        NSLog(@"[Bindings] %@ → info=%@ boundObj=%@ bound=%d", key, info, info[@"bound"], bound);
         
         UIView *row = [[UIView alloc] initWithFrame:CGRectMake(0, startY + i * 54, _window_width, 54)];
         row.backgroundColor = UIColor.whiteColor;
@@ -120,11 +111,7 @@
         // 平台图标
         UIImageView *iconIV = [UIImageView new];
         iconIV.contentMode = UIViewContentModeScaleAspectFit;
-        NSString *iconName = bound ? plat[@"iconBound"] : plat[@"iconUnbound"];
-        if (iconName.length > 0) {
-            iconIV.image = [UIImage imageNamed:iconName];
-        }
-        iconIV.tag = 9100;
+        iconIV.image = [UIImage imageNamed:plat[@"icon"]];
         [row addSubview:iconIV];
         [iconIV mas_makeConstraints:^(MASConstraintMaker *make) {
             make.left.equalTo(row.mas_left).offset(12);
@@ -136,23 +123,19 @@
         UILabel *nameLab = [HistoryRecordModel createLabLabTextColor:UIColor.blackColor fontFloat:14 textAlignment:NSTextAlignmentLeft];
         nameLab.frame = CGRectMake(44, 0, 120, row.height);
         nameLab.text = plat[@"name"];
-        nameLab.tag = 9101;
         [row addSubview:nameLab];
         
-        // 绑定状态（右对齐，离右箭头 8pt）
-        // 箭头在 right=-12 宽16 → 箭头左边界 = _window_width-28 → 状态文字右边界 = _window_width-36
+        // 绑定状态
         NSString *statusText = bound ? @"已绑定" : @"未绑定";
         UIColor *statusColor = bound ? RGB(7, 193, 96) : RGB(153, 153, 153);
         UILabel *statusLab = [HistoryRecordModel createLabLabTextColor:statusColor fontFloat:13 textAlignment:NSTextAlignmentRight];
         statusLab.frame = CGRectMake(_window_width - 36 - 120, 0, 120, row.height);
         statusLab.text = statusText;
-        statusLab.tag = 9102;
         [row addSubview:statusLab];
         
         // 右箭头
         UIImageView *nexIV = [HistoryRecordModel createImgImgView];
         nexIV.image = [UIImage imageNamed:@"next_Img2"];
-        nexIV.tag = 9103;
         [row addSubview:nexIV];
         [nexIV mas_makeConstraints:^(MASConstraintMaker *make) {
             make.right.equalTo(row.mas_right).offset(-12);
@@ -160,14 +143,82 @@
             make.width.height.offset(16);
         }];
         
+        // 点击按钮（tag = 9200 + i，与 row 关联）
+        UIButton *cliBBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 5, row.width, row.height - 10)];
+        cliBBtn.tag = 9200 + i;
+        [cliBBtn addTarget:self action:@selector(_onPlatformRowTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [row addSubview:cliBBtn];
+        
         // 分割线
         if (i < platforms.count - 1) {
             UIView *linV = [HistoryRecordModel createLineViewUIUI];
             linV.frame = CGRectMake(0, row.height - 1, _window_width, 1);
-            linV.tag = 9104;
             [row addSubview:linV];
         }
     }
+}
+
+- (void)_onPlatformRowTapped:(UIButton *)sender {
+    NSArray *platformKeys = @[@"wechat", @"apple"];
+    if (sender.tag - 9200 < 0 || sender.tag - 9200 >= platformKeys.count) return;
+    
+    NSString *key = platformKeys[sender.tag - 9200];
+    NSDictionary *bindings = [LYUserDefault userDefault].socialBindings;
+    NSDictionary *info = bindings[key];
+    BOOL bound = NO;
+    if ([info isKindOfClass:[NSDictionary class]]) {
+        id boundObj = info[@"bound"];
+        if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) {
+            bound = [boundObj boolValue];
+        }
+    }
+    
+    if (bound) {
+        NSString *platformName = [key isEqualToString:@"wechat"] ? @"微信" : @"Apple";
+        [SGActionView showAlertWithTitle:[NSString stringWithFormat:@"是否解绑%@？", platformName]
+                                message:[NSString stringWithFormat:@"解绑后将无法使用%@登录", platformName]
+                     leftButtonTitle:@"取消"
+                    rightButtonTitle:@"解绑"
+                       selectedHandle:^(NSInteger index) {
+            if (index == 1) {
+                [self _callUnbindAPI:key platformName:platformName];
+            }
+        }];
+    } else {
+        [SVProgressHUD showInfoWithStatus:@"当前未绑定"];
+    }
+}
+
+- (void)_callUnbindAPI:(NSString *)key platformName:(NSString *)platformName {
+    [SVProgressHUD showWithStatus:@"解绑中..."];
+    
+    // 目前只支持解绑微信
+    [requestToolClass postNetworkWithUrl:request_unbind_wechat andParameter:@{} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        if (code == 200) {
+            [SVProgressHUD showSuccessWithStatus:@"解绑成功"];
+            [self _markPlatformUnbound:key];
+        } else {
+            [SVProgressHUD showErrorWithStatus:msg ?: @"解绑失败"];
+        }
+    } fail:^(NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:msg ?: @"解绑失败"];
+    }];
+}
+
+- (void)_markPlatformUnbound:(NSString *)key {
+    NSDictionary *bindings = [LYUserDefault userDefault].socialBindings;
+    if (![bindings isKindOfClass:[NSDictionary class]]) return;
+    
+    NSMutableDictionary *mutable = [bindings mutableCopy];
+    NSMutableDictionary *platInfo = [mutable[key] mutableCopy];
+    if (!platInfo) platInfo = [NSMutableDictionary dictionary];
+    platInfo[@"bound"] = @(0);
+    mutable[key] = [platInfo copy];
+    
+    [[LYUserDefault userDefault] setSocialBindings:[mutable copy]];
+    [self setupSocialBindingsRows];
 }
 
 - (void)clicListTagsMethod:(UIButton *)btn
