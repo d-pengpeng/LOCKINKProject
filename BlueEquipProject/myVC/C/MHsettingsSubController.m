@@ -88,6 +88,7 @@
     if (![bindings isKindOfClass:[NSDictionary class]]) {
         bindings = @{};
     }
+    NSLog(@"[Bindings] 缓存 bindings=%@", bindings);
     
     NSArray *platforms = @[
         @{@"key": @"wechat", @"name": @"微信", @"iconBound": @"wechat_bound", @"iconUnbound": @"wechat_login"},
@@ -101,7 +102,15 @@
         NSDictionary *plat = platforms[i];
         NSString *key = plat[@"key"];
         NSDictionary *info = bindings[key];
-        BOOL bound = [info[@"bound"] boolValue];
+        // bound 可能是 NSNumber(1)、NSString(@"1")、NSNull 或 缺失
+        BOOL bound = NO;
+        if ([info isKindOfClass:[NSDictionary class]]) {
+            id boundObj = info[@"bound"];
+            if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) {
+                bound = [boundObj boolValue];
+            }
+        }
+        NSLog(@"[Bindings] %@ → info=%@ boundObj=%@ bound=%d", key, info, info[@"bound"], bound);
         
         UIView *row = [[UIView alloc] initWithFrame:CGRectMake(0, startY + i * 54, _window_width, 54)];
         row.backgroundColor = UIColor.whiteColor;

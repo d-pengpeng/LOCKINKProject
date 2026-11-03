@@ -914,6 +914,13 @@ API_AVAILABLE(ios(13.0))
               info[@"wechatTicket"] ?: @"(null)",
               info[@"nickName"] ?: @"(null)");
 
+        // 缓存第三方 bindings（顶层 info 里有，authInfo 里没有）
+        NSDictionary *bindings = info[@"bindings"];
+        if ([bindings isKindOfClass:[NSDictionary class]]) {
+            [[LYUserDefault userDefault] setSocialBindings:bindings];
+            NSLog(@"[WeChat] 缓存 bindings=%@", bindings);
+        }
+
         if (bound) {
             NSLog(@"[WeChat] 已绑定账号 → 直接登录");
             NSDictionary *authInfo = info[@"authInfo"];
