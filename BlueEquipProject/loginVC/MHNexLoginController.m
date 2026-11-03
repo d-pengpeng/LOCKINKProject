@@ -289,11 +289,10 @@
         [dicMM setObject:self.oneSt2 ?: @"" forKey:@"genderPreference"];
         [dicMM setObject:self.oneSt3 ?: @"" forKey:@"rolePreference"];
         [dicMM setObject:@"IOS" forKey:@"channel"];
-        if (self.wechatTicket.length > 0) {
-            [dicMM setObject:self.wechatTicket forKey:@"wechatTicket"];
-        }
-        if (self.appleTicket.length > 0) {
-            [dicMM setObject:self.appleTicket forKey:@"appleTicket"];
+        // 按文档统一用 ticket 字段（兼容 wechatTicket/appleTicket 旧字段）
+        NSString *socialTicket = self.wechatTicket.length > 0 ? self.wechatTicket : self.appleTicket;
+        if (socialTicket.length > 0) {
+            [dicMM setObject:socialTicket forKey:@"ticket"];
         }
         [requestToolClass postRegisterLogNetworkWithUrl:request_login_register andParameter:dicMM success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
 
@@ -364,15 +363,28 @@
         [LYUserDefault saveIsEmailBoo:self.isEmilBoo];
         [LYUserDefault saveIsLoginBoo:YES];
 
-        // 微信绑定场景：登录成功后带 wechatTicket 自动绑定
+        // 按文档：register 失败走 login 成功后，如有 ticket 自动 bindAccount
+        // 统一接口：POST /oauth/bindAccount {type, ticket}
         if (self.wechatTicket.length > 0) {
             NSString *ticket = self.wechatTicket;
             self.wechatTicket = nil;
-            NSLog(@"[WeChat] register→login 成功，自动 bindWechat ticket=%@", ticket);
-            [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-                NSLog(@"[WeChat] bindWechat 成功 — code=%d, msg=%@", code, msg);
+            NSLog(@"[WeChat] register→login 成功，自动 bindAccount ticket=%@", ticket);
+            NSDictionary *params = @{@"type": @"wechat", @"ticket": ticket};
+            [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                NSLog(@"[WeChat] bindAccount 成功 — code=%d, msg=%@", code, msg);
             } fail:^(NSString * _Nonnull msg) {
-                NSLog(@"[WeChat] bindWechat 失败 — msg=%@ (不拦截)", msg);
+                NSLog(@"[WeChat] bindAccount 失败 — msg=%@ (不拦截)", msg);
+            }];
+        }
+        if (self.appleTicket.length > 0) {
+            NSString *ticket = self.appleTicket;
+            self.appleTicket = nil;
+            NSLog(@"[Apple] register→login 成功，自动 bindAccount ticket=%@", ticket);
+            NSDictionary *params = @{@"type": @"apple", @"ticket": ticket};
+            [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+                NSLog(@"[Apple] bindAccount 成功 — code=%d, msg=%@", code, msg);
+            } fail:^(NSString * _Nonnull msg) {
+                NSLog(@"[Apple] bindAccount 失败 — msg=%@ (不拦截)", msg);
             }];
         }
         

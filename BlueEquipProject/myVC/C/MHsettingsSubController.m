@@ -294,13 +294,17 @@
         BOOL bound = NO;
         id boundObj = info[@"bound"];
         if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) bound = [boundObj boolValue];
-        NSString *ticket = [info[@"wechatTicket"] copy];
+        // 优先读统一字段 ticket，兜底 wechatTicket（微信兼容）
+        NSString *ticket = [info[@"ticket"] copy];
+        if (ticket.length == 0) {
+            ticket = [info[@"wechatTicket"] copy];
+        }
         
         if (bound && ticket.length == 0) {
             [SVProgressHUD showSuccessWithStatus:@"已绑定"];
             [self _refreshBindingsFromServer];
         } else if (ticket.length > 0) {
-            [self _callBindAccountAPI:@"wechat" params:@{@"type": @"wechat", @"wechatTicket": ticket}];
+            [self _callBindAccountAPI:@"wechat" params:@{@"type": @"wechat", @"ticket": ticket}];
         } else {
             [SVProgressHUD showErrorWithStatus:@"未返回票据"];
         }
@@ -347,14 +351,15 @@
     NSString *tokenStr = [[NSString alloc] initWithData:identityToken encoding:NSUTF8StringEncoding];
     
     [SVProgressHUD showWithStatus:@"绑定中..."];
+    // 按文档 Apple 绑定两种方式：identityToken 现场授权 或 ticket 票据
+    // 这里用现场授权方式（有 identityToken）
     // Apple 只在第一次授权返回 fullName → 必须带上
-    NSMutableDictionary *params = [@{
+    NSDictionary *params = @{
         @"type": @"apple",
         @"identityToken": tokenStr ?: @"",
         @"email": email,
         @"fullName": fullName
-    } mutableCopy];
-    if (user.length > 0) params[@"appleUserId"] = user;
+    };
     
     [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:[params copy] success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         [SVProgressHUD dismiss];

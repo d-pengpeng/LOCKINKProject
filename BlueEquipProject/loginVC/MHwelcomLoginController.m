@@ -828,9 +828,8 @@ API_AVAILABLE(ios(13.0))
     
     [SVProgressHUD show];
     
-    // 调后端苹果登录接口
+    // 调后端苹果登录接口（按文档：identityToken 是必填，fullName/email 可选）
     NSDictionary *dicMM = @{
-        @"appleUserId": user ?: @"",
         @"identityToken": tokenStr ?: @"",
         @"email": email,
         @"fullName": fullName
@@ -843,60 +842,58 @@ API_AVAILABLE(ios(13.0))
             return;
         }
         
-        // 先缓存 bindings（无论 bound true/false）
-        NSDictionary *bindings = info[@"bindings"];
-        if ([bindings isKindOfClass:[NSDictionary class]]) {
-            [[LYUserDefault userDefault] setSocialBindings:bindings];
-        }
-        
         // ====== 三层判断绑定状态（默认 NO，兜底防误判）======
         BOOL bound = NO;
         
-        // 方式1: 直接读 info[@"bound"]（后端如果返回了就用）
+        // 方式1: 直接读 info[@"bound"]（文档说必定返回）
         id boundObj = info[@"bound"];
         if (boundObj && ![boundObj isKindOfClass:[NSNull class]]) {
             bound = [boundObj respondsToSelector:@selector(boolValue)] ? [boundObj boolValue] : NO;
         }
         
-        // 方式2: 如果方式1没拿到，从 bindings.apple.bound 读
-        if (!bound && [bindings isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *appleBind = bindings[@"apple"];
-            if ([appleBind isKindOfClass:[NSDictionary class]]) {
-                id b2 = appleBind[@"bound"];
-                if (b2 && ![b2 isKindOfClass:[NSNull class]]) {
-                    bound = [b2 respondsToSelector:@selector(boolValue)] ? [b2 boolValue] : NO;
-                }
-            }
+        // 方式2: 从 ticket 判断（文档说 bound=false 时 ticket 有值；兼容旧版）
+        // 统一字段名是 ticket（不是 appleTicket），wechatTicket 是微信兼容字段
+        NSString *ticket = [info[@"ticket"] copy];
+        if (ticket.length == 0) {
+            // 兜底：如果后端还返回旧字段 appleTicket
+            ticket = [info[@"appleTicket"] copy];
+        }
+        if (ticket.length > 0) {
+            bound = NO;  // 有 ticket → 一定未绑定
         }
         
-        // 方式3: 有 appleTicket → 强制 bound=NO（后端未绑定时通常返回 ticket）
-        NSString *appleTicket = [info[@"appleTicket"] copy];
-        if (appleTicket.length > 0) {
-            bound = NO;
-        }
-        
-        NSLog(@"[Apple] bound判断 — boundObj=%@, bindings.apple=%@, appleTicket=%@ → 最终 bound=%d, info.keys=%@",
+        NSLog(@"[Apple] bound判断 — boundObj=%@, ticket=%@ → bound=%d, info.keys=%@",
               boundObj ?: @"(null)",
-              bindings[@"apple"] ?: @"(null)",
-              appleTicket ?: @"(null)",
+              ticket ?: @"(null)",
               bound,
               [info allKeys]);
         
         if (bound) {
-            // 已绑定 → 直接登录
-            // 兼容两种后端返回结构：
-            //   结构A: {bound:true, authInfo:{token, userId, ...}, bindings:{...}}
-            //   结构B: {bound:true, token, userId, ..., bindings:{...}}  ← 用户信息在顶层
+            // ====== 已绑定 → 直接登录 ======
+            // 按文档：authInfo 里有 token/userId/bindings
             NSDictionary *authInfo = info[@"authInfo"];
             if (![authInfo isKindOfClass:[NSDictionary class]] || authInfo.count == 0) {
-                // 顶层兼容：把 info 去掉 bound/bindings 后当作用户信息
+                // 兼容：有些后端版本把用户信息直接放在顶层
                 NSMutableDictionary *topLevel = [info mutableCopy];
                 [topLevel removeObjectForKey:@"bound"];
-                [topLevel removeObjectForKey:@"bindings"];
+                [topLevel removeObjectForKey:@"ticket"];
+                [topLevel removeObjectForKey:@"nickName"];
+                [topLevel removeObjectForKey:@"email"];
+                [topLevel removeObjectForKey:@"channel"];
+                [topLevel removeObjectForKey:@"wechatTicket"];
                 authInfo = [topLevel copy];
                 NSLog(@"[Apple] authInfo 缺失，使用顶层信息: %@", authInfo);
             } else {
                 NSLog(@"[Apple] authInfo 正常: %@", authInfo);
+            }
+            
+            // 缓存 bindings（优先 authInfo 内部，兼容顶层）
+            NSDictionary *bindings = [authInfo isKindOfClass:[NSDictionary class]] ? authInfo[@"bindings"] : nil;
+            if (![bindings isKindOfClass:[NSDictionary class]]) {
+                bindings = info[@"bindings"];
+            }
+            if ([bindings isKindOfClass:[NSDictionary class]]) {
+                [[LYUserDefault userDefault] setSocialBindings:bindings];
             }
             
             if ([authInfo isKindOfClass:[NSDictionary class]] && authInfo.count > 0) {
@@ -927,11 +924,15 @@ API_AVAILABLE(ios(13.0))
                 [SVProgressHUD showErrorWithStatus:@"Apple 登录返回异常"];
             }
         } else {
-            // 未绑定 → 显示状态图标 + 暂存票据（用户后续注册或登录时自动 bindAccount）
-            NSLog(@"[Apple] 未绑定 → 显示图片 ticket=%@", appleTicket ?: @"(null)");
+            // ====== 未绑定 → 显示状态图标 + 暂存票据 ======
+            // 按文档：bound=false 时 ticket/nickName/email 在顶层
+            NSString *nickName = [info[@"nickName"] copy];
+            NSString *email = [info[@"email"] copy];
+            NSLog(@"[Apple] 未绑定 → ticket=%@, nickName=%@, email=%@",
+                  ticket ?: @"(null)", nickName ?: @"(null)", email ?: @"(null)");
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.pendingAppleTicket = appleTicket;
-                self.pendingAppleNickName = fullName;
+                self.pendingAppleTicket = ticket;
+                self.pendingAppleNickName = nickName;
                 self.pendingAppleEmail = email;
                 self.appleBindView.hidden = NO;
                 self.wechatBindView.hidden = YES;  // 互斥
@@ -1003,14 +1004,18 @@ API_AVAILABLE(ios(13.0))
             return;
         }
 
-        // bound 字段兼容处理：nil/NSNull/NO → 未绑定；YES → 已绑定
+        // bound + ticket 判断（按文档：bound 必返回；ticket 在 bound=false 时有值）
         id boundObj = info[@"bound"];
         BOOL bound = [boundObj respondsToSelector:@selector(boolValue)] ? [boundObj boolValue] : NO;
-        NSLog(@"[WeChat] boundObj=%@, bound=%d, authInfo=%@, wechatTicket=%@, nickName=%@",
-              boundObj ?: @"(null)", bound,
-              info[@"authInfo"] ?: @"(null)",
-              info[@"wechatTicket"] ?: @"(null)",
-              info[@"nickName"] ?: @"(null)");
+        // 票据优先读 ticket（统一字段），兜底 wechatTicket（微信兼容）
+        NSString *ticket = [info[@"ticket"] copy];
+        if (ticket.length == 0) {
+            ticket = [info[@"wechatTicket"] copy];
+        }
+        if (ticket.length > 0) bound = NO;  // 有 ticket → 未绑定
+        NSString *nickName = [info[@"nickName"] copy];
+        NSLog(@"[WeChat] boundObj=%@, bound=%d, ticket=%@, nickName=%@, info.keys=%@",
+              boundObj ?: @"(null)", bound, ticket ?: @"(null)", nickName ?: @"(null)", [info allKeys]);
 
         if (bound) {
             NSLog(@"[WeChat] 已绑定账号 → 直接登录");
@@ -1018,9 +1023,22 @@ API_AVAILABLE(ios(13.0))
             if (![authInfo isKindOfClass:[NSDictionary class]] || authInfo.count == 0) {
                 NSMutableDictionary *topLevel = [info mutableCopy];
                 [topLevel removeObjectForKey:@"bound"];
-                [topLevel removeObjectForKey:@"bindings"];
+                [topLevel removeObjectForKey:@"ticket"];
+                [topLevel removeObjectForKey:@"channel"];
+                [topLevel removeObjectForKey:@"nickName"];
+                [topLevel removeObjectForKey:@"email"];
+                [topLevel removeObjectForKey:@"wechatTicket"];
                 authInfo = [topLevel copy];
                 NSLog(@"[WeChat] authInfo 缺失，使用顶层信息: %@", authInfo);
+            }
+            
+            // 缓存 bindings（优先 authInfo 内部，兼容顶层）
+            NSDictionary *bindings = [authInfo isKindOfClass:[NSDictionary class]] ? authInfo[@"bindings"] : nil;
+            if (![bindings isKindOfClass:[NSDictionary class]]) {
+                bindings = info[@"bindings"];
+            }
+            if ([bindings isKindOfClass:[NSDictionary class]]) {
+                [[LYUserDefault userDefault] setSocialBindings:bindings];
             }
             
             if ([authInfo isKindOfClass:[NSDictionary class]] && authInfo.count > 0) {
@@ -1043,10 +1061,8 @@ API_AVAILABLE(ios(13.0))
                 [SVProgressHUD showErrorWithStatus:@"微信登录返回异常"];
             }
         } else {
-            // 未绑定 → 显示图片提示 + 暂存 ticket + nickName（用户正常登录后自动 bindWechat）
-            NSString *ticket = [info[@"wechatTicket"] copy];
-            NSString *nickName = [info[@"nickName"] copy];
-            NSLog(@"[WeChat] 未绑定 → 显示图片 ticket=%@, nickName=%@", ticket ?: @"(null)", nickName ?: @"(null)");
+            // 未绑定 → 显示图片提示 + 暂存 ticket + nickName（用户正常登录后自动 bindAccount）
+            NSLog(@"[WeChat] 未绑定 → ticket=%@, nickName=%@", ticket ?: @"(null)", nickName ?: @"(null)");
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.pendingWechatTicket = ticket;
                 self.pendingWechatNickName = nickName;
@@ -1072,16 +1088,18 @@ API_AVAILABLE(ios(13.0))
 
 // MARK: 内嵌卡片按钮事件已移除 —— 现在只显示图片，不做交互
 
-/// 登录成功后，如有 pendingWechatTicket 自动调 bindWechat（场景 C）
+/// 登录成功后，如有 pending ticket 自动调 bindAccount（场景 C — 未绑定后用已有账号绑定）
+/// 按文档：POST /oauth/bindAccount {type, ticket}
 - (void)_bindPendingWechatTicketIfNeeded {
     NSString *ticket = self.pendingWechatTicket;
     if (ticket.length == 0) return;
     self.pendingWechatTicket = nil;
-    NSLog(@"[WeChat] 场景 C — 登录成功，自动 bindWechat ticket=%@", ticket);
-    [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
-        NSLog(@"[WeChat] bindWechat 成功 — code=%d, msg=%@", code, msg);
+    NSLog(@"[WeChat] 场景 C — 登录成功，自动 bindAccount ticket=%@", ticket);
+    NSDictionary *params = @{@"type": @"wechat", @"ticket": ticket};
+    [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        NSLog(@"[WeChat] bindAccount 成功 — code=%d, msg=%@", code, msg);
     } fail:^(NSString * _Nonnull msg) {
-        NSLog(@"[WeChat] bindWechat 失败 — msg=%@ (不拦截登录)", msg);
+        NSLog(@"[WeChat] bindAccount 失败 — msg=%@ (不拦截登录)", msg);
     }];
 }
 
@@ -1090,8 +1108,8 @@ API_AVAILABLE(ios(13.0))
     NSString *ticket = self.pendingAppleTicket;
     if (ticket.length == 0) return;
     self.pendingAppleTicket = nil;
-    NSLog(@"[Apple] 场景 C — 登录成功，自动 bindAccount appleTicket=%@", ticket);
-    NSDictionary *params = @{@"type": @"apple", @"appleTicket": ticket};
+    NSLog(@"[Apple] 场景 C — 登录成功，自动 bindAccount ticket=%@", ticket);
+    NSDictionary *params = @{@"type": @"apple", @"ticket": ticket};
     [requestToolClass postNetworkWithUrl:request_oauth_bindAccount andParameter:params success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         NSLog(@"[Apple] bindAccount 成功 — code=%d, msg=%@", code, msg);
     } fail:^(NSString * _Nonnull msg) {
