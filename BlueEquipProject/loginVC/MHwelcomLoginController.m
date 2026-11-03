@@ -1006,6 +1006,11 @@ API_AVAILABLE(ios(13.0))
 }
 
 - (void)_onWeChatAuthReceived:(NSNotification *)note {
+    // 只有当前页面还在 window 上才处理（防止旧登录页抢处理）
+    if (!self.view.window) {
+        NSLog(@"[WeChat] 登录页微信 code 回调但页面已不在 window，忽略");
+        return;
+    }
     NSString *code = note.userInfo[@"code"];
     NSLog(@"[WeChat] 收到授权回调，code=%@", code ?: @"(null)");
     if (code.length == 0) {
@@ -1105,12 +1110,14 @@ API_AVAILABLE(ios(13.0))
 }
 
 - (void)_onWeChatAuthFailed:(NSNotification *)note {
+    if (!self.view.window) return;
     NSString *error = note.userInfo[@"error"];
     NSLog(@"[WeChat] 授权失败 — %@", error ?: @"(null)");
     [SVProgressHUD showErrorWithStatus:error.length > 0 ? error : @"微信授权失败"];
 }
 
 - (void)_onWeChatAuthCanceled:(NSNotification *)note {
+    if (!self.view.window) return;
     NSLog(@"[WeChat] 用户主动取消授权");
 }
 

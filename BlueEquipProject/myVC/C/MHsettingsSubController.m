@@ -316,6 +316,15 @@
 }
 
 - (void)_onWechatAuthReceived:(NSNotification *)note {
+    // 只有当前页面还在 window 上 + 仍是登录态才处理
+    if (!self.view.window) {
+        NSLog(@"[Settings] 微信 code 回调但页面已不在 window，忽略");
+        return;
+    }
+    if (![LYUserDefault userDefault].isLoginBoo) {
+        NSLog(@"[Settings] 微信 code 回调但已退出登录，忽略");
+        return;
+    }
     NSString *code = note.userInfo[@"code"];
     if (code.length == 0) return;
     
@@ -325,9 +334,11 @@
 }
 
 - (void)_onWechatAuthFailed {
+    if (!self.view.window) return;
     [SVProgressHUD showErrorWithStatus:@"微信授权失败"];
 }
 - (void)_onWechatAuthCanceled {
+    if (!self.view.window) return;
     [SVProgressHUD showInfoWithStatus:@"已取消"];
 }
 
