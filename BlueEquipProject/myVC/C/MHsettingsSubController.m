@@ -10,6 +10,7 @@
 #import "LYUserDefault.h"
 #import "requestUrlRFile.h"
 #import "MHWeChatHandler.h"
+#import "MHBehaviorReporter.h"
 #import <AuthenticationServices/AuthenticationServices.h>
 
 @interface MHsettingsSubController () <ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding>
