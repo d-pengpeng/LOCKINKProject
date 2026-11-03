@@ -9,12 +9,19 @@
 #import "MHRedoPasswordController.h"
 #import "LYUserDefault.h"
 #import "requestUrlRFile.h"
+#import "MHWeChatHandler.h"
 
-@interface MHsettingsSubController ()
+@interface MHsettingsSubController () <WXApiDelegate>
+
+@property (nonatomic, copy) void (^pendingWechatBindBlock)(NSString *ticket);
 
 @end
 
 @implementation MHsettingsSubController
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -31,6 +38,11 @@
     
     self.titleName.text = eLocalizedString(@"my_settings1");
     self.navView.backgroundColor = RGB(247, 247, 247);
+
+    // 注册微信授权结果通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWechatAuthReceived:) name:@"MHWeChatDidAuthNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWechatAuthFailed) name:@"MHWeChatDidFailNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_onWechatAuthCanceled) name:@"MHWeChatDidCancelNotification" object:nil];
 
     UIImageView *placeImV = [[UIImageView alloc] initWithFrame:CGRectMake(0, NAVHEIGHT, _window_width, _window_height)];
     placeImV.image = [UIImage imageNamed:@"allBackImgsMsg"];
@@ -202,8 +214,104 @@
             }
         }];
     } else {
-        [SVProgressHUD showInfoWithStatus:@"当前未绑定"];
+        if ([key isEqualToString:@"wechat"]) {
+            [self _startWechatBindFlow];
+        } else {
+            [SVProgressHUD showInfoWithStatus:@"暂不支持"];
+        }
     }
+}
+
+#pragma mark - 微信绑定流程（未绑定 → 授权 → loginWechat 拿 ticket → bindWechat）
+
+- (void)_startWechatBindFlow {
+    if (![WXApi isWXAppInstalled]) {
+        [SVProgressHUD showErrorWithStatus:@"请先安装微信"];
+        return;
+    }
+    
+    SendAuthReq *req = [[SendAuthReq alloc] init];
+    req.scope = @"snsapi_userinfo";
+    req.state = @"LOCKINK_BIND";
+    
+    __weak typeof(self) weakSelf = self;
+    [[MHWeChatHandler sharedInstance] sendAuthReq:req viewController:self delegate:self completion:^(BOOL success) {
+        __strong typeof(weakSelf) self = weakSelf;
+        if (!success) {
+            [SVProgressHUD showErrorWithStatus:@"调起微信失败"];
+        }
+    }];
+}
+
+- (void)_onWechatAuthReceived:(NSNotification *)note {
+    NSString *code = note.userInfo[@"code"];
+    if (code.length == 0) return;
+    
+    [SVProgressHUD showWithStatus:@"绑定中..."];
+    
+    // 用 code 调 /oauth/loginWechat 拿 wechatTicket
+    NSDictionary *params = @{@"code": code};
+    [requestToolClass postNetworkWithUrl:request_login_wechat andParameter:params success:^(int code2, id  _Nonnull info, NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        if (code2 != 200 || ![info isKindOfClass:[NSDictionary class]]) {
+            [SVProgressHUD showErrorWithStatus:msg ?: @"授权失败"];
+            return;
+        }
+        
+        BOOL bound = [info[@"bound"] boolValue];
+        NSString *ticket = info[@"wechatTicket"];
+        
+        if (bound) {
+            // 已经绑了（可能微信授权了同一个微信号），直接更新缓存
+            [SVProgressHUD showSuccessWithStatus:@"已绑定"];
+            [self _markPlatformUnbound:@"dummy"]; // 触发刷新
+            [self _refreshBindingsFromServer];
+        } else if (ticket.length > 0) {
+            // 有 ticket，调 bindWechat
+            [self _callBindWechatAPI:ticket];
+        } else {
+            [SVProgressHUD showErrorWithStatus:@"未返回票据"];
+        }
+    } fail:^(NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:msg ?: @"网络异常"];
+    }];
+}
+
+- (void)_onWechatAuthFailed {
+    [SVProgressHUD showErrorWithStatus:@"微信授权失败"];
+}
+
+- (void)_onWechatAuthCanceled {
+    [SVProgressHUD showInfoWithStatus:@"已取消"];
+}
+
+- (void)_callBindWechatAPI:(NSString *)ticket {
+    [SVProgressHUD showWithStatus:@"绑定中..."];
+    [requestToolClass postNetworkWithUrl:request_bind_wechat andParameter:@{@"wechatTicket": ticket} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        if (code == 200) {
+            [SVProgressHUD showSuccessWithStatus:@"绑定成功"];
+            [self _refreshBindingsFromServer];
+        } else {
+            [SVProgressHUD showErrorWithStatus:msg ?: @"绑定失败"];
+        }
+    } fail:^(NSString * _Nonnull msg) {
+        [SVProgressHUD dismiss];
+        [SVProgressHUD showErrorWithStatus:msg ?: @"绑定失败"];
+    }];
+}
+
+- (void)_refreshBindingsFromServer {
+    [requestToolClass getNetworkWithUrl:request_user_me andParameter:@{} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+        if ([info isKindOfClass:[NSDictionary class]]) {
+            [LYUserDefault saveUserDefault:info];  // 会自动缓存 bindings
+            [self setupSocialBindingsRows];
+        }
+    } fail:^(NSString * _Nonnull msg) {
+        // 拉不到也刷新 UI（可能本地缓存已经是旧的 bound=1 了）
+        [self setupSocialBindingsRows];
+    }];
 }
 
 - (void)_callUnbindAPI:(NSString *)key platformName:(NSString *)platformName {
