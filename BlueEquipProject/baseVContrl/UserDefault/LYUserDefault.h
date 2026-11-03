@@ -157,6 +157,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL isFirstLogin1;
 
+// 第三方账号绑定信息 {apple/google/wechat: {bound, nickName, avatar, email}}
+@property (nonatomic, strong) NSDictionary *socialBindings;
+
 + (LYUserDefault *)userDefault;
 
 + (void)saveisFirstLogin1:(BOOL)isbfff;

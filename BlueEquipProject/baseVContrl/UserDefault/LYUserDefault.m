@@ -26,6 +26,23 @@
     [[NSUserDefaults standardUserDefaults] setValue:@"" forKey:@"imUserSig"];
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"isLoginBoo"];
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"user_isPrivacyAgreeBoo"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"socialBindings"];
+}
+
+#pragma mark - 第三方账号绑定
+
+- (NSDictionary *)socialBindings {
+    NSDictionary *d = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"socialBindings"];
+    if ([d isKindOfClass:[NSDictionary class]]) return d;
+    return @{};
+}
+
+- (void)setSocialBindings:(NSDictionary *)socialBindings {
+    if ([socialBindings isKindOfClass:[NSDictionary class]]) {
+        [[NSUserDefaults standardUserDefaults] setObject:socialBindings forKey:@"socialBindings"];
+    } else {
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"socialBindings"];
+    }
 }
 
 + (void)saveQCloudDic:(NSDictionary *)cloudDic
@@ -303,6 +320,13 @@
     [[NSUserDefaults standardUserDefaults] setBool:[dicT[@"isDomestic"] boolValue] forKey:@"isDomestic"];
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"userId"]) forKey:@"user_id"];
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"token"]) forKey:@"AppToken"];
+
+    // 第三方账号绑定信息缓存
+    NSDictionary *bindings = dicT[@"bindings"];
+    if ([bindings isKindOfClass:[NSDictionary class]]) {
+        [[NSUserDefaults standardUserDefaults] setObject:bindings forKey:@"socialBindings"];
+    }
+
     [[NSUserDefaults standardUserDefaults] synchronize];
 
     // login_success 行为上报（登录/注册成功拿到 token 后立即上报，必须带 token）
