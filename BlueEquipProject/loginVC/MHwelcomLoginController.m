@@ -1004,7 +1004,7 @@ API_AVAILABLE(ios(13.0))
     }
     [SVProgressHUD showWithStatus:@"登录中..."];
 
-    [[MHBehaviorReporter shared] trackAction:@"login_apple_start"
+    [[MHBehaviorReporter shared] trackAction:@"login_wechat_start"
                                         page:NSStringFromClass([self class])
                                          ext:@{@"platform": @"wechat"}];
 
@@ -1062,7 +1062,7 @@ API_AVAILABLE(ios(13.0))
                 [self _bindPendingWechatTicketIfNeeded];
                 [self _bindPendingAppleTicketIfNeeded];
 
-                [[MHBehaviorReporter shared] trackAction:@"login_apple_success"
+                [[MHBehaviorReporter shared] trackAction:@"login_wechat_success"
                                                     page:NSStringFromClass([self class])
                                                      ext:@{@"platform": @"wechat"}];
 

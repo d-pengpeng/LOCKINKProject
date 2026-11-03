@@ -322,8 +322,8 @@
     [[NSUserDefaults standardUserDefaults] setValue:minStr(dicT[@"token"]) forKey:@"AppToken"];
     [[NSUserDefaults standardUserDefaults] synchronize];
 
-    // login_success 行为上报（登录/注册成功拿到 token 后立即上报，必须带 token）
-    NSString *token = minStr(dicT[@"token"]);
+    // login_success 行为上报（登录/注册成功拿到 token 后立即上报）
+    // 注意：ext 里绝对不能塞 token — 用户身份关联靠请求头就够了
     NSString *userId = minStr(dicT[@"userId"]);
     [[MHBehaviorReporter shared] trackAction:@"login_success"
                                         page:nil
@@ -332,8 +332,7 @@
                                     targetId:userId ?: @""
                                          ext:@{
         @"method": [dicT[@"bindingMethod"] isKindOfClass:[NSString class]] ? dicT[@"bindingMethod"] : @"code",
-        @"isNewUser": @([dicT[@"isNewUser"] boolValue]),
-        @"token": token ?: @""
+        @"isNewUser": @([dicT[@"isNewUser"] boolValue])
     }];
     [[MHBehaviorReporter shared] flushNow];  // 立即 flush，确保登录事件能尽快上送
 }
