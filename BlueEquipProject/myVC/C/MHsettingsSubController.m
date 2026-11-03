@@ -153,10 +153,9 @@
         nameLab.text = plat[@"name"];
         [row addSubview:nameLab];
         
-        // 绑定状态（已绑定显示 nickName，未绑定显示"未绑定"）
+        // 绑定状态（已绑定显示 nickName，空则显示 email，再空则"已绑定"）
         NSString *statusText;
         if (bound) {
-            // 兼容多种 key：nickName / nickname / nick_name
             NSString *nick = nil;
             if ([info isKindOfClass:[NSDictionary class]]) {
                 nick = info[@"nickName"];
@@ -166,8 +165,14 @@
             if ([nick isKindOfClass:[NSString class]] && nick.length > 0) {
                 statusText = nick;
             } else {
-                NSLog(@"[Bindings] ⚠️ %@ bound=1 但 nickName 为空，info=%@", key, info);
-                statusText = @"已绑定";
+                // nickName 为空 → 尝试 email
+                NSString *email = [info isKindOfClass:[NSDictionary class]] ? info[@"email"] : nil;
+                if ([email isKindOfClass:[NSString class]] && email.length > 0) {
+                    statusText = email;
+                } else {
+                    NSLog(@"[Bindings] ⚠️ %@ bound=1 但 nickName+email 都空, info=%@", key, info);
+                    statusText = @"已绑定";
+                }
             }
         } else {
             statusText = @"未绑定";
