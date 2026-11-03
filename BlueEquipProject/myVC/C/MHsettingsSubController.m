@@ -149,9 +149,12 @@
         
         // 标签
         UILabel *nameLab = [HistoryRecordModel createLabLabTextColor:UIColor.blackColor fontFloat:14 textAlignment:NSTextAlignmentLeft];
-        nameLab.frame = CGRectMake(44, 0, 120, row.height);
         nameLab.text = plat[@"name"];
         [row addSubview:nameLab];
+        [nameLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(row.mas_left).offset(44);
+            make.centerY.equalTo(row.mas_centerY);
+        }];
         
         // 绑定状态（已绑定显示 nickName，空则显示 email，再空则"已绑定"）
         NSString *statusText;
@@ -179,7 +182,6 @@
         }
         UIColor *statusColor = bound ? RGB(7, 193, 96) : RGB(153, 153, 153);
         UILabel *statusLab = [HistoryRecordModel createLabLabTextColor:statusColor fontFloat:13 textAlignment:NSTextAlignmentRight];
-        statusLab.frame = CGRectMake(_window_width - 36 - 120, 0, 120, row.height);
         statusLab.text = statusText;
         [row addSubview:statusLab];
         
@@ -191,6 +193,13 @@
             make.right.equalTo(row.mas_right).offset(-12);
             make.centerY.equalTo(row.mas_centerY);
             make.width.height.offset(16);
+        }];
+        
+        // statusLab 左边紧贴 nameLab + 8pt gap，右边紧贴箭头 - 4pt gap，中间全部可用
+        [statusLab mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(nameLab.mas_right).offset(8);
+            make.right.equalTo(nexIV.mas_left).offset(-4);
+            make.centerY.equalTo(row.mas_centerY);
         }];
         
         // 点击按钮（tag = 9200 + i，与 row 关联）
