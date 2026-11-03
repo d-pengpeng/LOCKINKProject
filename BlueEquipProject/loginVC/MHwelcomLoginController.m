@@ -44,8 +44,7 @@ API_AVAILABLE(ios(13.0))
 @property (nonatomic, strong) UIButton *deleleMethBtn;
 @property (nonatomic, strong) eSelectCountryCodeView *eSelectCountryCodeV;
 @property (nonatomic, copy, nullable) NSString *pendingWechatTicket; // 绑定已有账号场景：暂存票据
-@property (nonatomic, strong) UIView *wechatBindView;   // 未绑定时显示的内嵌绑定卡片
-@property (nonatomic, copy, nullable) NSString *wechatBindNickName;
+@property (nonatomic, strong) UIView *wechatBindView;   // 未绑定时显示的图片提示
 @end
 
 @implementation MHwelcomLoginController
@@ -123,70 +122,16 @@ API_AVAILABLE(ios(13.0))
     [oneBtn2 addTarget:self action:@selector(onebtnMethodTwo) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:oneBtn2];
 
-    //MARK: 微信未绑定提示卡片（默认 hidden）
-    self.wechatBindView = [[UIView alloc] init];
+    //MARK: 微信未绑定提示（仅显示图片，默认 hidden）
+    self.wechatBindView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]];
+    self.wechatBindView.contentMode = UIViewContentModeScaleAspectFit;
     self.wechatBindView.hidden = YES;
-    self.wechatBindView.backgroundColor = RGB(245, 245, 245);
-    self.wechatBindView.layer.cornerRadius = 10;
-    self.wechatBindView.layer.masksToBounds = YES;
     [self.view addSubview:self.wechatBindView];
     [self.wechatBindView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.left.equalTo(self.view.mas_left).offset(30);
         make.right.equalTo(self.view.mas_right).offset(-30);
         make.top.equalTo(self.oneLab.mas_bottom).offset(6);
-        make.height.offset(120);
-    }];
-
-    UIImageView *wechatIcon = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"wechat_info"]];
-    wechatIcon.contentMode = UIViewContentModeScaleAspectFit;
-    [self.wechatBindView addSubview:wechatIcon];
-    [wechatIcon mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.wechatBindView.mas_left).offset(12);
-        make.top.equalTo(self.wechatBindView.mas_top).offset(14);
-        make.width.height.offset(36);
-    }];
-
-    UILabel *wechatTip = [HistoryRecordModel createLabLabTextColor:RGB(90, 90, 90) fontFloat:14 textAlignment:NSTextAlignmentLeft];
-    wechatTip.numberOfLines = 0;
-    wechatTip.text = @"微信信息拉取成功";
-    [self.wechatBindView addSubview:wechatTip];
-    [wechatTip mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(wechatIcon.mas_right).offset(8);
-        make.centerY.equalTo(wechatIcon);
-        make.right.equalTo(self.wechatBindView.mas_right).offset(-12);
-    }];
-
-    UIButton *regBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [regBtn setTitle:@"注册新账号" forState:UIControlStateNormal];
-    [regBtn setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
-    regBtn.titleLabel.font = SYS_Font(13);
-    regBtn.backgroundColor = RGB(7, 193, 96);
-    regBtn.layer.cornerRadius = 16;
-    regBtn.layer.masksToBounds = YES;
-    [regBtn addTarget:self action:@selector(_wechatRegisterTapped) forControlEvents:UIControlEventTouchUpInside];
-    [self.wechatBindView addSubview:regBtn];
-    [regBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.left.equalTo(self.wechatBindView.mas_left).offset(12);
-        make.bottom.equalTo(self.wechatBindView.mas_bottom).offset(-14);
-        make.height.offset(32);
-        make.width.offset(110);
-    }];
-
-    UIButton *bindBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [bindBtn setTitle:@"绑定已有账号" forState:UIControlStateNormal];
-    [bindBtn setTitleColor:RGB(7, 193, 96) forState:UIControlStateNormal];
-    bindBtn.titleLabel.font = SYS_Font(13);
-    bindBtn.layer.borderColor = RGB(7, 193, 96).CGColor;
-    bindBtn.layer.borderWidth = 1;
-    bindBtn.layer.cornerRadius = 16;
-    bindBtn.layer.masksToBounds = YES;
-    [bindBtn addTarget:self action:@selector(_wechatBindTapped) forControlEvents:UIControlEventTouchUpInside];
-    [self.wechatBindView addSubview:bindBtn];
-    [bindBtn mas_makeConstraints:^(MASConstraintMaker *make) {
-        make.right.equalTo(self.wechatBindView.mas_right).offset(-12);
-        make.bottom.equalTo(self.wechatBindView.mas_bottom).offset(-14);
-        make.height.offset(32);
-        make.width.offset(110);
+        make.height.offset(40);
     }];
     
     
@@ -691,6 +636,10 @@ API_AVAILABLE(ios(13.0))
     }
     MHRegisterLController *vc = [[MHRegisterLController alloc] init];
     vc.isTYBoo = self.isTYBoo;
+    // 如果有 pendingWechatTicket（微信未绑定场景），自动传给注册页
+    if (self.pendingWechatTicket.length > 0) {
+        vc.wechatTicket = self.pendingWechatTicket;
+    }
     [self.navigationController pushViewController:vc animated:YES];
     vc.block_ = ^(BOOL isboo) {
       
@@ -1001,13 +950,11 @@ API_AVAILABLE(ios(13.0))
                 [SVProgressHUD showErrorWithStatus:@"微信登录返回异常"];
             }
         } else {
-            // 未绑定 → 显示内嵌 wechatBindView 卡片，让用户选注册新账号 / 绑定已有账号
-            NSString *nickName = minStr(info[@"nickName"]);
+            // 未绑定 → 显示图片提示 + 暂存 ticket（用户正常登录后自动 bindWechat）
             NSString *ticket = [info[@"wechatTicket"] copy];
-            NSLog(@"[WeChat] 未绑定 → 显示内嵌卡片 ticket=%@, nickName=%@", ticket ?: @"(null)", nickName ?: @"(null)");
+            NSLog(@"[WeChat] 未绑定 → 显示图片 ticket=%@", ticket ?: @"(null)");
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.pendingWechatTicket = ticket;
-                self.wechatBindNickName = nickName;
                 self.wechatBindView.hidden = NO;
             });
         }
@@ -1028,23 +975,7 @@ API_AVAILABLE(ios(13.0))
     NSLog(@"[WeChat] 用户主动取消授权");
 }
 
-// MARK: 内嵌卡片按钮事件
-
-/// 「注册新账号」→ push 注册页，注册时带 ticket 自动绑定
-- (void)_wechatRegisterTapped {
-    NSLog(@"[WeChat] 用户选择 → 注册新账号");
-    NSString *ticket = self.pendingWechatTicket;
-    NSString *nickName = self.wechatBindNickName;
-    self.wechatBindView.hidden = YES;
-    [self _pushRegisterWithWechatTicket:ticket nickName:nickName];
-}
-
-/// 「绑定已有账号」→ 留在当前登录页，引导用户用手机号/邮箱正常登录，登录成功后自动 bindWechat
-- (void)_wechatBindTapped {
-    NSLog(@"[WeChat] 用户选择 → 绑定已有账号（pendingWechatTicket 已保存，等用户登录）");
-    self.wechatBindView.hidden = YES;
-    [SVProgressHUD showInfoWithStatus:@"请用已有账号登录，登录后将自动绑定微信"];
-}
+// MARK: 内嵌卡片按钮事件已移除 —— 现在只显示图片，不做交互
 
 /// 登录成功后，如有 pendingWechatTicket 自动调 bindWechat（场景 C）
 - (void)_bindPendingWechatTicketIfNeeded {
@@ -1059,28 +990,7 @@ API_AVAILABLE(ios(13.0))
     }];
 }
 
-- (void)_pushRegisterWithWechatTicket:(NSString *)ticket nickName:(NSString *)nickName {
-    MHRegisterLController *vc = [[MHRegisterLController alloc] init];
-    if (ticket.length > 0) {
-        vc.wechatTicket = ticket;
-    }
-    if (nickName.length > 0) {
-        vc.prefillName = nickName;
-    }
-    vc.isTYBoo = self.isTYBoo;
-    [self.navigationController pushViewController:vc animated:YES];
-    __weak typeof(self) weakSelf = self;
-    vc.block_ = ^(BOOL isboo) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (!strongSelf) return;
-        strongSelf.isTYBoo = isboo;
-        if (strongSelf.isTYBoo) {
-            strongSelf.selImgV.image = [UIImage imageNamed:@"selSelect_img"];
-        } else {
-            strongSelf.selImgV.image = [UIImage imageNamed:@"selNor_img"];
-        }
-    };
-}
+// MARK: _pushRegisterWithWechatTicket:nickName: 已移除 — sigUpBtnMethod 现在自动传递 pendingWechatTicket
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
