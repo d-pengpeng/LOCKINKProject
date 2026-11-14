@@ -208,7 +208,8 @@ static requestToolClass* kSingleObject = nil;
                 successBlock(code, datainfo,strMessage);
 
             }else{
-                NSString *strMessage = [NSString stringWithFormat:@"%@", resultDict[@"message"]];
+                id errMsgObj = resultDict[@"message"];
+                NSString *strMessage = (errMsgObj && errMsgObj != [NSNull null]) ? [NSString stringWithFormat:@"%@", errMsgObj] : @"";
                 NSString *perfUrl193 = url ?: @"";
                 NSString *perfCode193 = number ?: @"";
                 NSDictionary *perfDic193 = @{@"url": perfUrl193, @"code": perfCode193};
@@ -227,7 +228,7 @@ static requestToolClass* kSingleObject = nil;
                     failBlock(@"登陆已失效");
                 }else {
                     [SVProgressHUD showErrorWithStatus:strMessage];
-                    failBlock(@"失败");
+                    failBlock(strMessage.length > 0 ? strMessage : @"失败");
                 }
             }
         }

@@ -1247,13 +1247,13 @@
         if(self.peripheral && (self.peripheral != nil)) {
             if(self.characteristic && (self.characteristic != nil)) {
                 
-                NSLog(@"经典滑动ppt -- %d -- %d -- %d -- %d", spinFrequency, spinIntensity, electricFrequency, voltage);
+                NSLog(@"经典滑动ppt -- %d -- %d -- %d -- %d -- props:%lu", spinFrequency, spinIntensity, electricFrequency, voltage, (unsigned long)self.characteristic.properties);
                 if ([[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName5]) {
                     
                     Byte byteArray[] = {0xAA, 0x01, spinFrequency, spinIntensity, electricFrequency, voltage};
                     NSData *param = [NSData dataWithBytes:byteArray length:sizeof(byteArray)];
 //                    [self.peripheral writeValue:param forCharacteristic:self.characteristic type:CBCharacteristicWriteWithoutResponse];
-                    if (self.characteristicType == CBCharacteristicPropertyWriteWithoutResponse) {
+                    if ((self.characteristic.properties & CBCharacteristicPropertyWriteWithoutResponse) != 0) {
                         [self.peripheral writeValue:param forCharacteristic:self.characteristic type:CBCharacteristicWriteWithoutResponse];
                     }else {
                         [self.peripheral writeValue:param forCharacteristic:self.characteristic type:CBCharacteristicWriteWithResponse];
@@ -1275,7 +1275,7 @@
 //                    }else {
 //                        [self.peripheral writeValue:param forCharacteristic:self.characteristic type:CBCharacteristicWriteWithResponse];
 //                    }
-                    if (self.characteristicType == CBCharacteristicPropertyWriteWithoutResponse) {
+                    if ((self.characteristic.properties & CBCharacteristicPropertyWriteWithoutResponse) != 0) {
                         [self.peripheral writeValue:param forCharacteristic:self.characteristic type:CBCharacteristicWriteWithoutResponse];
                     }else {
                         [self.peripheral writeValue:param forCharacteristic:self.characteristic type:CBCharacteristicWriteWithResponse];

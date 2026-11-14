@@ -32,6 +32,9 @@
 @property (nonatomic, assign) BOOL isSuijiBoo;
 
 @property (nonatomic, assign) BOOL controling_boo; //是否是 被控制设备
+
+- (BOOL)mh_sendClassicModeViaBLEIfLocal;
+- (BOOL)mh_sendClassicModeStopViaBLEIfLocal;
 @end
 
 @implementation MHRoleThrJDMSController
@@ -676,6 +679,11 @@
             }
             
             BOOL isEEEqq = [self.roleOneModel.mac compare:[LYUserDefault userDefault].macName options:NSCaseInsensitiveSearch | NSNumericSearch] == NSOrderedSame;
+            //本机即被控设备时，直接走本地蓝牙停止指令
+            BOOL mhLocalStop = [self mh_sendClassicModeStopViaBLEIfLocal];
+            if (mhLocalStop && [[eSocketRocketUtility sharedInstance] getSocketCloseBoo]) {
+                return;
+            }
             if(isEEEqq) {
                 
                 
@@ -704,6 +712,39 @@
     
 }
 
+//MARK: 是否为本机 BLE 已连接设备
+- (BOOL)mh_isLocalDevice
+{
+    return [self.roleOneModel.mac compare:[LYUserDefault userDefault].macName options:NSCaseInsensitiveSearch | NSNumericSearch] == NSOrderedSame;
+}
+
+//MARK: 本机即被控设备时，直接走本地蓝牙经典模式指令（不依赖服务端广播）
+- (BOOL)mh_sendClassicModeViaBLEIfLocal
+{
+    if (![self mh_isLocalDevice]) {
+        return NO;
+    }
+    
+    NSLog(@"经典模式--本地蓝牙--model:%@--强度:%@--模式:%@--电击强度:%@--电击模式:%@", [FloatingWindowModel shareInstance].namStMMM, self.val_one1, self.val_one2, self.val_one3, self.val_one4);
+    
+    NSString *berserk = [self.val_one5 isEqualToString:@"true"] ? @"1" : @"0";
+    NSString *random = [self.val_one7 isEqualToString:@"true"] ? @"1" : @"0";
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:app_sendCustomNotifName object:nil userInfo:@{@"motor":@"31", @"shakeIntensity":minStr(self.val_one1), @"shakeFrequency":minStr(self.val_one2), @"voltage":minStr(self.val_one3), @"electricFrequency":minStr(self.val_one4), @"inBerserkMode":berserk, @"inRandomMode":random, @"minVoltage":minStr(self.val_one8), @"maxVoltage":minStr(self.val_one9)}];
+    return YES;
+}
+
+//MARK: 停止经典模式时同样走本地蓝牙
+- (BOOL)mh_sendClassicModeStopViaBLEIfLocal
+{
+    if (![self mh_isLocalDevice]) {
+        return NO;
+    }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:app_sendCustomNotifName object:nil userInfo:@{@"motor":@"31", @"shakeIntensity":@"0", @"shakeFrequency":@"0", @"voltage":@"0", @"electricFrequency":@"0", @"inBerserkMode":@"0", @"inRandomMode":@"0", @"minVoltage":minStr(self.val_one8), @"maxVoltage":minStr(self.val_one9)}];
+    return YES;
+}
+
 - (void)sendSocketThreeDataMethod
 {
     if([self.devicTyp isEqualToString:kCharactName12] && self.isBMMM) {
@@ -716,6 +757,13 @@
     if ([self.val_one8 intValue]<=0) {
         self.val_one8 = @"1";
     }
+    
+    //本机即被控设备时，直接走本地蓝牙（服务端广播未到达时也能控制）
+    BOOL mhLocalSended = [self mh_sendClassicModeViaBLEIfLocal];
+    if (mhLocalSended && [[eSocketRocketUtility sharedInstance] getSocketCloseBoo]) {
+        return;
+    }
+    
     BOOL isEEEqq = [self.roleOneModel.mac compare:[LYUserDefault userDefault].macName options:NSCaseInsensitiveSearch | NSNumericSearch] == NSOrderedSame;
     if(isEEEqq) {
         

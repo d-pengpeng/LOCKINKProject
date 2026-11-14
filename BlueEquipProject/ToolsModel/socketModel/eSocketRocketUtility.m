@@ -8,6 +8,7 @@
 
 #import "eSocketRocketUtility.h"
 #import <SocketRocket.h>
+#import <AFNetworking/AFNetworkReachabilityManager.h>
 
 @interface eSocketRocketUtility()<SRWebSocketDelegate>
 {
@@ -18,7 +19,19 @@
 
 @property (nonatomic,strong) SRWebSocket *socket;
 @property (nonatomic, assign) BOOL isBOpen;
+@property (nonatomic, strong) NSMutableArray<NSDictionary *> *pendingMessages;
+
+//调用层是否需要 socket（进入控制页/首页时置 YES，主动关闭时置 NO）
+@property (nonatomic, assign) BOOL needConnect;
+//当前网络是否可用
+@property (nonatomic, assign) BOOL isNetworkReachable;
+//鉴权失败（401/403），暂停自动重连，避免无意义刷流量
+@property (nonatomic, assign) BOOL isAuthFailed;
+@property (nonatomic, strong) AFNetworkReachabilityManager *reachabilityManager;
 @end
+
+static const NSTimeInterval kMHPendingMessageMaxAge = 5.0;
+static const NSInteger kMHPendingMessageMaxCount = 20;
 
 @implementation eSocketRocketUtility
 
@@ -36,45 +49,72 @@
 {
     self = [super init];
     if (self) {
-    
+        //初始按有网处理，真实状态由网络监听回调纠正
+        _isNetworkReachable = YES;
+        [self mh_startNetworkMonitor];
     }
     return self;
 }
 
-- (BOOL)getSocketCloseBoo
+//MARK: 监听网络状态：断网不重连，网络恢复后自动重连
+- (void)mh_startNetworkMonitor
 {
-    return !self.isBOpen;
+    //使用独立实例，避免与 HistoryRecordModel 里的 sharedManager 回调互相覆盖
+    self.reachabilityManager = [AFNetworkReachabilityManager manager];
+    __weak typeof(self) weakSelf = self;
+    [self.reachabilityManager setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        __strong typeof(weakSelf) self = weakSelf;
+        if (!self) {
+            return;
+        }
+        BOOL reachable = (status != AFNetworkReachabilityStatusNotReachable);
+        BOOL wasReachable = self.isNetworkReachable;
+        self.isNetworkReachable = reachable;
+        
+        if (!reachable) {
+            NSLog(@"socket--当前无网络，暂停连接与重连");
+        }else if (!wasReachable) {
+            NSLog(@"socket--网络已恢复，准备重连");
+            if (self.needConnect && self.socket.readyState != SR_OPEN) {
+                reConnectTime = 0;
+                [self reConnect];
+            }
+        }
+    }];
+    [self.reachabilityManager startMonitoring];
 }
 
-//开启连接
+- (BOOL)getSocketCloseBoo
+{
+    return !(self.isBOpen && self.socket.readyState == SR_OPEN);
+}
+
+- (NSMutableArray<NSDictionary *> *)pendingMessages
+{
+    if (!_pendingMessages) {
+        _pendingMessages = [NSMutableArray array];
+    }
+    return _pendingMessages;
+}
+
+//开启连接（调用层表示「需要 socket」）
 -(void)SRWebSocketOpenWithURLString:(NSString *)urlString {
-    if(self.isBOpen) {
+    if (!urlString) {
+        return;
+    }
+    self.urlSSt = urlString;
+    self.needConnect = YES;
+    //调用层主动要求连接时，允许重新尝试鉴权
+    self.isAuthFailed = NO;
+    
+    if (!self.isNetworkReachable) {
+        NSLog(@"socket--当前无网络，暂不建立连接，等待网络恢复");
         return;
     }
     if (self.socket) {
         return;
     }
-
-    if (!urlString) {
-        return;
-    }
-    self.urlSSt = urlString;
-    //SRWebSocketUrlString 就是websocket的地址 写入自己后台的地址
-    
-    NSURLRequest *urlRquest = [NSURLRequest requestWithURL:[NSURL URLWithString:urlString]];
-//    urlRquest.allHTTPHeaderFields = @{@"token":TOKEN};
-    NSMutableURLRequest *mutableRequest = [urlRquest mutableCopy];
-    [mutableRequest setValue:TOKEN forHTTPHeaderField:@"token"];
-    [mutableRequest setValue:@"zh-CN" forHTTPHeaderField:@"Accept-Language"];
-    //3.把值覆给request
-    urlRquest = [mutableRequest copy];
-    
-    NSLog(@"%@", urlRquest.allHTTPHeaderFields);
-    self.socket = [[SRWebSocket alloc] initWithURLRequest:urlRquest];
-    
-    self.socket.delegate = self;   //SRWebSocketDelegate 协议
-    
-    [self.socket open];     //开始连接
+    [self mh_openSocket];
 }
 
 - (void)SRWebSocketSendJsonDic:(NSDictionary *)jsonDic
@@ -84,25 +124,43 @@
     [self sendData:jsonSt];
 }
 
-//MARK: 重新连接
-- (void)SRWebSocketOpen {
-    
-    if (self.urlSSt) {
-        
-        self.socket = [[SRWebSocket alloc] initWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.urlSSt]]];
-        self.socket.delegate = self;   //SRWebSocketDelegate 协议
-        [self.socket open];
+//MARK: 真正建立连接（统一带上 token，重连也必须走这里）
+- (void)mh_openSocket {
+    if (!self.urlSSt) {
+        return;
     }
+    if (!self.isNetworkReachable) {
+        NSLog(@"socket--当前无网络，跳过建立连接");
+        return;
+    }
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.urlSSt]];
+    [request setValue:TOKEN forHTTPHeaderField:@"token"];
+    [request setValue:@"zh-CN" forHTTPHeaderField:@"Accept-Language"];
+    //注意：服务端对带 Origin 的握手一律返回 403，已在 Podfile 的 post_install 中移除 SocketRocket 自动补的 Origin 头
+    NSLog(@"socket--请求头--%@", request.allHTTPHeaderFields);
+    
+    self.socket = [[SRWebSocket alloc] initWithURLRequest:request];
+    self.socket.delegate = self;   //SRWebSocketDelegate 协议
+    [self.socket open];     //开始连接
 }
 
-//关闭连接
+//关闭连接（调用层明确不再需要 socket）
 - (void)SRWebSocketClose {
+    self.needConnect = NO;
+    [self mh_closeSocket];
+}
+
+//MARK: 仅关闭连接，不改变「调用层是否需要连接」的意图
+- (void)mh_closeSocket {
     if (self.socket){
+        self.socket.delegate = nil;
         [self.socket close];
         self.socket = nil;
-        //断开连接时销毁心跳
-        [self destoryHeartBeat];
     }
+    self.isBOpen = NO;
+    //断开连接时销毁心跳
+    [self destoryHeartBeat];
 }
 
 #pragma mark - socket delegate
@@ -113,24 +171,42 @@
     self.isBOpen = YES;
     //开启心跳 心跳是发送pong的消息 我这里根据后台的要求发送data给后台
     [self initHeartBeat];
+    //连接成功后补发断线期间积压的指令
+    [self flushPendingMessages];
 }
 
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error {
     NSLog(@"连接失败，这里可以实现掉线自动重连，%@", error);
-    NSLog(@"1.判断当前网络环境，如果断网了就不要连了，等待网络到来，在发起重连");
-    NSLog(@"2.判断调用层是否需要连接，例如用户都没在聊天界面，连接上去浪费流量");
     _socket = nil;
     self.isBOpen = NO;
-    //连接失败就重连
+    [self destoryHeartBeat];
+    
+    NSInteger statusCode = [error.userInfo[@"HTTPResponseStatusCode"] integerValue];
+    if (statusCode == 401 || statusCode == 403) {
+        //鉴权失败，重试也不会成功，等调用层下次主动连接
+        self.isAuthFailed = YES;
+        NSLog(@"socket--鉴权失败(%ld)，暂停自动重连", (long)statusCode);
+        return;
+    }
+    if (!self.isNetworkReachable) {
+        NSLog(@"socket--当前无网络，等待网络恢复后重连");
+        return;
+    }
     [self reConnect];
 }
 
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean {
     NSLog(@"被关闭连接，code:%ld,reason:%@,wasClean:%d",code,reason,wasClean);
     //断开连接 同时销毁心跳
-    [self SRWebSocketClose];
+    self.socket = nil;
     self.isBOpen = NO;
+    [self destoryHeartBeat];
     [[NSNotificationCenter defaultCenter] postNotificationName:kNeedChangeGoodsUploginNote object:@""];
+    
+    //服务端主动断开时，只有调用层仍需要连接才重连
+    if (self.needConnect && self.isNetworkReachable) {
+        [self reConnect];
+    }
 }
 
 /*
@@ -156,15 +232,38 @@
 //重连机制
 - (void)reConnect
 {
-    [self SRWebSocketClose];
-    //超过一分钟就不再重连 所以只会重连5次 2^5 = 64
-    if (reConnectTime > 64) {
+    //调用层已不需要连接（用户没在控制页等），不重连，省流量
+    if (!self.needConnect) {
+        NSLog(@"socket--调用层无需连接，跳过重连");
         return;
     }
-  
+    //断网时不重连，等网络恢复回调触发
+    if (!self.isNetworkReachable) {
+        NSLog(@"socket--当前无网络，跳过重连");
+        return;
+    }
+    //鉴权失败时重试无意义，等调用层下次主动连接
+    if (self.isAuthFailed) {
+        NSLog(@"socket--鉴权失败状态，跳过重连");
+        return;
+    }
+    
+    [self mh_closeSocket];
+    //超过一分钟就不再重连 所以只会重连5次 2^5 = 64
+    if (reConnectTime > 64) {
+        NSLog(@"socket--重连次数已达上限，停止重连");
+        return;
+    }
+    
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(reConnectTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (!self.needConnect || !self.isNetworkReachable || self.isAuthFailed) {
+            return;
+        }
+        if (self.socket) {
+            return;
+        }
         self.socket = nil;
-        [self SRWebSocketOpen];
+        [self mh_openSocket];
         NSLog(@"重连");
     });
     
@@ -191,7 +290,7 @@
                 NSData *hearData = [[NSData alloc] initWithBase64EncodedString:@"heartbeat" options:NSUTF8StringEncoding];
                 [self.socket sendPing:hearData error:NULL]; //发送心跳ping
             }else if (self.socket.readyState == SR_CONNECTING) {
-                [self reConnect];
+                //连接中，等待连接结果，避免反复关闭重开
             }else if (self.socket.readyState == SR_CLOSED || self.socket.readyState == SR_CLOSING) {
                 [self reConnect];
             }else {
@@ -245,30 +344,67 @@
 //- (void)sendData:(id)data {
 - (void)sendData:(NSString *)data {
 
-    WeakSelf(ws);
-    dispatch_queue_t queue =  dispatch_queue_create("zy", NULL);
-    
-    dispatch_async(queue, ^{
-        if (weakSelf.socket != nil) {
-            // 只有 SR_OPEN 开启状态才能调 send 方法，不然要崩
-            if (weakSelf.socket.readyState == SR_OPEN) {
-//                [weakSelf.socket send:data];    // 发送数据
-                [weakSelf.socket sendString:data error:nil];
-            } else if (weakSelf.socket.readyState == SR_CONNECTING) {
-                NSLog(@"正在连接中，重连后其他方法会去自动同步数据");
-                // 每隔2秒检测一次 socket.readyState 状态，检测 10 次左右
-                // 只要有一次状态是 SR_OPEN 的就调用 [ws.socket send:data] 发送数据
-                // 如果 10 次都还是没连上的，那这个发送请求就丢失了，这种情况是服务器的问题了，小概率的
-                [self reConnect];
-                
-            } else if (weakSelf.socket.readyState == SR_CLOSING || weakSelf.socket.readyState == SR_CLOSED) {
-                // websocket 断开了，调用 reConnect 方法重连
-                [self reConnect];
-            }
+    if (data.length == 0) {
+        return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (self.socket.readyState == SR_OPEN) {
+            [self.socket sendString:data error:nil];
+            return;
+        }
+
+        //未连接时先缓存，连接成功后由 flushPendingMessages 补发（5 秒内有效，避免过期指令延后执行）
+        [self enqueueMessage:data];
+        
+        if (!self.isNetworkReachable) {
+            NSLog(@"socket--当前无网络，指令暂存，等待网络恢复：%@", data);
+            return;
+        }
+        if (self.isAuthFailed) {
+            NSLog(@"socket--鉴权失败，指令暂存，等待下次主动连接：%@", data);
+            return;
+        }
+        
+        if (self.socket == nil) {
+            NSString *url = self.urlSSt.length > 0 ? self.urlSSt : socketWSUrl;
+            NSLog(@"socket 未连接，指令暂存并重新建立连接：%@", data);
+            [self SRWebSocketOpenWithURLString:url];
+        } else if (self.socket.readyState == SR_CLOSING || self.socket.readyState == SR_CLOSED) {
+            NSLog(@"socket 已关闭，指令暂存并重连：%@", data);
+            //重置退避时间，保证用户操作时立即发起重连
+            reConnectTime = 0;
+            [self reConnect];
         } else {
-            NSLog(@"没网络，发送失败，一旦断网 socket 会被我设置 nil 的");
+            //SR_CONNECTING：等待 webSocketDidOpen 后统一发送
+            NSLog(@"socket 连接中，指令暂存待发送：%@", data);
         }
     });
+}
+
+- (void)enqueueMessage:(NSString *)data
+{
+    NSMutableArray<NSDictionary *> *queue = self.pendingMessages;
+    [queue addObject:@{@"data": data, @"time": @([[NSDate date] timeIntervalSince1970])}];
+    while (queue.count > kMHPendingMessageMaxCount) {
+        [queue removeObjectAtIndex:0];
+    }
+}
+
+- (void)flushPendingMessages
+{
+    if (self.socket.readyState != SR_OPEN || self.pendingMessages.count == 0) {
+        return;
+    }
+    NSTimeInterval now = [[NSDate date] timeIntervalSince1970];
+    NSArray<NSDictionary *> *queue = [self.pendingMessages copy];
+    [self.pendingMessages removeAllObjects];
+    for (NSDictionary *item in queue) {
+        NSString *message = item[@"data"];
+        NSTimeInterval sendTime = [item[@"time"] doubleValue];
+        if (message.length > 0 && now - sendTime <= kMHPendingMessageMaxAge) {
+            [self.socket sendString:message error:nil];
+        }
+    }
 }
 
 -(void)dealloc{

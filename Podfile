@@ -104,4 +104,21 @@ post_install do |installer|
     puts "✅ AFNetworking patched (netinet6/in6.h → netinet/in.h)"
   end
 
+  # 补丁：SocketRocket WebSocket 握手不再发送 Origin（服务端对带 Origin 的握手一律 403）
+  sr_path = installer.sandbox.pod_dir('SocketRocket').to_s + '/SocketRocket/Internal/Utilities/SRHTTPConnectMessage.m'
+  if File.exist?(sr_path)
+    system("chmod u+w '#{sr_path}'")
+    c = File.read(sr_path)
+    origin_line = '    CFHTTPMessageSetHeaderFieldValue(message, CFSTR("Origin"), (__bridge CFStringRef)SRURLOrigin(url));'
+    if c.include?(origin_line)
+      c.sub!(origin_line, '    // 服务端对带 Origin 的握手一律返回 403，不发送 Origin')
+      File.write(sr_path, c)
+      puts "✅ SocketRocket patched (removed Origin header)"
+    else
+      puts "⚠️ SocketRocket Origin line not found (already patched?)"
+    end
+  else
+    puts "⚠️ SRHTTPConnectMessage.m not found"
+  end
+
 end

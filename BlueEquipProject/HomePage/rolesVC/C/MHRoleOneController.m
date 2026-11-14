@@ -94,6 +94,8 @@
 @property (nonatomic, strong) UIView *placVVV_vv;
 
 @property (nonatomic, assign) BOOL isLimitsAutBoo;
+
+- (void)mh_applyLockEnabled:(BOOL)lockEnabled;
 @end
 
 @implementation MHRoleOneController
@@ -1226,6 +1228,18 @@
     };
 }
 
+//MARK: 开/关锁成功后，本机设备直接走本地蓝牙并同步 UI 状态
+- (void)mh_applyLockEnabled:(BOOL)lockEnabled
+{
+    BOOL isEEEqq = [self.modelM.mac compare:[LYUserDefault userDefault].macName options:NSCaseInsensitiveSearch | NSNumericSearch] == NSOrderedSame;
+    if (isEEEqq) {
+        // motor 1：strong=1 开锁，strong=0 关锁
+        [[NSNotificationCenter defaultCenter] postNotificationName:app_sendCustomNotifName object:nil userInfo:@{@"motor":@"1", @"strong":lockEnabled ? @"0" : @"1", @"strong2":@"0"}];
+    }
+    self.roleOneModel.lockEnabled = lockEnabled;
+    self.lockBtn.selected = lockEnabled;
+}
+
 //MARK: 开锁
 - (void)lockBtnmethod
 {
@@ -1266,6 +1280,7 @@
 //                        self.roleOneModel.lockEnabled = NO;
 //                        self.lockBtn.selected = self.roleOneModel.lockEnabled;
                         self.isRRRRR = NO;
+                        [self mh_applyLockEnabled:NO];
                         [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock1")];
                     } fail:^(NSString * _Nonnull msg) {
                         self.isRRRRR = NO;
@@ -1282,6 +1297,7 @@
 //                    self.roleOneModel.lockEnabled = NO;
 //                    self.lockBtn.selected = self.roleOneModel.lockEnabled;
                     self.isRRRRR = NO;
+                    [self mh_applyLockEnabled:NO];
                     [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock1")];
                     
                 } fail:^(NSString * _Nonnull msg) {
@@ -1311,6 +1327,7 @@
 //                        self.roleOneModel.lockEnabled = YES;
 //                        self.lockBtn.selected = self.roleOneModel.lockEnabled;
                         self.isRRRRR = NO;
+                        [self mh_applyLockEnabled:YES];
                         if(![self.modelM.realName isEqualToString:kCharactName2]) {
                             [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock2")];
                         }
@@ -1332,6 +1349,7 @@
 //                    self.roleOneModel.lockEnabled = YES;
 //                    self.lockBtn.selected = self.roleOneModel.lockEnabled;
                     self.isRRRRR = NO;
+                    [self mh_applyLockEnabled:YES];
                     if(![self.modelM.realName isEqualToString:kCharactName2]) {
                         [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock2")];
                     }
@@ -1384,6 +1402,7 @@
                     
                     self.roleOneModel.allowServantUnlock = NO;
                     self.isRRRRR = NO;
+                    [self mh_applyLockEnabled:NO];
                     [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock1")];
                 } fail:^(NSString * _Nonnull msg) {
                     [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock3")];
@@ -1488,6 +1507,7 @@
 //                            self.roleOneModel.lockEnabled = YES;
 //                            self.lockBtn.selected = self.roleOneModel.lockEnabled;
                             self.isRRRRR = NO;
+                            [self mh_applyLockEnabled:NO];
                             [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock1")];
                         } fail:^(NSString * _Nonnull msg) {
                             [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock3")];
@@ -1504,6 +1524,7 @@
                         //                    self.roleOneModel.lockEnabled = NO;
                         //                    self.lockBtn.selected = self.roleOneModel.lockEnabled;
                         self.isRRRRR = NO;
+                        [self mh_applyLockEnabled:NO];
                         [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock1")];
                         
                     } fail:^(NSString * _Nonnull msg) {
@@ -1533,6 +1554,7 @@
 //                            self.roleOneModel.lockEnabled = YES;
 //                            self.lockBtn.selected = self.roleOneModel.lockEnabled;
                             self.isRRRRR = NO;
+                            [self mh_applyLockEnabled:YES];
                             if(![self.modelM.realName isEqualToString:kCharactName2]) {
                                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock2")];
                             }
@@ -1554,6 +1576,7 @@
                             //                        self.roleOneModel.lockEnabled = !self.roleOneModel.lockEnabled;
                             //                        self.lockBtn.selected = self.roleOneModel.lockEnabled;
                             self.isRRRRR = NO;
+                            [self mh_applyLockEnabled:NO];
                             [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock1")];
                             
                         } fail:^(NSString * _Nonnull msg) {
@@ -1566,6 +1589,7 @@
                             //                        self.roleOneModel.lockEnabled = !self.roleOneModel.lockEnabled;
                             //                        self.lockBtn.selected = self.roleOneModel.lockEnabled;
                             self.isRRRRR = NO;
+                            [self mh_applyLockEnabled:YES];
                             if(![self.modelM.realName isEqualToString:kCharactName2]) {
                                 [SVProgressHUD showInfoWithStatus:eLocalizedString(@"role_unlock2")];
                             }
