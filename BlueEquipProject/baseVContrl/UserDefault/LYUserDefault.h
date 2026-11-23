@@ -140,6 +140,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) NSArray *CountryCode;
 @property (nonatomic, strong) NSArray *adListArr;
+@property (nonatomic, strong) NSDictionary *chatBanner;
 
 @property (nonatomic, copy) NSString *tmpSecretId;
 @property (nonatomic, copy) NSString *tmpSecretKey;
