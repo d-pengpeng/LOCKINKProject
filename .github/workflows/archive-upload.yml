@@ -1,70 +1,74 @@
-name: Archive & Export IPA
+name: Manual Archive & Upload IPA
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: macos-15
+  archive:
+    runs-on: macos-latest
+    timeout-minutes: 30
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Select Xcode
+      - name: Pod install
         run: |
-          LATEST=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
-          echo "Selecting: $LATEST"
-          sudo xcode-select -s "$LATEST/Contents/Developer"
-          xcodebuild -version
+          rm -rf Pods Podfile.lock
+          pod install
 
-      - name: Install CocoaPods
-        run: gem install cocoapods
-
-      - name: Pod Install
+      - name: Setup signing & patch pbxproj
         run: |
-          pod repo update
-          pod install --verbose 2>&1 | tail -30
-          echo "=== Pod install done ==="
-          ls -la Pods/QCloudCore/QCloudCore/Classes/Base/ 2>/dev/null || echo "QCloudCore base dir not found"
-
-      - name: Patch QCloudCore for Xcode 26
-        run: |
-          # Patch all QCloudCore .m files with missing imports
-          find Pods/QCloudCore -name "*.m" -exec sed -i '' '1s/^/#import <CFNetwork\/CFHost.h>\n/' {} \; 2>/dev/null || true
-          find Pods/QCloudCore -name "*.m" -exec sed -i '' '1s/^/#import <CoreServices\/AssertMacros.h>\n/' {} \; 2>/dev/null || true
-          echo "Patched all QCloudCore .m files"
-
-      - name: Setup signing
-        run: |
-          # GitHub Actions runner 没有 Apple 开发者账号登录态 → 用 Manual。
-          # 但读 profile 自身的 Name / UUID，写 signing.env 给后续 step 用。
+          # GitHub Actions runner 没有 Apple 开发者账号登录态 → Manual。
+          # 直接用 sed 改 pbxproj：每个 target/configuration 单独写 PROVISIONING_PROFILE_SPECIFIER。
+          # 换 profile 只换 secrets 的 base64 值，脚本自动适配。
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
+
           # 主 App profile
-          MAIN_PROFILE="$PP_DIR/temp_main.mobileprovision"
-          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$MAIN_PROFILE"
-          MAIN_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i "$MAIN_PROFILE" 2>/dev/null)")
-          MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$MAIN_PROFILE" 2>/dev/null)")
-          mv "$MAIN_PROFILE" "$PP_DIR/${MAIN_UUID}.mobileprovision"
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > /tmp/main.mobileprovision
+          MAIN_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
+          MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
+          cp /tmp/main.mobileprovision "$PP_DIR/${MAIN_UUID}.mobileprovision"
           echo "✅ Main: UUID=${MAIN_UUID} Name=${MAIN_NAME}"
+
           # Noti 扩展 profile
-          EXT_PROFILE="$PP_DIR/temp_ext.mobileprovision"
-          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$EXT_PROFILE"
-          EXT_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i "$EXT_PROFILE" 2>/dev/null)")
-          EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$EXT_PROFILE" 2>/dev/null)")
-          mv "$EXT_PROFILE" "$PP_DIR/${EXT_UUID}.mobileprovision"
+          echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > /tmp/ext.mobileprovision
+          EXT_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
+          EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
+          cp /tmp/ext.mobileprovision "$PP_DIR/${EXT_UUID}.mobileprovision"
           echo "✅ Ext:  UUID=${EXT_UUID} Name=${EXT_NAME}"
-          # 写 env 文件给后续 step
-          echo "MAIN_UUID=${MAIN_UUID}" > signing.env
-          echo "MAIN_NAME=${MAIN_NAME}" >> signing.env
-          echo "EXT_UUID=${EXT_UUID}" >> signing.env
-          echo "EXT_NAME=${EXT_NAME}" >> signing.env
+
+          # 直接改 pbxproj
+          PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBXPROJ"
+          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$PBXPROJ"
+          # 主 App bundle id → 插入 MAIN_UUID
+          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;/{
+            /BlueEquipProjectNotiServier/b
+            /PROVISIONING_PROFILE_SPECIFIER/d
+            a\\
+\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${MAIN_UUID};
+          }" "$PBXPROJ"
+          # 扩展 bundle id → 插入 EXT_UUID
+          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro.BlueEquipProjectNotiServier;/{
+            /PROVISIONING_PROFILE_SPECIFIER/d
+            a\\
+\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${EXT_UUID};
+          }" "$PBXPROJ"
+          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER = "";/d' "$PBXPROJ"
+          sed -i '' '/"PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+          sed -i '' '/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+          sed -i '' '/"DEVELOPMENT_TEAM\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+          echo ""
+          echo "=== ✅ pbxproj 签名配置 ==="
+          grep -n "PROVISIONING_PROFILE_SPECIFIER\|CODE_SIGN_STYLE\|CODE_SIGN_IDENTITY" "$PBXPROJ" | head -20
           ls -la "$PP_DIR"
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -75,7 +79,7 @@ jobs:
 
       - name: Archive
         run: |
-          source signing.env
+          mkdir -p build
           xcodebuild archive \
             -workspace BlueEquipProject.xcworkspace \
             -scheme BlueEquipProject \
@@ -84,13 +88,13 @@ jobs:
             -destination "generic/platform=iOS" \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=L992GPQMS4 \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="${MAIN_UUID}" \
-            "PROVISIONING_PROFILE_SPECIFIER[BlueEquipProjectNotiServier]=${EXT_UUID}"
+            CODE_SIGN_IDENTITY="Apple Distribution"
 
       - name: Export IPA
         run: |
-          source signing.env
+          # 再读一次 profile Name（base64 文件还在 /tmp/）
+          MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
+          EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
           mkdir -p build/export
           cat > build/export/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -120,14 +124,8 @@ jobs:
             -exportPath build/export \
             -exportOptionsPlist build/export/ExportOptions.plist
 
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: BlueEquipProject-IPA
+          name: BlueEquipProject.ipa
           path: build/export/*.ipa
-
-      - name: Cleanup
-        if: always()
-        run: |
-          security delete-keychain build.keychain 2>/dev/null || true
-          rm -f certificate.p12
+          if-no-files-found: error

@@ -26,11 +26,13 @@ workflows:
 
       - name: Setup code signing
         script: |
-          # Codemagic CI 没有 Apple 开发者账号登录态，Automatic signing 会报 "No Accounts"。
-          # 改用 Manual，但不在 pbxproj 里硬写 profile 名（Xcode 每次打开都重写）。
-          # 做法：解码 base64 → 从 profile 自身读 UUID → 存 MobileDevice/Profiles/<UUID>.mobileprovision
-          #       后续 Archive / Export 命令从同一个 UUID 变量注入。
-          # 换 profile 只需要换环境变量值，代码零改动。
+          # Codemagic CI 没有 Apple 开发者账号登录态 → 只能 Manual。
+          # 命令行 target 覆盖 PROVISIONING_PROFILE_SPECIFIER[target]=UUID 不可靠
+          # （xcodebuild archive -scheme 下子 target 覆盖经常失效，所有 target 都用同一个）。
+          # 最稳妥：Setup 阶段解码 profile → 读 UUID → 直接用 sed 改 pbxproj，
+          # 每个 target/configuration 单独写 PROVISIONING_PROFILE_SPECIFIER。
+          # 命令行 Archive 只写 CODE_SIGN_STYLE=Manual，不再写 PROVISIONING_PROFILE_SPECIFIER。
+          # 换 profile 只换环境变量 base64 值，脚本自动适配。
           #
           # 需要 Codemagic Settings → Environment variables → signing 分组：
           #   BUILD_CERTIFICATE_BASE64          Apple Distribution .p12 (Base64)
@@ -41,6 +43,7 @@ workflows:
 
           KEYCHAIN_PATH="$HOME/codemagic.keychain"
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
 
           # —— 1. 创建临时 keychain ——
           security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
@@ -70,20 +73,17 @@ workflows:
             exit 1
           fi
 
-          # —— 3. 安装 provisioning profiles（UUID 作为文件名 + 读 UUID 到 shell 变量）——
+          # —— 3. 安装 provisioning profiles 并读 UUID ——
           mkdir -p "$PP_DIR"
 
           if [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
             echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > /tmp/main.mobileprovision
             MAIN_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
               "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
-            cp /tmp/main.mobileprovision "$PP_DIR/${MAIN_UUID}.mobileprovision"
-            # 同时读 Name 供 ExportOptions.plist provisioningProfiles 用
             MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \
               "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
-            echo "✅ 主 App profile: UUID=${MAIN_UUID} Name=${MAIN_NAME}"
-            echo "MAIN_UUID=${MAIN_UUID}" > signing.env
-            echo "MAIN_NAME=${MAIN_NAME}" >> signing.env
+            cp /tmp/main.mobileprovision "$PP_DIR/${MAIN_UUID}.mobileprovision"
+            echo "✅ 主 App: UUID=${MAIN_UUID} Name=${MAIN_NAME}"
           else
             echo "❌ PROVISIONING_PROFILE_BASE64 未设置"
             exit 1
@@ -93,17 +93,60 @@ workflows:
             echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > /tmp/ext.mobileprovision
             EXT_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
               "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
-            cp /tmp/ext.mobileprovision "$PP_DIR/${EXT_UUID}.mobileprovision"
             EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \
               "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
-            echo "✅ Noti 扩展 profile: UUID=${EXT_UUID} Name=${EXT_NAME}"
-            echo "EXT_UUID=${EXT_UUID}" >> signing.env
-            echo "EXT_NAME=${EXT_NAME}" >> signing.env
+            cp /tmp/ext.mobileprovision "$PP_DIR/${EXT_UUID}.mobileprovision"
+            echo "✅ Noti 扩展: UUID=${EXT_UUID} Name=${EXT_NAME}"
           else
             echo "❌ PROVISIONING_PROFILE_EXT_BASE64 未设置"
             exit 1
           fi
 
+          # —— 4. 直接改 pbxproj：每个 target/configuration 单独写 PROVISIONING_PROFILE_SPECIFIER ——
+          # Xcode 打开工程后会把 pbxproj 改回 Automatic，所以每次 CI 都要重写。
+          # 思路：
+          #   a) 把所有 CODE_SIGN_STYLE = Automatic → Manual
+          #   b) 把所有 CODE_SIGN_IDENTITY = "Apple Development" → "Apple Distribution"
+          #      （只有 Release archive，用 Distribution 就行）
+          #   c) 找 PRODUCT_BUNDLE_IDENTIFIER 行，在后面插入 PROVISIONING_PROFILE_SPECIFIER = UUID
+          #      主 App bundle id 是 com.lockink.qingQuPro
+          #      扩展 bundle id 是 com.lockink.qingQuPro.BlueEquipProjectNotiServier
+          #   d) 删掉可能残留的空 PROVISIONING_PROFILE_SPECIFIER = "";
+          #   e) 删掉 [sdk=iphoneos*] 覆盖行（我们直接写默认值）
+          cp "$PBXPROJ" "${PBXPROJ}.bak"
+
+          # a) CODE_SIGN_STYLE: Automatic → Manual
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBXPROJ"
+
+          # b) CODE_SIGN_IDENTITY: Apple Development → Apple Distribution（所有配置）
+          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$PBXPROJ"
+
+          # c1) 主 App bundle id → 插入 PROVISIONING_PROFILE_SPECIFIER = MAIN_UUID
+          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;/{
+            /BlueEquipProjectNotiServier/b
+            /PROVISIONING_PROFILE_SPECIFIER/d
+            a\\
+\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${MAIN_UUID};
+          }" "$PBXPROJ"
+
+          # c2) 扩展 bundle id → 插入 PROVISIONING_PROFILE_SPECIFIER = EXT_UUID
+          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro.BlueEquipProjectNotiServier;/{
+            /PROVISIONING_PROFILE_SPECIFIER/d
+            a\\
+\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${EXT_UUID};
+          }" "$PBXPROJ"
+
+          # d) 删空的 PROVISIONING_PROFILE_SPECIFIER = "";
+          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER = "";/d' "$PBXPROJ"
+
+          # e) 删 [sdk=iphoneos*] 覆盖行（我们直接写默认值）
+          sed -i '' '/"PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+          sed -i '' '/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+          sed -i '' '/"DEVELOPMENT_TEAM\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+
+          echo ""
+          echo "=== ✅ pbxproj 改完，验证签名配置 ==="
+          grep -n "PROVISIONING_PROFILE_SPECIFIER\|CODE_SIGN_STYLE\|CODE_SIGN_IDENTITY\|CODE_SIGN_ENTITLEMENTS" "$PBXPROJ" | grep -v "^#" | head -20
           echo ""
           echo "=== 钥匙串 identities ==="
           security find-identity -v -p codesigning "$KEYCHAIN_PATH" 2>&1
@@ -112,14 +155,8 @@ workflows:
 
       - name: Archive
         script: |
-          # Codemagic CI 没有 Apple 开发者账号登录态 → Automatic 不行 → Manual。
-          # 但 profile 选择用 Setup 脚本从 base64 解码后动态读到的 UUID。
-          # 这样换 profile 只换 base64，代码零改动。
-          source signing.env
-          echo "=== Using profiles ==="
-          echo "Main UUID: ${MAIN_UUID} Name: ${MAIN_NAME}"
-          echo "Ext  UUID: ${EXT_UUID} Name: ${EXT_NAME}"
-
+          # pbxproj 已经被 Setup 脚本改成 Manual + 每个 target 单独写 PROVISIONING_PROFILE_SPECIFIER
+          # 命令行只覆盖 CODE_SIGN_STYLE 防止 Xcode 重写，不再写 PROVISIONING_PROFILE_SPECIFIER
           mkdir -p build
           rm -rf ~/Library/Developer/Xcode/DerivedData/BlueEquipProject-*
           set -o pipefail
@@ -132,9 +169,6 @@ workflows:
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=L992GPQMS4 \
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            CODE_SIGN_ENTITLEMENTS=BlueEquipProject/BlueEquipProject.entitlements \
-            PROVISIONING_PROFILE_SPECIFIER="${MAIN_UUID}" \
-            "PROVISIONING_PROFILE_SPECIFIER[BlueEquipProjectNotiServier]=${EXT_UUID}" \
             CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES=YES \
             2>&1 | tee build/archive.log
           echo "=== Archive exit code: ${PIPESTATUS[0]} ==="
@@ -144,8 +178,13 @@ workflows:
 
       - name: Export IPA
         script: |
-          # source signing.env 读 MAIN_NAME / EXT_NAME（之前 Setup 脚本从 base64 解码后读出来的）
-          source signing.env
+          # Export 阶段需要 provisioningProfiles 字典，填 profile Name
+          # 从之前的 base64 再读一次（和 Setup 同一份解码文件还在 /tmp/ 里）
+          MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \
+            "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
+          EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \
+            "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
+          mkdir -p build/export
           cat > build/export/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
