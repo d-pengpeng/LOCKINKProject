@@ -66,50 +66,101 @@
     
     self.isStopBo = YES;
 
-    // 反诈提示条
-    self.antiTipH = 48;
-    CGFloat antiBarH = 48;
-    self.antiFraudView = [[UIView alloc] initWithFrame:CGRectMake(0, NAVHEIGHT, _window_width, antiBarH)];
-    self.antiFraudView.backgroundColor = [UIColor colorWithRed:255/255.f green:248/255.f blue:240/255.f alpha:1.f];
+    // 反诈提示条 — 后端可配 chatBanner，无配置或 enabled=false 则隐藏
+    NSDictionary *bannerConf = [LYUserDefault userDefault].chatBanner;
+    BOOL bannerEnabled = YES;
+    if (bannerConf && [bannerConf isKindOfClass:[NSDictionary class]]) {
+        id enabledObj = bannerConf[@"enabled"];
+        if (enabledObj && ![enabledObj isKindOfClass:[NSNull class]]) {
+            bannerEnabled = [enabledObj respondsToSelector:@selector(boolValue)] ? [enabledObj boolValue] : YES;
+        }
+    }
 
-    // 警告图标
-    UIImageView *warningIcon = [[UIImageView alloc] initWithFrame:CGRectMake(12, (antiBarH - 18) / 2.0, 20, 18)];
-    warningIcon.image = [UIImage systemImageNamed:@"exclamationmark.triangle"];
-    warningIcon.tintColor = [UIColor colorWithRed:250/255.f green:140/255.f blue:22/255.f alpha:1.f];
-    warningIcon.contentMode = UIViewContentModeScaleAspectFit;
-    [self.antiFraudView addSubview:warningIcon];
+    if (bannerEnabled) {
+        self.antiTipH = 48;
+        CGFloat antiBarH = 48;
 
-    // 关闭按钮 X
-    UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    closeBtn.frame = CGRectMake(_window_width - 32, (antiBarH - 20) / 2.0, 20, 20);
-    [closeBtn setImage:[UIImage systemImageNamed:@"xmark"] forState:UIControlStateNormal];
-    closeBtn.tintColor = [UIColor colorWithRed:153/255.f green:153/255.f blue:153/255.f alpha:1.f];
-    [closeBtn addTarget:self action:@selector(closeAntiFraudTip) forControlEvents:UIControlEventTouchUpInside];
-    [self.antiFraudView addSubview:closeBtn];
+        // 背景色：后端可下发 bgColor (#RRGGBB)，默认 #FFF8F0
+        UIColor *bgColor = [UIColor colorWithRed:255/255.f green:248/255.f blue:240/255.f alpha:1.f];
+        NSString *bgHex = bannerConf[@"bgColor"];
+        if ([bgHex isKindOfClass:[NSString class]] && bgHex.length > 0) {
+            UIColor *c = [self _colorFromHexString:bgHex];
+            if (c) bgColor = c;
+        }
 
-    // 文本（含可点击的"点此举报"链接）
-    CGFloat textX = 40;
-    CGFloat textW = _window_width - textX - 36;
-    UILabel *antiLabel = [[UILabel alloc] initWithFrame:CGRectMake(textX, 0, textW, antiBarH)];
-    antiLabel.numberOfLines = 2;
-    antiLabel.font = SYS_Font(12);
-    antiLabel.textColor = [UIColor colorWithRed:89/255.f green:89/255.f blue:89/255.f alpha:1.f];
-    antiLabel.userInteractionEnabled = YES;
+        self.antiFraudView = [[UIView alloc] initWithFrame:CGRectMake(0, NAVHEIGHT, _window_width, antiBarH)];
+        self.antiFraudView.backgroundColor = bgColor;
 
-    NSString *fullText = eLocalizedString(@"anti_fraud_tip");
-    NSString *linkText = eLocalizedString(@"anti_fraud_report");
-    NSString *combinedText = [NSString stringWithFormat:@"%@%@", fullText, linkText];
-    NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:combinedText];
-    NSRange linkRange = [combinedText rangeOfString:linkText];
-    [attrStr addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:24/255.f green:144/255.f blue:255/255.f alpha:1.f] range:linkRange];
-    [attrStr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:linkRange];
-    antiLabel.attributedText = attrStr;
+        // 警告图标
+        UIImageView *warningIcon = [[UIImageView alloc] initWithFrame:CGRectMake(12, (antiBarH - 18) / 2.0, 20, 18)];
+        warningIcon.image = [UIImage systemImageNamed:@"exclamationmark.triangle"];
+        warningIcon.tintColor = [UIColor colorWithRed:250/255.f green:140/255.f blue:22/255.f alpha:1.f];
+        warningIcon.contentMode = UIViewContentModeScaleAspectFit;
+        [self.antiFraudView addSubview:warningIcon];
 
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openAntiFraudReport)];
-    [antiLabel addGestureRecognizer:tap];
-    [self.antiFraudView addSubview:antiLabel];
+        // 关闭按钮 X
+        UIButton *closeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        closeBtn.frame = CGRectMake(_window_width - 32, (antiBarH - 20) / 2.0, 20, 20);
+        [closeBtn setImage:[UIImage systemImageNamed:@"xmark"] forState:UIControlStateNormal];
+        closeBtn.tintColor = [UIColor colorWithRed:153/255.f green:153/255.f blue:153/255.f alpha:1.f];
+        [closeBtn addTarget:self action:@selector(closeAntiFraudTip) forControlEvents:UIControlEventTouchUpInside];
+        [self.antiFraudView addSubview:closeBtn];
 
-    [self.view addSubview:self.antiFraudView];
+        // 文本（含可点击的"点此举报"链接）
+        CGFloat textX = 40;
+        CGFloat textW = _window_width - textX - 36;
+        UILabel *antiLabel = [[UILabel alloc] initWithFrame:CGRectMake(textX, 0, textW, antiBarH)];
+        antiLabel.numberOfLines = 2;
+        antiLabel.font = SYS_Font(12);
+        antiLabel.userInteractionEnabled = YES;
+
+        // 文案优先级：后端下发 > 本地 strings fallback
+        NSString *fullText = eLocalizedString(@"anti_fraud_tip");
+        NSString *linkText = eLocalizedString(@"anti_fraud_report");
+        if (bannerConf) {
+            NSString *t = bannerConf[@"text"];
+            if ([t isKindOfClass:[NSString class]] && t.length > 0) fullText = t;
+            NSString *lt = bannerConf[@"linkText"];
+            if ([lt isKindOfClass:[NSString class]] && lt.length > 0) linkText = lt;
+        }
+
+        NSString *combinedText = [NSString stringWithFormat:@"%@%@", fullText, linkText ?: @""];
+        NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:combinedText];
+
+        UIColor *baseColor = [UIColor colorWithRed:89/255.f green:89/255.f blue:89/255.f alpha:1.f];
+        UIColor *linkColor = [UIColor colorWithRed:24/255.f green:144/255.f blue:255/255.f alpha:1.f];
+        if (bannerConf) {
+            NSString *tc = bannerConf[@"textColor"];
+            if ([tc isKindOfClass:[NSString class]] && tc.length > 0) {
+                UIColor *c = [self _colorFromHexString:tc];
+                if (c) baseColor = c;
+            }
+            NSString *lc = bannerConf[@"linkColor"];
+            if ([lc isKindOfClass:[NSString class]] && lc.length > 0) {
+                UIColor *c = [self _colorFromHexString:lc];
+                if (c) linkColor = c;
+            }
+        }
+        [attrStr addAttribute:NSForegroundColorAttributeName value:baseColor range:NSMakeRange(0, combinedText.length)];
+
+        if (linkText.length > 0) {
+            NSRange linkRange = [combinedText rangeOfString:linkText];
+            if (linkRange.location != NSNotFound) {
+                [attrStr addAttribute:NSForegroundColorAttributeName value:linkColor range:linkRange];
+                [attrStr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:linkRange];
+            }
+        }
+        antiLabel.attributedText = attrStr;
+
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openAntiFraudReport)];
+        [antiLabel addGestureRecognizer:tap];
+        [self.antiFraudView addSubview:antiLabel];
+
+        [self.view addSubview:self.antiFraudView];
+    } else {
+        // 后端 disabled，整条提示条隐藏，chat 顶部直接贴导航栏
+        self.antiTipH = 0;
+    }
 
     if(self.isHistoryBoo) {
         
@@ -233,10 +284,43 @@
 
 - (void)openAntiFraudReport
 {
+    NSDictionary *bannerConf = [LYUserDefault userDefault].chatBanner;
+    NSString *linkUrl = bannerConf[@"linkUrl"];
+    if ([linkUrl isKindOfClass:[NSString class]] && linkUrl.length > 0) {
+        NSURL *url = [NSURL URLWithString:linkUrl];
+        if (url) {
+            [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+            return;
+        }
+    }
+    // fallback：走 App 内举报页
     MHReportJBViewController *vc = [[MHReportJBViewController alloc] init];
     vc.typeL = @"USER";
     vc.targetIId = self.chatId;
     [self.navigationController pushViewController:vc animated:YES];
+}
+
+/// 把 "#RRGGBB" 或 "#RGB" 十六进制串转成 UIColor，失败返回 nil
+- (UIColor *)_colorFromHexString:(NSString *)hex
+{
+    if (hex.length < 3) return nil;
+    NSString *h = [hex stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if ([h hasPrefix:@"#"]) h = [h substringFromIndex:1];
+    if (h.length == 3) {
+        // 3 位简写：abc → aabbcc
+        h = [NSString stringWithFormat:@"%c%c%c%c%c%c",
+             [h characterAtIndex:0], [h characterAtIndex:0],
+             [h characterAtIndex:1], [h characterAtIndex:1],
+             [h characterAtIndex:2], [h characterAtIndex:2]];
+    }
+    if (h.length != 6) return nil;
+    unsigned val = 0;
+    NSScanner *scan = [NSScanner scannerWithString:h];
+    if (![scan scanHexInt:&val]) return nil;
+    CGFloat r = ((val >> 16) & 0xFF) / 255.f;
+    CGFloat g = ((val >> 8)  & 0xFF) / 255.f;
+    CGFloat b = ( val        & 0xFF) / 255.f;
+    return [UIColor colorWithRed:r green:g blue:b alpha:1.f];
 }
 
 - (void)rightImageActiUIUI

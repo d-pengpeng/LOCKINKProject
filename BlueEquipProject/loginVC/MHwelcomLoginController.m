@@ -410,6 +410,9 @@ API_AVAILABLE(ios(13.0))
             if([info[@"adList"] isKindOfClass:[NSArray class]]) {
                 [LYUserDefault saveAdListArr:info[@"adList"]];
             }
+            if([info[@"chatBanner"] isKindOfClass:[NSDictionary class]]) {
+                [LYUserDefault saveChatBanner:info[@"chatBanner"]];
+            }
             [LYUserDefault savePrivacyOrUserDic:info];
         }
     } fail:^(NSString * _Nonnull msg) {

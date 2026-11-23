@@ -4784,10 +4784,10 @@
 				E8005C952D0BE06C00F63FE5 /* MHNewDrawingView.h */,
 				E8005C962D0BE06C00F63FE5 /* MHNewDrawingView.m */,
 				E83790242AECF2A6008D67F0 /* FloatingWindowModel.h */,
-				E83790232AECF2A6008D67F0 /* FloatingWindowModel.m */,
 				E8AFEA602CF5A20200D99083 /* MHBoXingModel.h */,
 				E8AFEA612CF5A20200D99083 /* MHBoXingModel.m */,
 				E88CCD362AAB192A0019E488 /* floatingPlayLivingView.h */,
+				E83790232AECF2A6008D67F0 /* FloatingWindowModel.m */,
 				E88CCD2E2AAB192A0019E488 /* floatingPlayLivingView.m */,
 				E88CCD3B2AAB192A0019E488 /* FloatingWController.h */,
 				E88CCD312AAB192A0019E488 /* FloatingWController.m */,
@@ -5274,9 +5274,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-BlueEquipProject/Pods-BlueEquipProject-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-BlueEquipProject/Pods-BlueEquipProject-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

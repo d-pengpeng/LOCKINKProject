@@ -161,6 +161,21 @@
     }
 }
 
++ (void)saveChatBanner:(NSDictionary *)dic
+{
+    if ([dic isKindOfClass:[NSDictionary class]]) {
+        [[NSUserDefaults standardUserDefaults] setObject:dic forKey:@"chatBanner"];
+    } else {
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"chatBanner"];
+    }
+}
+
+- (NSDictionary *)chatBanner
+{
+    id v = [[NSUserDefaults standardUserDefaults] objectForKey:@"chatBanner"];
+    return [v isKindOfClass:[NSDictionary class]] ? v : nil;
+}
+
 - (NSArray *)dayArr
 {
     return @[@"00", @"01", @"02", @"03", @"04", @"05", @"06", @"07", @"08", @"09", @"10", @"11", @"12", @"13", @"14"];

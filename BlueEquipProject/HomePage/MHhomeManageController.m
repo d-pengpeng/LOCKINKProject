@@ -242,6 +242,9 @@
             if([info[@"adList"] isKindOfClass:[NSArray class]]) {
                 [LYUserDefault saveAdListArr:info[@"adList"]];
             }
+            if([info[@"chatBanner"] isKindOfClass:[NSDictionary class]]) {
+                [LYUserDefault saveChatBanner:info[@"chatBanner"]];
+            }
             //MARK: 读取 app_ios_review(String)，与App版本号比较，判断是否为审核版本
             NSString *reviewStr = @"";
             if([info[@"app_ios_review"] isKindOfClass:[NSString class]]) {
