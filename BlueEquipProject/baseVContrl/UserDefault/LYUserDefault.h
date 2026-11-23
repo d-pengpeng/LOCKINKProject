@@ -178,6 +178,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)saveCountiesArr:(NSArray *)arrs;
 + (void)saveCountryCodeArr:(NSArray *)arrs;
 + (void)saveAdListArr:(NSArray *)arrs;
++ (void)saveChatBanner:(NSDictionary *)dic;
 
 + (void)saveIsEmailBoo:(NSInteger)isShow;
 
