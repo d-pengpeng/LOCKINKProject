@@ -59,6 +59,7 @@
 #define request_upload_getTmpCredential @"upload/getTmpCredential"
 #define request_carousel_listAll @"carousel/listAll"
 #define request_config_get @"config/get"
+#define request_config_getConfig @"config/getConfig"
 
 
 //首页

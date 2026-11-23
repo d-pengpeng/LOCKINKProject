@@ -37,6 +37,9 @@
 @property (nonatomic, copy) NSString *sessionId;
 @property (nonatomic, strong) UIView *antiFraudView;
 @property (nonatomic, assign) CGFloat antiTipH;
+@property (nonatomic, strong) UILabel *antiLabel;
+@property (nonatomic, copy) NSString *antiFraudTipText;   // /config/getConfig 拉到的反诈主文本
+@property (nonatomic, copy) NSString *antiFraudLinkText;  // 可点击部分，默认"点此举报"
 @end
 
 @implementation c2cChatController
@@ -109,54 +112,34 @@
         // 文本（含可点击的"点此举报"链接）
         CGFloat textX = 40;
         CGFloat textW = _window_width - textX - 36;
-        UILabel *antiLabel = [[UILabel alloc] initWithFrame:CGRectMake(textX, 0, textW, antiBarH)];
-        antiLabel.numberOfLines = 2;
-        antiLabel.font = SYS_Font(12);
-        antiLabel.userInteractionEnabled = YES;
+        self.antiLabel = [[UILabel alloc] initWithFrame:CGRectMake(textX, 0, textW, antiBarH)];
+        self.antiLabel.numberOfLines = 2;
+        self.antiLabel.font = SYS_Font(12);
+        self.antiLabel.userInteractionEnabled = YES;
 
-        // 文案优先级：后端下发 > 本地 strings fallback
-        NSString *fullText = eLocalizedString(@"anti_fraud_tip");
-        NSString *linkText = eLocalizedString(@"anti_fraud_report");
-        if (bannerConf) {
-            NSString *t = bannerConf[@"text"];
-            if ([t isKindOfClass:[NSString class]] && t.length > 0) fullText = t;
-            NSString *lt = bannerConf[@"linkText"];
-            if ([lt isKindOfClass:[NSString class]] && lt.length > 0) linkText = lt;
-        }
-
-        NSString *combinedText = [NSString stringWithFormat:@"%@%@", fullText, linkText ?: @""];
-        NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:combinedText];
-
-        UIColor *baseColor = [UIColor colorWithRed:89/255.f green:89/255.f blue:89/255.f alpha:1.f];
-        UIColor *linkColor = [UIColor colorWithRed:24/255.f green:144/255.f blue:255/255.f alpha:1.f];
-        if (bannerConf) {
-            NSString *tc = bannerConf[@"textColor"];
-            if ([tc isKindOfClass:[NSString class]] && tc.length > 0) {
-                UIColor *c = [self _colorFromHexString:tc];
-                if (c) baseColor = c;
-            }
-            NSString *lc = bannerConf[@"linkColor"];
-            if ([lc isKindOfClass:[NSString class]] && lc.length > 0) {
-                UIColor *c = [self _colorFromHexString:lc];
-                if (c) linkColor = c;
-            }
-        }
-        [attrStr addAttribute:NSForegroundColorAttributeName value:baseColor range:NSMakeRange(0, combinedText.length)];
-
-        if (linkText.length > 0) {
-            NSRange linkRange = [combinedText rangeOfString:linkText];
-            if (linkRange.location != NSNotFound) {
-                [attrStr addAttribute:NSForegroundColorAttributeName value:linkColor range:linkRange];
-                [attrStr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:linkRange];
-            }
-        }
-        antiLabel.attributedText = attrStr;
+        // 先设默认文案，接口回来后会刷新
+        [self _refreshAntiFraudLabel];
 
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(openAntiFraudReport)];
-        [antiLabel addGestureRecognizer:tap];
-        [self.antiFraudView addSubview:antiLabel];
+        [self.antiLabel addGestureRecognizer:tap];
+        [self.antiFraudView addSubview:self.antiLabel];
 
         [self.view addSubview:self.antiFraudView];
+
+        // 异步拉取反诈主文本 —— /config/getConfig?key=antifraudwarning
+        // 成功：用后端返回字符串替换主文本；失败：保留本地默认
+        [requestToolClass getNetworkWithUrl:request_config_getConfig
+                               andParameter:@{@"key": @"antifraudwarning"}
+                                    success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
+            if (code == 200 && [info isKindOfClass:[NSString class]] && ((NSString *)info).length > 0) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.antiFraudTipText = (NSString *)info;
+                    [self _refreshAntiFraudLabel];
+                });
+            }
+        } fail:^(NSString * _Nonnull msg) {
+            // 接口失败 —— 不做事，保留本地默认文案
+        }];
     } else {
         // 后端 disabled，整条提示条隐藏，chat 顶部直接贴导航栏
         self.antiTipH = 0;
@@ -270,6 +253,65 @@
 }
 
 #pragma mark - 反诈提示条
+
+/// 刷新反诈条文本。文案优先级：
+///   /config/getConfig 接口返回  >  chatBanner.text  >  本地 InfoPlist.strings
+/// linkText 优先级同上。颜色 chatBanner 可配。
+- (void)_refreshAntiFraudLabel
+{
+    if (!self.antiLabel) return;
+
+    NSDictionary *bannerConf = [LYUserDefault userDefault].chatBanner;
+
+    // 主文本
+    NSString *fullText = nil;
+    if (self.antiFraudTipText.length > 0) {
+        fullText = self.antiFraudTipText;   // /config/getConfig 刚拉到的
+    } else if (bannerConf) {
+        NSString *t = bannerConf[@"text"];
+        if ([t isKindOfClass:[NSString class]] && t.length > 0) fullText = t;
+    }
+    if (fullText.length == 0) fullText = eLocalizedString(@"anti_fraud_tip");
+
+    // 可点击文本
+    NSString *linkText = nil;
+    if (self.antiFraudLinkText.length > 0) {
+        linkText = self.antiFraudLinkText;
+    } else if (bannerConf) {
+        NSString *lt = bannerConf[@"linkText"];
+        if ([lt isKindOfClass:[NSString class]] && lt.length > 0) linkText = lt;
+    }
+    if (linkText.length == 0) linkText = eLocalizedString(@"anti_fraud_report");
+
+    NSString *combinedText = [NSString stringWithFormat:@"%@%@", fullText, linkText ?: @""];
+    NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:combinedText];
+
+    // 颜色
+    UIColor *baseColor = [UIColor colorWithRed:89/255.f green:89/255.f blue:89/255.f alpha:1.f];
+    UIColor *linkColor = [UIColor colorWithRed:24/255.f green:144/255.f blue:255/255.f alpha:1.f];
+    if (bannerConf) {
+        NSString *tc = bannerConf[@"textColor"];
+        if ([tc isKindOfClass:[NSString class]] && tc.length > 0) {
+            UIColor *c = [self _colorFromHexString:tc];
+            if (c) baseColor = c;
+        }
+        NSString *lc = bannerConf[@"linkColor"];
+        if ([lc isKindOfClass:[NSString class]] && lc.length > 0) {
+            UIColor *c = [self _colorFromHexString:lc];
+            if (c) linkColor = c;
+        }
+    }
+    [attrStr addAttribute:NSForegroundColorAttributeName value:baseColor range:NSMakeRange(0, combinedText.length)];
+
+    if (linkText.length > 0) {
+        NSRange linkRange = [combinedText rangeOfString:linkText];
+        if (linkRange.location != NSNotFound) {
+            [attrStr addAttribute:NSForegroundColorAttributeName value:linkColor range:linkRange];
+            [attrStr addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:linkRange];
+        }
+    }
+    self.antiLabel.attributedText = attrStr;
+}
 
 - (void)closeAntiFraudTip
 {
