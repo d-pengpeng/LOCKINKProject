@@ -63,7 +63,14 @@ jobs:
 
       - name: Archive
         run: |
-          xcodebuild archive -workspace BlueEquipProject.xcworkspace -scheme BlueEquipProject -configuration Release -archivePath build/BlueEquipProject.xcarchive -destination "generic/platform=iOS"
+          xcodebuild archive \
+            -workspace BlueEquipProject.xcworkspace \
+            -scheme BlueEquipProject \
+            -configuration Release \
+            -archivePath build/BlueEquipProject.xcarchive \
+            -destination "generic/platform=iOS" \
+            -allowProvisioningUpdates \
+            DEVELOPMENT_TEAM=L992GPQMS4
 
       - name: Export IPA
         run: |
@@ -80,11 +87,14 @@ jobs:
               <key>uploadSymbols</key>
               <true/>
               <key>signingStyle</key>
-              <string>manual</string>
+              <string>automatic</string>
           </dict>
           </plist>
           EOF
-          xcodebuild -exportArchive -archivePath build/BlueEquipProject.xcarchive -exportPath build/export -exportOptionsPlist build/export/ExportOptions.plist
+          xcodebuild -exportArchive \
+            -archivePath build/BlueEquipProject.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist build/export/ExportOptions.plist
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4

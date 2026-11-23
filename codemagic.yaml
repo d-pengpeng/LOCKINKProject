@@ -26,12 +26,15 @@ workflows:
 
       - name: Setup code signing
         script: |
-          # 说明：Codemagic Settings → iOS code signing 上传的 profile / p12 不会自动放系统目录
-          # 它们会以 base64 形式注入以下环境变量：
-          #   BUILD_CERTIFICATE_BASE64 / BUILD_CERTIFICATE_PASSWORD  （.p12）
-          #   PROVISIONING_PROFILE_BASE64                             （主 App App Store profile）
-          #   PROVISIONING_PROFILE_EXT_BASE64                         （Noti 扩展 profile）
-          # 这里手动解码 + 动态读取 UUID 作为文件名，以后换 profile 不用改 yaml
+          # Automatic signing 模式：证书和 profile 仍然需要解码装到系统，
+          # 但不再手动指定 UUID 或 profile 名称，让 xcodebuild 根据 bundle id + entitlements + Team ID 自动匹配。
+          #
+          # 需要 Codemagic Settings → Environment variables → signing 分组里配置：
+          #   BUILD_CERTIFICATE_BASE64          Apple Distribution .p12 (Base64)
+          #   BUILD_CERTIFICATE_PASSWORD        .p12 导入密码
+          #   PROVISIONING_PROFILE_BASE64       主 App 的 App Store profile (Base64)
+          #   PROVISIONING_PROFILE_EXT_BASE64   Noti 扩展的 App Store profile (Base64)
+          #   KEYCHAIN_PASSWORD                  Codemagic 临时钥匙串密码（任意字符串）
 
           KEYCHAIN_PATH="$HOME/codemagic.keychain"
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
@@ -42,59 +45,56 @@ workflows:
           security default-keychain -s "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
-          # —— 2. 导入 .p12 证书（Settings 上传后环境变量会被自动覆盖为新值）——
+          # —— 2. 导入 Apple Distribution .p12 ——
           if [ -n "$BUILD_CERTIFICATE_BASE64" ]; then
             echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > /tmp/certificate.p12
-            IMPORT_OUT=$(security import /tmp/certificate.p12 -k "$KEYCHAIN_PATH" -P "$BUILD_CERTIFICATE_PASSWORD" -T /usr/bin/codesign 2>&1)
-            IMPORT_RC=$?
-            echo "$IMPORT_OUT"
-            if [ $IMPORT_RC -ne 0 ]; then
-              echo "❌ .p12 导入失败！BUILD_CERTIFICATE_PASSWORD 当前值: [${BUILD_CERTIFICATE_PASSWORD:-(空)}]"
-              echo "❌ 请在 Codemagic Settings → Environment variables → signing 分组里把 BUILD_CERTIFICATE_PASSWORD 设为 131010"
+            security import /tmp/certificate.p12 \
+              -k "$KEYCHAIN_PATH" \
+              -P "$BUILD_CERTIFICATE_PASSWORD" \
+              -T /usr/bin/codesign 2>&1
+            RC=$?
+            if [ $RC -ne 0 ]; then
+              echo "❌ .p12 导入失败！退出码: $RC"
+              echo "❌ 请检查 BUILD_CERTIFICATE_BASE64 / BUILD_CERTIFICATE_PASSWORD"
               exit 1
             fi
-            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-            echo "✅ Certificate imported"
+            security set-key-partition-list \
+              -S apple-tool:,apple:,codesign: \
+              -s -k "$KEYCHAIN_PASSWORD" \
+              "$KEYCHAIN_PATH"
+            echo "✅ Apple Distribution 证书已导入"
           else
-            echo "❌ BUILD_CERTIFICATE_BASE64 未设置！请在 Codemagic Settings 里上传证书"
+            echo "❌ BUILD_CERTIFICATE_BASE64 未设置"
             exit 1
           fi
 
-          # —— 3. 安装主 App provisioning profile（从 profile 自身读取 UUID 作文件名）——
+          # —— 3. 安装 provisioning profiles（解压后用 Profile 自带的 UUID 作为文件名）——
+          # Automatic signing 会扫描整个目录的 .mobileprovision，按 bundle id + entitlements 自动匹配
           mkdir -p "$PP_DIR"
+
           if [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
             echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > /tmp/main.mobileprovision
             MAIN_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
               "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
             cp /tmp/main.mobileprovision "$PP_DIR/${MAIN_UUID}.mobileprovision"
-            echo "✅ Main profile installed: ${MAIN_UUID}.mobileprovision"
+            echo "✅ 主 App profile 已安装: ${MAIN_UUID}.mobileprovision"
           else
             echo "⚠️ PROVISIONING_PROFILE_BASE64 未设置"
           fi
 
-          # —— 4. 安装 Noti 扩展 profile ——
           if [ -n "$PROVISIONING_PROFILE_EXT_BASE64" ]; then
             echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > /tmp/ext.mobileprovision
             EXT_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
               "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
             cp /tmp/ext.mobileprovision "$PP_DIR/${EXT_UUID}.mobileprovision"
-            echo "✅ Ext profile installed: ${EXT_UUID}.mobileprovision"
+            echo "✅ Noti 扩展 profile 已安装: ${EXT_UUID}.mobileprovision"
           else
             echo "⚠️ PROVISIONING_PROFILE_EXT_BASE64 未设置"
           fi
 
           echo ""
-          echo "=== 钥匙串里的所有 identities ==="
-          security find-identity -v -p codesigning 2>&1
-          echo ""
-          echo "=== 钥匙串里的证书详情 ==="
-          security find-certificate -a -c "Apple Distribution" -Z "$KEYCHAIN_PATH" 2>&1 | head -20
-          security find-certificate -a -c "iOS Distribution" -Z "$KEYCHAIN_PATH" 2>&1 | head -20
-          security find-certificate -a -c "iPhone Distribution" -Z "$KEYCHAIN_PATH" 2>&1 | head -20
-          echo ""
-          echo "=== 钥匙串里所有证书名称 ==="
-          security find-certificate -a "$KEYCHAIN_PATH" -p 2>/dev/null \
-            | openssl x509 -noout -subject 2>/dev/null | sort -u
+          echo "=== 钥匙串 identities ==="
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH" 2>&1
           echo "=== Provisioning Profiles 目录 ==="
           ls -la "$PP_DIR"
 
@@ -109,9 +109,8 @@ workflows:
             -configuration Release \
             -archivePath build/BlueEquipProject.xcarchive \
             -destination "generic/platform=iOS" \
-            CODE_SIGN_STYLE=Manual \
+            -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=L992GPQMS4 \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
             CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES=YES \
             2>&1 | tee build/archive.log
           echo "=== Archive exit code: ${PIPESTATUS[0]} ==="
@@ -134,14 +133,7 @@ workflows:
               <key>uploadSymbols</key>
               <true/>
               <key>signingStyle</key>
-              <string>manual</string>
-              <key>provisioningProfiles</key>
-              <dict>
-                  <key>com.lockink.qingQuPro</key>
-                  <string>lockink-appstore</string>
-                  <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
-                  <string>com.lockink.qingQuPro.BlueEquipProjectNotiServier</string>
-              </dict>
+              <string>automatic</string>
           </dict>
           </plist>
           EOF
