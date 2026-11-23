@@ -26,15 +26,18 @@ workflows:
 
       - name: Setup code signing
         script: |
-          # Automatic signing 模式：证书和 profile 仍然需要解码装到系统，
-          # 但不再手动指定 UUID 或 profile 名称，让 xcodebuild 根据 bundle id + entitlements + Team ID 自动匹配。
+          # Codemagic CI 没有 Apple 开发者账号登录态，Automatic signing 会报 "No Accounts"。
+          # 改用 Manual，但不在 pbxproj 里硬写 profile 名（Xcode 每次打开都重写）。
+          # 做法：解码 base64 → 从 profile 自身读 UUID → 存 MobileDevice/Profiles/<UUID>.mobileprovision
+          #       后续 Archive / Export 命令从同一个 UUID 变量注入。
+          # 换 profile 只需要换环境变量值，代码零改动。
           #
-          # 需要 Codemagic Settings → Environment variables → signing 分组里配置：
+          # 需要 Codemagic Settings → Environment variables → signing 分组：
           #   BUILD_CERTIFICATE_BASE64          Apple Distribution .p12 (Base64)
           #   BUILD_CERTIFICATE_PASSWORD        .p12 导入密码
-          #   PROVISIONING_PROFILE_BASE64       主 App 的 App Store profile (Base64)
-          #   PROVISIONING_PROFILE_EXT_BASE64   Noti 扩展的 App Store profile (Base64)
-          #   KEYCHAIN_PASSWORD                  Codemagic 临时钥匙串密码（任意字符串）
+          #   PROVISIONING_PROFILE_BASE64       主 App App Store profile (Base64)
+          #   PROVISIONING_PROFILE_EXT_BASE64   Noti 扩展 App Store profile (Base64)
+          #   KEYCHAIN_PASSWORD                 Codemagic 临时钥匙串密码（任意字符串）
 
           KEYCHAIN_PATH="$HOME/codemagic.keychain"
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
@@ -55,7 +58,6 @@ workflows:
             RC=$?
             if [ $RC -ne 0 ]; then
               echo "❌ .p12 导入失败！退出码: $RC"
-              echo "❌ 请检查 BUILD_CERTIFICATE_BASE64 / BUILD_CERTIFICATE_PASSWORD"
               exit 1
             fi
             security set-key-partition-list \
@@ -68,8 +70,7 @@ workflows:
             exit 1
           fi
 
-          # —— 3. 安装 provisioning profiles（解压后用 Profile 自带的 UUID 作为文件名）——
-          # Automatic signing 会扫描整个目录的 .mobileprovision，按 bundle id + entitlements 自动匹配
+          # —— 3. 安装 provisioning profiles（UUID 作为文件名 + 读 UUID 到 shell 变量）——
           mkdir -p "$PP_DIR"
 
           if [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
@@ -77,9 +78,15 @@ workflows:
             MAIN_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
               "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
             cp /tmp/main.mobileprovision "$PP_DIR/${MAIN_UUID}.mobileprovision"
-            echo "✅ 主 App profile 已安装: ${MAIN_UUID}.mobileprovision"
+            # 同时读 Name 供 ExportOptions.plist provisioningProfiles 用
+            MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \
+              "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
+            echo "✅ 主 App profile: UUID=${MAIN_UUID} Name=${MAIN_NAME}"
+            echo "MAIN_UUID=${MAIN_UUID}" > signing.env
+            echo "MAIN_NAME=${MAIN_NAME}" >> signing.env
           else
-            echo "⚠️ PROVISIONING_PROFILE_BASE64 未设置"
+            echo "❌ PROVISIONING_PROFILE_BASE64 未设置"
+            exit 1
           fi
 
           if [ -n "$PROVISIONING_PROFILE_EXT_BASE64" ]; then
@@ -87,9 +94,14 @@ workflows:
             EXT_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< \
               "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
             cp /tmp/ext.mobileprovision "$PP_DIR/${EXT_UUID}.mobileprovision"
-            echo "✅ Noti 扩展 profile 已安装: ${EXT_UUID}.mobileprovision"
+            EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \
+              "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
+            echo "✅ Noti 扩展 profile: UUID=${EXT_UUID} Name=${EXT_NAME}"
+            echo "EXT_UUID=${EXT_UUID}" >> signing.env
+            echo "EXT_NAME=${EXT_NAME}" >> signing.env
           else
-            echo "⚠️ PROVISIONING_PROFILE_EXT_BASE64 未设置"
+            echo "❌ PROVISIONING_PROFILE_EXT_BASE64 未设置"
+            exit 1
           fi
 
           echo ""
@@ -100,6 +112,14 @@ workflows:
 
       - name: Archive
         script: |
+          # Codemagic CI 没有 Apple 开发者账号登录态 → Automatic 不行 → Manual。
+          # 但 profile 选择用 Setup 脚本从 base64 解码后动态读到的 UUID。
+          # 这样换 profile 只换 base64，代码零改动。
+          source signing.env
+          echo "=== Using profiles ==="
+          echo "Main UUID: ${MAIN_UUID} Name: ${MAIN_NAME}"
+          echo "Ext  UUID: ${EXT_UUID} Name: ${EXT_NAME}"
+
           mkdir -p build
           rm -rf ~/Library/Developer/Xcode/DerivedData/BlueEquipProject-*
           set -o pipefail
@@ -109,19 +129,24 @@ workflows:
             -configuration Release \
             -archivePath build/BlueEquipProject.xcarchive \
             -destination "generic/platform=iOS" \
-            -allowProvisioningUpdates \
+            CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=L992GPQMS4 \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            CODE_SIGN_ENTITLEMENTS=BlueEquipProject/BlueEquipProject.entitlements \
+            PROVISIONING_PROFILE_SPECIFIER="${MAIN_UUID}" \
+            "PROVISIONING_PROFILE_SPECIFIER[BlueEquipProjectNotiServier]=${EXT_UUID}" \
             CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES=YES \
             2>&1 | tee build/archive.log
           echo "=== Archive exit code: ${PIPESTATUS[0]} ==="
           echo "=== Error lines ==="
-          grep -i "error:" build/archive.log | head -20
+          grep -i "error:" build/archive.log | head -30
           exit ${PIPESTATUS[0]}
 
       - name: Export IPA
         script: |
-          mkdir -p build/export
-          cat > build/export/ExportOptions.plist << 'EOF'
+          # source signing.env 读 MAIN_NAME / EXT_NAME（之前 Setup 脚本从 base64 解码后读出来的）
+          source signing.env
+          cat > build/export/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -133,10 +158,19 @@ workflows:
               <key>uploadSymbols</key>
               <true/>
               <key>signingStyle</key>
-              <string>automatic</string>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.lockink.qingQuPro</key>
+                  <string>${MAIN_NAME}</string>
+                  <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
+                  <string>${EXT_NAME}</string>
+              </dict>
           </dict>
           </plist>
           EOF
+          echo "=== ExportOptions.plist ==="
+          cat build/export/ExportOptions.plist
           xcodebuild -exportArchive \
             -archivePath build/BlueEquipProject.xcarchive \
             -exportPath build/export \

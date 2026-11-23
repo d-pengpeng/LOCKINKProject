@@ -36,6 +36,8 @@ jobs:
 
       - name: Setup signing
         run: |
+          # GitHub Actions runner 没有 Apple 开发者账号登录态 → 用 Manual。
+          # 但读 profile 自身的 Name / UUID，写 signing.env 给后续 step 用。
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
@@ -44,15 +46,25 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           PP_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
           mkdir -p "$PP_DIR"
-          # Automatic signing matches by profile Name; extract Name from each .mobileprovision
+          # 主 App profile
           MAIN_PROFILE="$PP_DIR/temp_main.mobileprovision"
           echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > "$MAIN_PROFILE"
-          MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$MAIN_PROFILE" 2>/dev/null)" 2>/dev/null || echo "lockink-appstore")
-          mv "$MAIN_PROFILE" "$PP_DIR/${MAIN_NAME}.mobileprovision"
+          MAIN_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i "$MAIN_PROFILE" 2>/dev/null)")
+          MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$MAIN_PROFILE" 2>/dev/null)")
+          mv "$MAIN_PROFILE" "$PP_DIR/${MAIN_UUID}.mobileprovision"
+          echo "✅ Main: UUID=${MAIN_UUID} Name=${MAIN_NAME}"
+          # Noti 扩展 profile
           EXT_PROFILE="$PP_DIR/temp_ext.mobileprovision"
           echo "$PROVISIONING_PROFILE_EXT_BASE64" | base64 --decode > "$EXT_PROFILE"
-          EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$EXT_PROFILE" 2>/dev/null)" 2>/dev/null || echo "com.lockink.qingQuPro.BlueEquipProjectNotiServier")
-          mv "$EXT_PROFILE" "$PP_DIR/${EXT_NAME}.mobileprovision"
+          EXT_UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< "$(security cms -D -i "$EXT_PROFILE" 2>/dev/null)")
+          EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i "$EXT_PROFILE" 2>/dev/null)")
+          mv "$EXT_PROFILE" "$PP_DIR/${EXT_UUID}.mobileprovision"
+          echo "✅ Ext:  UUID=${EXT_UUID} Name=${EXT_NAME}"
+          # 写 env 文件给后续 step
+          echo "MAIN_UUID=${MAIN_UUID}" > signing.env
+          echo "MAIN_NAME=${MAIN_NAME}" >> signing.env
+          echo "EXT_UUID=${EXT_UUID}" >> signing.env
+          echo "EXT_NAME=${EXT_NAME}" >> signing.env
           ls -la "$PP_DIR"
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -63,19 +75,24 @@ jobs:
 
       - name: Archive
         run: |
+          source signing.env
           xcodebuild archive \
             -workspace BlueEquipProject.xcworkspace \
             -scheme BlueEquipProject \
             -configuration Release \
             -archivePath build/BlueEquipProject.xcarchive \
             -destination "generic/platform=iOS" \
-            -allowProvisioningUpdates \
-            DEVELOPMENT_TEAM=L992GPQMS4
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=L992GPQMS4 \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="${MAIN_UUID}" \
+            "PROVISIONING_PROFILE_SPECIFIER[BlueEquipProjectNotiServier]=${EXT_UUID}"
 
       - name: Export IPA
         run: |
+          source signing.env
           mkdir -p build/export
-          cat > build/export/ExportOptions.plist << 'EOF'
+          cat > build/export/ExportOptions.plist << EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -87,7 +104,14 @@ jobs:
               <key>uploadSymbols</key>
               <true/>
               <key>signingStyle</key>
-              <string>automatic</string>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.lockink.qingQuPro</key>
+                  <string>${MAIN_NAME}</string>
+                  <key>com.lockink.qingQuPro.BlueEquipProjectNotiServier</key>
+                  <string>${EXT_NAME}</string>
+              </dict>
           </dict>
           </plist>
           EOF
