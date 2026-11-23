@@ -20,19 +20,14 @@ workflows:
           rm -rf Pods Podfile.lock
           pod repo update
           pod install
-          echo "=== Pod install done ==="
-          grep "sys/socket.h" Pods/QCloudCore/QCloudCore/Classes/Base/QCLOUDRestNet/DNSCache/QCloudSimplePing.h || echo "⚠️ QCloudSimplePing.h not patched"
-          grep "netinet/in.h" Pods/AFNetworking/AFNetworking/AFNetworkReachabilityManager.m || echo "⚠️ AFNetworking not patched"
 
       - name: Setup code signing
         script: |
           # Codemagic CI 没有 Apple 开发者账号登录态 → 只能 Manual。
-          # 命令行 target 覆盖 PROVISIONING_PROFILE_SPECIFIER[target]=UUID 不可靠
-          # （xcodebuild archive -scheme 下子 target 覆盖经常失效，所有 target 都用同一个）。
-          # 最稳妥：Setup 阶段解码 profile → 读 UUID → 直接用 sed 改 pbxproj，
+          # 命令行 target 覆盖 PROVISIONING_PROFILE_SPECIFIER[target]=UUID 不可靠。
+          # 最稳妥：Setup 阶段解码 profile → 读 UUID → 用 Python 直接改 pbxproj，
           # 每个 target/configuration 单独写 PROVISIONING_PROFILE_SPECIFIER。
-          # 命令行 Archive 只写 CODE_SIGN_STYLE=Manual，不再写 PROVISIONING_PROFILE_SPECIFIER。
-          # 换 profile 只换环境变量 base64 值，脚本自动适配。
+          # 换 profile 只换环境变量的 base64 值，脚本自动适配。
           #
           # 需要 Codemagic Settings → Environment variables → signing 分组：
           #   BUILD_CERTIFICATE_BASE64          Apple Distribution .p12 (Base64)
@@ -102,61 +97,43 @@ workflows:
             exit 1
           fi
 
-          # —— 4. 直接改 pbxproj：每个 target/configuration 单独写 PROVISIONING_PROFILE_SPECIFIER ——
-          # Xcode 打开工程后会把 pbxproj 改回 Automatic，所以每次 CI 都要重写。
-          # 思路：
-          #   a) 把所有 CODE_SIGN_STYLE = Automatic → Manual
-          #   b) 把所有 CODE_SIGN_IDENTITY = "Apple Development" → "Apple Distribution"
-          #      （只有 Release archive，用 Distribution 就行）
-          #   c) 找 PRODUCT_BUNDLE_IDENTIFIER 行，在后面插入 PROVISIONING_PROFILE_SPECIFIER = UUID
-          #      主 App bundle id 是 com.lockink.qingQuPro
-          #      扩展 bundle id 是 com.lockink.qingQuPro.BlueEquipProjectNotiServier
-          #   d) 删掉可能残留的空 PROVISIONING_PROFILE_SPECIFIER = "";
-          #   e) 删掉 [sdk=iphoneos*] 覆盖行（我们直接写默认值）
+          # —— 4. 用 Python 改 pbxproj（heredoc 内容必须和起始行对齐缩进）——
           cp "$PBXPROJ" "${PBXPROJ}.bak"
-
-          # a) CODE_SIGN_STYLE: Automatic → Manual
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBXPROJ"
-
-          # b) CODE_SIGN_IDENTITY: Apple Development → Apple Distribution（所有配置）
-          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$PBXPROJ"
-
-          # c1) 主 App bundle id → 插入 PROVISIONING_PROFILE_SPECIFIER = MAIN_UUID
-          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;/{
-            /BlueEquipProjectNotiServier/b
-            /PROVISIONING_PROFILE_SPECIFIER/d
-            a\\
-\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${MAIN_UUID};
-          }" "$PBXPROJ"
-
-          # c2) 扩展 bundle id → 插入 PROVISIONING_PROFILE_SPECIFIER = EXT_UUID
-          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro.BlueEquipProjectNotiServier;/{
-            /PROVISIONING_PROFILE_SPECIFIER/d
-            a\\
-\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${EXT_UUID};
-          }" "$PBXPROJ"
-
-          # d) 删空的 PROVISIONING_PROFILE_SPECIFIER = "";
-          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER = "";/d' "$PBXPROJ"
-
-          # e) 删 [sdk=iphoneos*] 覆盖行（我们直接写默认值）
-          sed -i '' '/"PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
-          sed -i '' '/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
-          sed -i '' '/"DEVELOPMENT_TEAM\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+          MAIN_UUID_VAL="${MAIN_UUID}" EXT_UUID_VAL="${EXT_UUID}" PBXPROJ_VAL="$PBXPROJ" python3 << 'PYEOF'
+          import re, os
+          p = os.environ["PBXPROJ_VAL"]
+          main_uuid = os.environ["MAIN_UUID_VAL"]
+          ext_uuid = os.environ["EXT_UUID_VAL"]
+          with open(p, "r") as f:
+              s = f.read()
+          s = s.replace("CODE_SIGN_STYLE = Automatic;", "CODE_SIGN_STYLE = Manual;")
+          s = s.replace('CODE_SIGN_IDENTITY = "Apple Development";', 'CODE_SIGN_IDENTITY = "Apple Distribution";')
+          s = re.sub(r'^\s*PROVISIONING_PROFILE_SPECIFIER[^;]*;\n', '', s, flags=re.MULTILINE)
+          s = re.sub(r'^\s*"PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos\*\]"[^;]*;\n', '', s, flags=re.MULTILINE)
+          s = re.sub(r'^\s*"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]"[^;]*;\n', '', s, flags=re.MULTILINE)
+          s = re.sub(r'^\s*"DEVELOPMENT_TEAM\[sdk=iphoneos\*\]"[^;]*;\n', '', s, flags=re.MULTILINE)
+          def _insert(m):
+              indent = m.group(1)
+              bid = m.group(2)
+              uuid = main_uuid if bid == "com.lockink.qingQuPro" else ext_uuid
+              return m.group(0) + f'\n{indent}PROVISIONING_PROFILE_SPECIFIER = {uuid};'
+          s = re.sub(r'^(\s*)PRODUCT_BUNDLE_IDENTIFIER = (com\.lockink\.qingQuPro(?:\.BlueEquipProjectNotiServier)?);', _insert, s, flags=re.MULTILINE)
+          with open(p, "w") as f:
+              f.write(s)
+          print(f"✅ pbxproj 已改：主 App → {main_uuid}，扩展 → {ext_uuid}")
+          PYEOF
 
           echo ""
-          echo "=== ✅ pbxproj 改完，验证签名配置 ==="
-          grep -n "PROVISIONING_PROFILE_SPECIFIER\|CODE_SIGN_STYLE\|CODE_SIGN_IDENTITY\|CODE_SIGN_ENTITLEMENTS" "$PBXPROJ" | grep -v "^#" | head -20
-          echo ""
+          echo "=== ✅ pbxproj 签名配置 ==="
+          grep -n "PROVISIONING_PROFILE_SPECIFIER\|CODE_SIGN_STYLE\|CODE_SIGN_IDENTITY" "$PBXPROJ" | head -20
           echo "=== 钥匙串 identities ==="
           security find-identity -v -p codesigning "$KEYCHAIN_PATH" 2>&1
-          echo "=== Provisioning Profiles 目录 ==="
+          echo "=== Provisioning Profiles ==="
           ls -la "$PP_DIR"
 
       - name: Archive
         script: |
-          # pbxproj 已经被 Setup 脚本改成 Manual + 每个 target 单独写 PROVISIONING_PROFILE_SPECIFIER
-          # 命令行只覆盖 CODE_SIGN_STYLE 防止 Xcode 重写，不再写 PROVISIONING_PROFILE_SPECIFIER
+          # pbxproj 已被 Setup 脚本改成 Manual + 每个 target 独立 PROVISIONING_PROFILE_SPECIFIER
           mkdir -p build
           rm -rf ~/Library/Developer/Xcode/DerivedData/BlueEquipProject-*
           set -o pipefail
@@ -178,8 +155,7 @@ workflows:
 
       - name: Export IPA
         script: |
-          # Export 阶段需要 provisioningProfiles 字典，填 profile Name
-          # 从之前的 base64 再读一次（和 Setup 同一份解码文件还在 /tmp/ 里）
+          # 从之前 setup 时解码的 profile 再读 Name（/tmp/ 文件还在）
           MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \
             "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
           EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print Name" /dev/stdin <<< \

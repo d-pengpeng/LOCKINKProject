@@ -19,8 +19,7 @@ jobs:
       - name: Setup signing & patch pbxproj
         run: |
           # GitHub Actions runner 没有 Apple 开发者账号登录态 → Manual。
-          # 直接用 sed 改 pbxproj：每个 target/configuration 单独写 PROVISIONING_PROFILE_SPECIFIER。
-          # 换 profile 只换 secrets 的 base64 值，脚本自动适配。
+          # 用 Python 直接改 pbxproj：每个 target/configuration 单独写 PROVISIONING_PROFILE_SPECIFIER。
           echo "$BUILD_CERTIFICATE_BASE64" | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
@@ -45,29 +44,33 @@ jobs:
           cp /tmp/ext.mobileprovision "$PP_DIR/${EXT_UUID}.mobileprovision"
           echo "✅ Ext:  UUID=${EXT_UUID} Name=${EXT_NAME}"
 
-          # 直接改 pbxproj
+          # —— Python 改 pbxproj（heredoc 单引号 + 环境变量传参）——
           PBXPROJ="BlueEquipProject.xcodeproj/project.pbxproj"
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' "$PBXPROJ"
-          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "Apple Distribution";/g' "$PBXPROJ"
-          # 主 App bundle id → 插入 MAIN_UUID
-          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro;/{
-            /BlueEquipProjectNotiServier/b
-            /PROVISIONING_PROFILE_SPECIFIER/d
-            a\\
-\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${MAIN_UUID};
-          }" "$PBXPROJ"
-          # 扩展 bundle id → 插入 EXT_UUID
-          sed -i '' "/PRODUCT_BUNDLE_IDENTIFIER = com.lockink.qingQuPro.BlueEquipProjectNotiServier;/{
-            /PROVISIONING_PROFILE_SPECIFIER/d
-            a\\
-\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = ${EXT_UUID};
-          }" "$PBXPROJ"
-          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER = "";/d' "$PBXPROJ"
-          sed -i '' '/"PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
-          sed -i '' '/"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
-          sed -i '' '/"DEVELOPMENT_TEAM\[sdk=iphoneos\*\]"/d' "$PBXPROJ"
+          MAIN_UUID_VAL="${MAIN_UUID}" EXT_UUID_VAL="${EXT_UUID}" PBXPROJ_VAL="$PBXPROJ" python3 << 'PYEOF'
+          import re, os
+          p = os.environ["PBXPROJ_VAL"]
+          main_uuid = os.environ["MAIN_UUID_VAL"]
+          ext_uuid = os.environ["EXT_UUID_VAL"]
+          with open(p, "r") as f:
+              s = f.read()
+          s = s.replace("CODE_SIGN_STYLE = Automatic;", "CODE_SIGN_STYLE = Manual;")
+          s = s.replace('CODE_SIGN_IDENTITY = "Apple Development";', 'CODE_SIGN_IDENTITY = "Apple Distribution";')
+          s = re.sub(r'^\s*PROVISIONING_PROFILE_SPECIFIER[^;]*;\n', '', s, flags=re.MULTILINE)
+          s = re.sub(r'^\s*"PROVISIONING_PROFILE_SPECIFIER\[sdk=iphoneos\*\]"[^;]*;\n', '', s, flags=re.MULTILINE)
+          s = re.sub(r'^\s*"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]"[^;]*;\n', '', s, flags=re.MULTILINE)
+          s = re.sub(r'^\s*"DEVELOPMENT_TEAM\[sdk=iphoneos\*\]"[^;]*;\n', '', s, flags=re.MULTILINE)
+          def _insert(m):
+              indent = m.group(1)
+              bid = m.group(2)
+              uuid = main_uuid if bid == "com.lockink.qingQuPro" else ext_uuid
+              return m.group(0) + f'\n{indent}PROVISIONING_PROFILE_SPECIFIER = {uuid};'
+          s = re.sub(r'^(\s*)PRODUCT_BUNDLE_IDENTIFIER = (com\.lockink\.qingQuPro(?:\.BlueEquipProjectNotiServier)?);', _insert, s, flags=re.MULTILINE)
+          with open(p, "w") as f:
+              f.write(s)
+          print(f"✅ pbxproj 已改：主 App → {main_uuid}，扩展 → {ext_uuid}")
+          PYEOF
           echo ""
-          echo "=== ✅ pbxproj 签名配置 ==="
+          echo "=== 签名配置 ==="
           grep -n "PROVISIONING_PROFILE_SPECIFIER\|CODE_SIGN_STYLE\|CODE_SIGN_IDENTITY" "$PBXPROJ" | head -20
           ls -la "$PP_DIR"
         env:
@@ -79,7 +82,6 @@ jobs:
 
       - name: Archive
         run: |
-          mkdir -p build
           xcodebuild archive \
             -workspace BlueEquipProject.xcworkspace \
             -scheme BlueEquipProject \
@@ -92,7 +94,6 @@ jobs:
 
       - name: Export IPA
         run: |
-          # 再读一次 profile Name（base64 文件还在 /tmp/）
           MAIN_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i /tmp/main.mobileprovision 2>/dev/null)")
           EXT_NAME=$(/usr/libexec/PlistBuddy -c "Print :Name" /dev/stdin <<< "$(security cms -D -i /tmp/ext.mobileprovision 2>/dev/null)")
           mkdir -p build/export
