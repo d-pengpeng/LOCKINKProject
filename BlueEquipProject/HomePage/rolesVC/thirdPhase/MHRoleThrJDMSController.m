@@ -9,6 +9,7 @@
 #import "MHThrSDMSSliderView.h"
 #import "MHRoleSetCoreLocatView.h"
 #import "MHLimitsAuthorityView.h"
+#import "LHDeviceRegistry.h"
 
 @interface MHRoleThrJDMSController ()
 
@@ -32,12 +33,26 @@
 @property (nonatomic, assign) BOOL isSuijiBoo;
 
 @property (nonatomic, assign) BOOL controling_boo; //是否是 被控制设备
+/// 本次实际创建的狂暴/随机模式按钮数量（0 = 都不支持，用于下方随机区间区域定位）
+@property (nonatomic, assign) NSInteger mhModeBtnCount;
 
 - (BOOL)mh_sendClassicModeViaBLEIfLocal;
 - (BOOL)mh_sendClassicModeStopViaBLEIfLocal;
 @end
 
 @implementation MHRoleThrJDMSController
+
+#pragma mark - 功能开关（由后端 functions 控制）
+
+/// 狂暴模式：老设备保持原样显示，服务端新增型号按 METHOD_BERSERK_MODE 判断
+- (BOOL)mh_supportsBerserkMode {
+    return [[LHDeviceRegistry shared] model:self.devicTyp supportsFunctionCode:@"METHOD_BERSERK_MODE"];
+}
+
+/// 随机模式：老设备保持原样显示，服务端新增型号按 METHOD_RANDOM_MODE 判断
+- (BOOL)mh_supportsRandomMode {
+    return [[LHDeviceRegistry shared] model:self.devicTyp supportsFunctionCode:@"METHOD_RANDOM_MODE"];
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -162,13 +177,19 @@
         }
         
         //MARK: 狂暴、旋转、随机
-        CGFloat ww_lef = _window_width/2.f;
         NSArray *imgsA = @[@"three_imgs10", @"three_imgs11"];
         NSArray *namsA = @[@"thr_nams9", @"thr_nams11"];
         NSArray *tagsA = @[@"0", @"2"];
-        for (int i=0; i<namsA.count; i++) {
+        // 狂暴/随机默认不显示，按后端 functions（METHOD_BERSERK_MODE / METHOD_RANDOM_MODE）控制
+        NSMutableArray<NSNumber *> *visIdxA = [NSMutableArray array];
+        if ([self mh_supportsBerserkMode]) [visIdxA addObject:@0];
+        if ([self mh_supportsRandomMode]) [visIdxA addObject:@1];
+        self.mhModeBtnCount = visIdxA.count;
+        CGFloat ww_lef = visIdxA.count > 0 ? _window_width/visIdxA.count : _window_width/2.f;
+        for (NSInteger k=0; k<visIdxA.count; k++) {
+            NSInteger i = [visIdxA[k] integerValue];
             
-            UIButton *selBBtn = [[UIButton alloc] initWithFrame:CGRectMake(i*ww_lef, CGRectGetMaxY(sub_oneVV2.frame)+15, ww_lef, 120)];
+            UIButton *selBBtn = [[UIButton alloc] initWithFrame:CGRectMake(k*ww_lef, CGRectGetMaxY(sub_oneVV2.frame)+15, ww_lef, 120)];
             selBBtn.tag = 2600+[minStr(tagsA[i]) intValue];
             [selBBtn addTarget:self action:@selector(selBBtnMethod:) forControlEvents:UIControlEventTouchUpInside];
             [self.scrollVVV addSubview:selBBtn];
@@ -194,7 +215,8 @@
        
         //MARK: 设置随机模式 区间
         
-        self.suijiVV = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(sub_oneVV2.frame)+150, _window_width, 106)];
+        CGFloat suijiTop = CGRectGetMaxY(sub_oneVV2.frame) + (self.mhModeBtnCount > 0 ? 150 : 15);
+        self.suijiVV = [[UIView alloc] initWithFrame:CGRectMake(0, suijiTop, _window_width, 106)];
         self.suijiVV.backgroundColor = UIColor.clearColor;
         [self.scrollVVV addSubview:self.suijiVV];
         
@@ -392,13 +414,19 @@
         if ([[FloatingWindowModel shareInstance].devicNameArr3 containsObject:self.devicTyp] && ([self.devicTyp isEqualToString:kCharactName8]||[self.devicTyp isEqualToString:kCharactName9] || [self.devicTyp isEqualToString:kCharactName10] || [self.devicTyp isEqualToString:kCharactName11]|| [self.devicTyp isEqualToString:kCharactName16]|| [self.devicTyp isEqualToString:kCharactName17])) {
             
             
-            CGFloat ww_lef = _window_width/2.f;
             NSArray *imgsA = @[@"three_imgs10", @"three_imgs11"];
             NSArray *namsA = @[@"thr_nams9", @"thr_nams11"];
             NSArray *tagsA = @[@"0", @"2"];
-            for (int i=0; i<namsA.count; i++) {
+            // 狂暴/随机默认不显示，按后端 functions（METHOD_BERSERK_MODE / METHOD_RANDOM_MODE）控制
+            NSMutableArray<NSNumber *> *visIdxA = [NSMutableArray array];
+            if ([self mh_supportsBerserkMode]) [visIdxA addObject:@0];
+            if ([self mh_supportsRandomMode]) [visIdxA addObject:@1];
+            self.mhModeBtnCount = visIdxA.count;
+            CGFloat ww_lef = visIdxA.count > 0 ? _window_width/visIdxA.count : _window_width/2.f;
+            for (NSInteger k=0; k<visIdxA.count; k++) {
+                NSInteger i = [visIdxA[k] integerValue];
                 
-                UIButton *selBBtn = [[UIButton alloc] initWithFrame:CGRectMake(i*ww_lef, CGRectGetMaxY(sub_oneVV.frame)+15, ww_lef, 120)];
+                UIButton *selBBtn = [[UIButton alloc] initWithFrame:CGRectMake(k*ww_lef, CGRectGetMaxY(sub_oneVV.frame)+15, ww_lef, 120)];
                 selBBtn.tag = 2600+[minStr(tagsA[i]) intValue];
                 [selBBtn addTarget:self action:@selector(selBBtnMethod:) forControlEvents:UIControlEventTouchUpInside];
                 [self.scrollVVV addSubview:selBBtn];
@@ -422,7 +450,8 @@
                 [selBBtn addSubview:switImgV];
             }
             
-            self.scrollVVV.contentSize = CGSizeMake(_window_width, CGRectGetMaxY(sub_oneVV.frame)+150+50);
+            CGFloat modeH = self.mhModeBtnCount > 0 ? 150 : 15;
+            self.scrollVVV.contentSize = CGSizeMake(_window_width, CGRectGetMaxY(sub_oneVV.frame)+modeH+50);
             
             
         }else {
@@ -516,13 +545,19 @@
             }
             
             //MARK: 狂暴、旋转、随机
-            CGFloat ww_lef = _window_width/2.f;
             NSArray *imgsA = @[@"three_imgs10", @"three_imgs11"];
             NSArray *namsA = @[@"thr_nams9", @"thr_nams11"];
             NSArray *tagsA = @[@"0", @"2"];
-            for (int i=0; i<namsA.count; i++) {
+            // 狂暴/随机默认不显示，按后端 functions（METHOD_BERSERK_MODE / METHOD_RANDOM_MODE）控制
+            NSMutableArray<NSNumber *> *visIdxA = [NSMutableArray array];
+            if ([self mh_supportsBerserkMode]) [visIdxA addObject:@0];
+            if ([self mh_supportsRandomMode]) [visIdxA addObject:@1];
+            self.mhModeBtnCount = visIdxA.count;
+            CGFloat ww_lef = visIdxA.count > 0 ? _window_width/visIdxA.count : _window_width/2.f;
+            for (NSInteger k=0; k<visIdxA.count; k++) {
+                NSInteger i = [visIdxA[k] integerValue];
                 
-                UIButton *selBBtn = [[UIButton alloc] initWithFrame:CGRectMake(i*ww_lef, CGRectGetMaxY(sub_oneVV2.frame)+15, ww_lef, 120)];
+                UIButton *selBBtn = [[UIButton alloc] initWithFrame:CGRectMake(k*ww_lef, CGRectGetMaxY(sub_oneVV2.frame)+15, ww_lef, 120)];
                 selBBtn.tag = 2600+[minStr(tagsA[i]) intValue];
                 [selBBtn addTarget:self action:@selector(selBBtnMethod:) forControlEvents:UIControlEventTouchUpInside];
                 [self.scrollVVV addSubview:selBBtn];
@@ -580,7 +615,8 @@
             
             //MARK: 设置随机模式 区间
             
-            self.suijiVV = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(sub_oneVV2.frame)+150, _window_width, 106)];
+            CGFloat suijiTop2 = CGRectGetMaxY(sub_oneVV2.frame) + (self.mhModeBtnCount > 0 ? 150 : 15);
+            self.suijiVV = [[UIView alloc] initWithFrame:CGRectMake(0, suijiTop2, _window_width, 106)];
             self.suijiVV.backgroundColor = UIColor.clearColor;
             [self.scrollVVV addSubview:self.suijiVV];
             

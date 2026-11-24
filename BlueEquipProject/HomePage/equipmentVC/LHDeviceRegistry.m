@@ -102,6 +102,19 @@ static NSSet<NSString *> *LHLocalKnownModels(void) {
     return [arr copy];
 }
 
+- (BOOL)model:(NSString *)model supportsFunctionCode:(NSString *)code {
+    if (model.length == 0 || code.length == 0) return NO;
+    // 本地硬编码老设备：没有服务端功能数据，保持原有 UI 行为不变（默认显示）
+    if ([LHLocalKnownModels() containsObject:model]) return YES;
+    LHDeviceModel *m = self.serverModelsMutable[model];
+    // 服务端新增型号：严格按 functions 判断，没有就算不支持（默认不显示）
+    if (!m) return NO;
+    for (LHDeviceFunction *f in m.functions) {
+        if ([f.code isEqualToString:code]) return YES;
+    }
+    return NO;
+}
+
 #pragma mark - 缓存
 
 - (void)restoreFromCache {
