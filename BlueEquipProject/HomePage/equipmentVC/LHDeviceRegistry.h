@@ -47,6 +47,10 @@ FOUNDATION_EXTERN NSString * const LHDeviceRegistryDidUpdateNotification;
 /// 根据型号取设备模型（优先服务端，服务端没有返回 nil）
 - (nullable LHDeviceModel *)deviceModelForModel:(NSString *)model;
 
+/// 服务端新增的"玩具类"型号（非本地硬编码、非锁类、非 Qiui 协议）
+/// 用于把它们并入 devicNameArr3，从而复用三期玩具控制页（经典模式/摇一摇/语音控制）
+- (NSArray<NSString *> *)serverOnlyToyModels;
+
 /// 从本地 UserDefaults 恢复服务端缓存（App 启动时先 restore 一次，再异步拉新）
 - (void)restoreFromCache;
 

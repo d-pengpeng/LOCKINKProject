@@ -86,6 +86,22 @@ static NSSet<NSString *> *LHLocalKnownModels(void) {
     return self.serverModelsMutable[model];
 }
 
+- (NSArray<NSString *> *)serverOnlyToyModels {
+    NSMutableArray<NSString *> *arr = [NSMutableArray array];
+    for (LHDeviceModel *m in self.serverModelsMutable.allValues) {
+        // 只处理服务端新增型号（本地硬编码的老设备不走推断层）
+        if ([m isLocalKnownModel]) continue;
+        // 锁类走锁 UI，不并入玩具分组
+        if (m.inferredIsLockType) continue;
+        // Qiui 协议有独立页面（FourthRole），不并入
+        if (m.inferredProtocol == LHInferredProtocolQiui) continue;
+        // 没有任何功能数据，无法判断类型
+        if (m.functions.count == 0) continue;
+        [arr addObject:m.model];
+    }
+    return [arr copy];
+}
+
 #pragma mark - 缓存
 
 - (void)restoreFromCache {

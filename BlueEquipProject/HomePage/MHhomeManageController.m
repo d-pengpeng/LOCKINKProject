@@ -27,6 +27,9 @@
 
 @property (nonatomic, strong) UILabel *oneNumLab;
 
+/// 服务端新增玩具型号并入 devicNameArr3
+- (void)mh_applyServerToyModelsToNameGroups;
+
 //@property (nonatomic, assign) BOOL bleLBooThr;//是否进入蓝牙连接界面
 //@property (nonatomic, assign) NSInteger isFirstMAC;
 //@property (nonatomic, assign) BOOL isListBle;
@@ -240,9 +243,12 @@
     // —— 蓝牙设备注册表：先从本地缓存恢复，保证扫描匹配能识别上次服务端返回的型号
     // —— 再异步拉最新 listProduct（失败不影响，本地兜底）
     [[LHDeviceRegistry shared] restoreFromCache];
+    [self mh_applyServerToyModelsToNameGroups];
     [[LHDeviceRegistry shared] loadFromServerWithCompletion:^(BOOL success) {
         if (success) {
             NSLog(@"✅ [LHDeviceRegistry] listProduct 拉取成功");
+            // 服务端新增的玩具类设备并入 devicNameArr3 → 复用三期玩具控制页
+            [self mh_applyServerToyModelsToNameGroups];
         } else {
             NSLog(@"⚠️ [LHDeviceRegistry] listProduct 拉取失败，继续用本地兜底");
         }
@@ -341,6 +347,30 @@
             
             [self uploadMehtodUnread];
         }
+    }
+}
+
+/// 把服务端新增的玩具类型号并入 devicNameArr3
+/// devicNameArr3 里的型号会复用三期玩具控制页（经典模式/摇一摇/语音控制/手动模式/波形管理）
+/// 本地硬编码的老设备仍保留在原有分组，不受影响
+- (void)mh_applyServerToyModelsToNameGroups {
+    NSArray<NSString *> *toyModels = [[LHDeviceRegistry shared] serverOnlyToyModels];
+    if (toyModels.count == 0) return;
+    
+    NSMutableArray *arr = [[FloatingWindowModel shareInstance].devicNameArr3 mutableCopy];
+    if (!arr) arr = [NSMutableArray array];
+    
+    NSMutableArray *added = [NSMutableArray array];
+    for (NSString *model in toyModels) {
+        if (![arr containsObject:model]) {
+            [arr addObject:model];
+            [added addObject:model];
+        }
+    }
+    
+    if (added.count > 0) {
+        [FloatingWindowModel shareInstance].devicNameArr3 = [arr copy];
+        NSLog(@"[LHDeviceRegistry] 🧸 服务端玩具类型号并入 devicNameArr3: %@", added);
     }
 }
 
