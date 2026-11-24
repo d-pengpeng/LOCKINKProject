@@ -20,6 +20,7 @@
 
 #import "MHFourthRoleOneController.h"
 #import "MHBehaviorReporter.h"
+#import "LHDeviceRegistry.h"
 
 
 @interface MHhomeManageController ()<UITableViewDelegate, UITableViewDataSource, SDCycleScrollViewDelegate>
@@ -235,7 +236,18 @@
     } fail:^(NSString * _Nonnull msg) {
         
     }];
-    
+
+    // —— 蓝牙设备注册表：先从本地缓存恢复，保证扫描匹配能识别上次服务端返回的型号
+    // —— 再异步拉最新 listProduct（失败不影响，本地兜底）
+    [[LHDeviceRegistry shared] restoreFromCache];
+    [[LHDeviceRegistry shared] loadFromServerWithCompletion:^(BOOL success) {
+        if (success) {
+            NSLog(@"✅ [LHDeviceRegistry] listProduct 拉取成功");
+        } else {
+            NSLog(@"⚠️ [LHDeviceRegistry] listProduct 拉取失败，继续用本地兜底");
+        }
+    }];
+
     [requestToolClass getNetworkWithUrl:request_config_get andParameter:@{} success:^(int code, id  _Nonnull info, NSString * _Nonnull msg) {
         
         if([info isKindOfClass:[NSDictionary class]]) {

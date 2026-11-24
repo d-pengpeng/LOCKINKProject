@@ -379,6 +379,8 @@
 		E83790322AED04A2008D67F0 /* MHfloatPlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = E83790312AED04A2008D67F0 /* MHfloatPlayView.m */; };
 		E83DFC812AE35F8E00615E86 /* MHEquipmentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E83DFC802AE35F8E00615E86 /* MHEquipmentCell.m */; };
 		E83DFC842AE3606C00615E86 /* MHEquipmentModel.m in Sources */ = {isa = PBXBuildFile; fileRef = E83DFC832AE3606C00615E86 /* MHEquipmentModel.m */; };
+		1964CDFB871E486EB3FAD778 /* LHDeviceModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6F93633FCBC94EB3A9967DDA /* LHDeviceModel.m */; };
+		FDBE7926CEAA46C4A58091FF /* LHDeviceRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = B7976E48BB0D4995A74ADD34 /* LHDeviceRegistry.m */; };
 		E84056EA2C3B91E600FB5539 /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = E84056E92C3B91E600FB5539 /* NotificationService.m */; };
 		E84056EE2C3B91E600FB5539 /* BlueEquipProjectNotiServier.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E84056E62C3B91E600FB5539 /* BlueEquipProjectNotiServier.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E840CE512B1D6DE9004D92D0 /* MHPrivacyProtectionVView.m in Sources */ = {isa = PBXBuildFile; fileRef = E840CE502B1D6DE9004D92D0 /* MHPrivacyProtectionVView.m */; };
@@ -1539,6 +1541,10 @@
 		E83DFC7F2AE35F8E00615E86 /* MHEquipmentCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHEquipmentCell.h; sourceTree = "<group>"; };
 		E83DFC802AE35F8E00615E86 /* MHEquipmentCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHEquipmentCell.m; sourceTree = "<group>"; };
 		E83DFC822AE3606C00615E86 /* MHEquipmentModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MHEquipmentModel.h; sourceTree = "<group>"; };
+		4587B8E7783A4B05A2D78C57 /* LHDeviceModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LHDeviceModel.h; sourceTree = "<group>"; };
+		6F93633FCBC94EB3A9967DDA /* LHDeviceModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LHDeviceModel.m; sourceTree = "<group>"; };
+		BBC3CB60D2D14971B336603A /* LHDeviceRegistry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LHDeviceRegistry.h; sourceTree = "<group>"; };
+		B7976E48BB0D4995A74ADD34 /* LHDeviceRegistry.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LHDeviceRegistry.m; sourceTree = "<group>"; };
 		E83DFC832AE3606C00615E86 /* MHEquipmentModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MHEquipmentModel.m; sourceTree = "<group>"; };
 		E84056E62C3B91E600FB5539 /* BlueEquipProjectNotiServier.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BlueEquipProjectNotiServier.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E84056E82C3B91E600FB5539 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
@@ -3532,6 +3538,10 @@
 				E83DFC802AE35F8E00615E86 /* MHEquipmentCell.m */,
 				E83DFC822AE3606C00615E86 /* MHEquipmentModel.h */,
 				E83DFC832AE3606C00615E86 /* MHEquipmentModel.m */,
+				4587B8E7783A4B05A2D78C57 /* LHDeviceModel.h */,
+				6F93633FCBC94EB3A9967DDA /* LHDeviceModel.m */,
+				BBC3CB60D2D14971B336603A /* LHDeviceRegistry.h */,
+				B7976E48BB0D4995A74ADD34 /* LHDeviceRegistry.m */,
 				E8249B832B527F6B0057F5D3 /* MHDetailEquipmentController.h */,
 				E8249B842B527F6B0057F5D3 /* MHDetailEquipmentController.m */,
 			);
@@ -5496,6 +5506,8 @@
 				E87E1F2F2B81FAE200BF0C09 /* MHSystemMessageController.m in Sources */,
 				E8378F7E2AECB343008D67F0 /* TUIBlackListViewDataProvider.m in Sources */,
 				E83DFC842AE3606C00615E86 /* MHEquipmentModel.m in Sources */,
+				1964CDFB871E486EB3FAD778 /* LHDeviceModel.m in Sources */,
+				FDBE7926CEAA46C4A58091FF /* LHDeviceRegistry.m in Sources */,
 				E88CCA982AAB00EE0019E488 /* JHCollectionViewLayoutAttributes.m in Sources */,
 				E88CCD0B2AAB09A20019E488 /* LFAssetManager+Simple.m in Sources */,
 				E851DD8D2AF1E962006A7FB0 /* MHsettingPasswordController.m in Sources */,

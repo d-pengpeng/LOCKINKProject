@@ -17,6 +17,7 @@
 #import "MHEquipmentModel.h"
 #import "AESCipher.h"
 #import "MHBehaviorReporter.h"
+#import "LHDeviceRegistry.h"
 
 @interface SceneDelegate ()<CBCentralManagerDelegate, CBPeripheralDelegate>
 
@@ -301,7 +302,8 @@
     NSLog(@"-蓝牙设备名----%@", perName); // RSSI 是信号强度 可以通过强度选择最近的设备
     
     //MARK: 蓝牙连接设备
-    if (([perName isEqualToString:kCharactName] || [perName isEqualToString:kCharactName2] || [perName isEqualToString:kCharactName3] || [perName isEqualToString:kCharactName4] || [perName isEqualToString:kCharactName5] || [perName isEqualToString:kCharactName6] || [perName isEqualToString:kCharactName7] || [perName isEqualToString:kCharactName8] || [perName isEqualToString:kCharactName9] || [perName isEqualToString:kCharactName10] || [perName isEqualToString:kCharactName11] || [perName isEqualToString:kCharactName12] || [perName isEqualToString:kCharactName13] || [perName isEqualToString:kCharactName14] || [perName isEqualToString:kCharactName15]|| [perName isEqualToString:kCharactName16] || [perName isEqualToString:kCharactName17]) && peripheral) {
+    // 用 LHDeviceRegistry 统一判断：本地宏 + 服务端 /square/listProduct 合并后的已知型号集合
+    if ([[LHDeviceRegistry shared] isKnownModel:perName] && peripheral) {
 
         NSData *dataMac = [advertisementData objectForKey:@"kCBAdvDataManufacturerData"];
         NSString *mac = @"";
