@@ -39,6 +39,23 @@
 
 @implementation SceneDelegate
 
+#pragma mark - 协议推断 Helper（本地硬编码 + 服务端推断统一入口）
+
+/// 当前连接的设备是否走 Qiui 协议（kServiceQiuiUUID）
+/// 本地硬编码的 kCharactName13 直接返回 YES；
+/// 服务端新增设备（AA-A1018+）从 LHDeviceRegistry 推断
+- (BOOL)_isQiuiProtocolDevice {
+    NSString *perName = [FloatingWindowModel shareInstance].namStMMM;
+    // 本地硬编码 — 不改，保证旧设备不受影响
+    if ([perName isEqualToString:kCharactName13]) return YES;
+    // 服务端推断 — 新增设备
+    LHDeviceModel *serverModel = [[LHDeviceRegistry shared] deviceModelForModel:perName];
+    if (serverModel && !serverModel.isLocalKnownModel) {
+        return serverModel.inferredProtocol == LHInferredProtocolQiui;
+    }
+    return NO;
+}
+
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions  API_AVAILABLE(ios(13.0)){
     // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
     // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
@@ -483,7 +500,7 @@
     if(self.peripheral && (self.peripheral != nil)) {
         self.peripheral.delegate = self;
         //外围设备开始寻找服务
-        if ([[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName13]) {
+        if ([self _isQiuiProtocolDevice]) {
             self.blue_tokenKey = @"";
             [self.peripheral discoverServices:@[[CBUUID UUIDWithString:kServiceQiuiUUID]]];
         }else {
@@ -670,7 +687,7 @@
     }
      
     //遍历查找到的服务
-    if ([[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName13]) {
+    if ([self _isQiuiProtocolDevice]) {
         
         CBUUID *serviceUUID = [CBUUID UUIDWithString:kServiceQiuiUUID];
         CBUUID *characteristicUUID = [CBUUID UUIDWithString:kCharacteristicQiuiUUID];
@@ -706,7 +723,7 @@
     CBUUID *serviceUUID = [CBUUID UUIDWithString:kServiceUUID];
     CBUUID *characteristicUUID = [CBUUID UUIDWithString:kCharacteristicUUID];
     CBUUID *characteristicUUID2 = [CBUUID UUIDWithString:kCharacteristicUUID2];
-    if ([[FloatingWindowModel shareInstance].namStMMM isEqualToString:kCharactName13]) {
+    if ([self _isQiuiProtocolDevice]) {
         
         serviceUUID = [CBUUID UUIDWithString:kServiceQiuiUUID];
         characteristicUUID = [CBUUID UUIDWithString:kCharacteristicQiuiUUID];

@@ -148,19 +148,50 @@ static NSSet<NSString *> *LHLocalKnownModels(void) {
             if (m.model.length == 0) continue;
             newServer[m.model] = m;
             [newFromServer addObject:m.model];
+
+            // 打印推断结果（debug 用，正式版可以 NSLog 级别降）
+            NSString *routeStr;
+            switch (m.inferredRoute) {
+                case LHInferredRouteRoleOne:     routeStr = @"RoleOne"; break;
+                case LHInferredRouteRoleOneLock: routeStr = @"RoleOne_Lock"; break;
+                case LHInferredRouteFourthRole:  routeStr = @"FourthRole"; break;
+                default:                          routeStr = @"Unknown"; break;
+            }
+            NSString *protoStr = (m.inferredProtocol == LHInferredProtocolQiui) ? @"Qiui" : @"Default";
+            NSLog(@"[LHDeviceRegistry] 📦 %@ (%@) → route=%@ protocol=%@ lock=%d pause=%d | isLocal=%d",
+                  m.model, [m displayName], routeStr, protoStr,
+                  m.inferredIsLockType, m.inferredPauseSupported, [m isLocalKnownModel]);
         }
 
-        // 合并到 registry（服务端覆盖同 model 的本地旧值）
-        self.serverModelsMutable = newServer;
+        // —— 差集过滤 ——
+        // 后端说"排除 AA-A1017 及以前"，但如果后端暂时没改接口（还返回全部），iOS 端自己处理：
+        //   1. 本地已知 model（AA-A1001~17）→ 只取服务端的展示信息（name/img/languages），
+        //      路由/协议继续走本地硬编码，服务端推断的结果对这些 model 没用
+        //   2. 本地没有的 model（AA-A1018+）→ 服务端推断层生效，路由/协议全靠推断
+        NSMutableArray<NSString *> *serverOnlyModels = [NSMutableArray array];
+        for (NSString *model in newFromServer) {
+            if (![LHLocalKnownModels() containsObject:model]) {
+                [serverOnlyModels addObject:model];
+            }
+        }
+
+        // 合并：knownModels = 本地所有 ∪ 服务端所有（旧 model 保留 + 新 model 加入）
         [self.knownModelsMutable unionSet:newFromServer];
+        // serverModels 存全部（方便外部调 deviceModelForModel: 拿展示信息）
+        self.serverModelsMutable = newServer;
         self.lastServerFetchTime = [[NSDate date] timeIntervalSince1970];
 
         [self _saveCache];
 
-        NSLog(@"[LHDeviceRegistry] 合并完成：本地=%lu 服务端=%lu 总已知型号=%lu",
+        NSLog(@"[LHDeviceRegistry] ✅ 合并完成：本地=%lu 服务端总=%lu 服务端新增=%lu 总已知型号=%lu",
               (unsigned long)LHLocalKnownModels().count,
               (unsigned long)newServer.count,
+              (unsigned long)serverOnlyModels.count,
               (unsigned long)self.knownModelsMutable.count);
+
+        if (serverOnlyModels.count > 0) {
+            NSLog(@"[LHDeviceRegistry] 🆕 服务端新增型号（需走推断层）: %@", serverOnlyModels);
+        }
 
         [[NSNotificationCenter defaultCenter] postNotificationName:LHDeviceRegistryDidUpdateNotification object:nil];
         if (completion) completion(YES);
